@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PDF Assistant - Default MCQ Quiz Edition</title>
+    <title>AI PDF Assistant - Smart Semesters & Moodle Quiz</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
         /* --- CSS RESET & VARIABLE --- */
@@ -236,7 +236,9 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-        const BACKEND_URL = "http://127.0.0.1:3000/api/process";
+        
+        // 🎯 ĐÃ GHÉP CHUẨN CƠ ĐỊNH LINK BACKEND RENDER LIVE CỦA ÔNG
+        const BACKEND_URL = "https://spdf-t9x9.onrender.com/api/process";
 
         const state = {
             maxTokens: 100, currentTokens: 100,
@@ -260,7 +262,7 @@
 
         function renderMarkdownSafe(text) {
             let clean = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            clean = clean.replace(/\*\*(.*?)\*\*/g, "<strong>$1");
+            clean = clean.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
             clean = clean.replace(/`(.*?)`/g, "<code style='background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #f43f5e;'>$1</code>");
             return clean;
         }
@@ -463,14 +465,10 @@
             saveState();
             userInput.value = '';
 
-            // 🎯 THAY ĐỔI LỚN: ĐẢO NGƯỢC LOGIC ĐỂ MẶC ĐỊNH LÀ LUỒNG QUIZ MCQ
             const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp lý thuyết", "review"];
             const isSummarizeRequest = summarizeKeywords.some(kw => text.toLowerCase().includes(kw));
-            
-            // Nếu có từ khóa tóm tắt thì chạy tóm tắt, KHÔNG CÓ THÌ MẶC ĐỊNH LÀM QUIZ TRẮC NGHIỆM
             const feature = isSummarizeRequest ? "summarize" : "quiz";
 
-            // 🎯 BẪY SỐ THÔNG MINH: Chỉ cần tìm thấy bất kì cụm số nào là bắt làm số câu quiz luôn
             let numQuestionsRequested = 5; 
             if (feature === "quiz") {
                 const numberMatch = text.match(/(\d+)/);
