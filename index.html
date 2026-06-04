@@ -3,217 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>AceQuiz AI - Hệ thống ôn thi trắc nghiệm thông minh</title>
+    <title>AceQuiz AI - Hệ thống ôn thi trắc nghiệm thông minh</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
-        /* --- CSS RESET & VARIABLE --- */
+        /* --- DESIGN SYSTEM STYLING V2 (AI SAAS SERIES A STANDARD) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --danger-color: #ef4444;
-            --danger-bg: rgba(239, 68, 68, 0.15);
-            --success-color: #10b981;
-            --success-bg: rgba(16, 185, 129, 0.15);
-            --info-bg: rgba(59, 130, 246, 0.1);
+            --bg-main: #0b0f19;
+            --bg-sidebar: #111827;
+            --panel-surface: #1f2937;
+            --panel-hover: #374151;
+            --accent-primary: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-subtle: #374151;
+            --success: #10b981;
+            --success-surface: rgba(16, 185, 129, 0.12);
+            --danger: #ef4444;
+            --danger-surface: rgba(239, 68, 68, 0.12);
+            --info-surface: rgba(99, 102, 241, 0.08);
+            --sidebar-width: 300px;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-main);
             color: var(--text-main);
             height: 100vh;
             display: flex;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 1. MÀN HÌNH ĐĂNG NHẬP PREMIUM --- */
+        .login-container {
+            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0%, transparent 60%), #111827;
+            padding: 3rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            border: 1px solid var(--border-subtle);
+            margin: auto;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .login-brand {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-container p {
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .btn-google {
+            background-color: #ffffff;
+            color: #0f172a;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            gap: 12px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- 1. MÀN HÌNH ĐĂNG NHẬP --- */
-        .login-container {
-            background-color: var(--panel-bg);
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid var(--border-color);
+        .btn-google:hover {
+            background-color: #f3f4f6;
+            transform: translateY(-1px);
         }
 
-        .login-container h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
-        .login-container p { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem; }
-        .btn-google {
-            background-color: #ffffff; color: #1e293b; border: none; padding: 0.75rem 1.5rem;
-            border-radius: 6px; font-weight: 600; width: 100%; cursor: pointer;
-            display: flex; justify-content: center; align-items: center; gap: 10px; transition: background 0.2s ease;
-        }
-        .btn-google:hover { background-color: #f1f5f9; }
-
-        /* --- 2. MÀN HÌNH CHÍNH --- */
+        /* --- 2. BỐ CỤC CHUẨN ĐẸP CLAUDE + CHATGPT --- */
         .app-container {
-            display: none; width: 100vw; height: 100vh; grid-template-columns: 340px 1fr;
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
         }
 
+        /* Sidebar Gọn Gàng */
         .sidebar {
-            background-color: var(--panel-bg); border-right: 1px solid var(--border-color);
-            padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; height: 100%; overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-subtle);
+            padding: 1.5rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 10;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .logo-area h2 { font-size: 1.4rem; color: var(--accent-color); }
-        .usage-counter { background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; }
-        .usage-counter.warning { background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
-        .usage-counter span { color: var(--success-color); font-weight: bold; }
-        .usage-counter.warning span { color: var(--danger-color); }
+        .logo-area {
+            font-size: 1.35rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
+        .usage-counter {
+            background-color: rgba(99, 102, 241, 0.06);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+        .usage-counter span { color: var(--accent-primary); font-weight: 600; }
+        .usage-counter.warning { background-color: var(--danger-surface); border-color: rgba(239, 68, 68, 0.2); }
+        .usage-counter.warning span { color: var(--danger); }
+
+        /* Drag & Drop Upload Kính Mờ */
         .upload-box {
-            border: 2px dashed var(--border-color); padding: 1.5rem 1rem; text-align: center;
-            border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; flex-shrink: 0;
+            border: 2px dashed var(--border-subtle);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.01);
+            transition: all 0.2s ease-in-out;
         }
-        .upload-box.dragover { border-color: var(--accent-color); background-color: rgba(59, 130, 246, 0.05); }
-        .upload-box p { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+        .upload-box:hover, .upload-box.dragover {
+            border-color: var(--accent-primary);
+            background-color: rgba(99, 102, 241, 0.04);
+        }
+        .upload-box svg { color: var(--accent-primary); transition: transform 0.2s ease; }
+        .upload-box:hover svg { transform: translateY(-2px); }
+        .upload-box div { font-size: 0.9rem; font-weight: 500; margin-top: 0.5rem; }
+        .upload-box p { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
         #file-input { display: none; }
 
-        .file-list-header { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: -0.5rem; display: flex; justify-content: space-between; }
+        .file-list-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
 
-        .file-list { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 2px; }
+        .file-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .file-list::-webkit-scrollbar { width: 4px; }
+        .file-list::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
         
         .file-item {
-            background: rgba(255, 255, 255, 0.04); padding: 0.6rem 0.75rem; border-radius: 6px;
-            font-size: 0.85rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;
-            border: 1px solid var(--border-color); transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s ease;
         }
-        .file-item.active { border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.03); }
-        .file-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-color); cursor: pointer; flex-shrink: 0; }
+        .file-item.active {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.04);
+        }
+        .file-item input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--accent-primary);
+            cursor: pointer;
+            border-radius: 4px;
+        }
         
         .file-info-wrapper { display: flex; flex-direction: column; overflow: hidden; flex-grow: 1; cursor: pointer; }
-        .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-weight: 500; }
-        .file-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+        .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .file-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
-        .btn-delete-file { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; padding: 4px; border-radius: 4px; flex-shrink: 0; }
-        .btn-delete-file:hover { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
-
-        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color); flex-shrink: 0; }
-        .btn-logout {
-            background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color);
-            padding: 0.6rem 1rem; border-radius: 6px; width: 100%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease;
+        .btn-delete-file {
+            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+            display: flex; align-items: center; padding: 6px; border-radius: 6px;
         }
-        .btn-logout:hover { background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-color: var(--danger-color); }
+        .btn-delete-file:hover { color: var(--danger); background: var(--danger-surface); }
 
-        /* --- 3. BONG BÓNG CHAT --- */
-        .main-chat { display: flex; flex-direction: column; height: 100%; background-color: var(--bg-color); overflow: hidden; }
-        .chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); font-weight: 600; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
-        .selected-counter-badge { font-size: 0.8rem; font-weight: normal; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 20px; color: var(--accent-color); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-subtle); }
+        .btn-logout {
+            background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle);
+            padding: 0.75rem 1rem; border-radius: 10px; width: 100%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease;
+        }
+        .btn-logout:hover { background-color: var(--danger-surface); color: var(--danger); border-color: var(--danger); }
+
+        /* --- 3. KHU VỰC CHAT CHÍNH (FOCUS-FIRST) --- */
+        .main-chat {
+            margin-left: var(--sidebar-width);
+            width: calc(100vw - var(--sidebar-width));
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 5;
+        }
+        .menu-toggle-btn {
+            display: none; background: transparent; border: none; color: var(--text-main); cursor: pointer;
+        }
+        .chat-title-info { font-weight: 600; font-size: 1.05rem; }
+        .selected-counter-badge {
+            font-size: 0.8rem; font-weight: 500; background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); padding: 6px 14px; border-radius: 20px; color: #818cf8;
+        }
         
         .chat-messages {
-            flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex;
-            flex-direction: column; gap: 1.2rem; scroll-behavior: auto; min-height: 0;
+            flex-grow: 1;
+            padding: 2rem 4rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
+
+        /* Màn Hình Trống Gợi Ý Hành Động (Empty State) */
+        .empty-dashboard {
+            max-width: 720px; margin: auto; text-align: center; display: flex; flex-direction: column; gap: 2.5rem; padding: 2rem 0;
+        }
+        .empty-dashboard h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+        .empty-dashboard h2 span { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .suggested-cards-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: left;
+        }
+        .suggest-card {
+            background: var(--bg-sidebar); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 12px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .suggest-card:hover { border-color: var(--accent-primary); background: rgba(99, 102, 241, 0.03); transform: translateY(-1px); }
+        .suggest-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-main); }
+        .suggest-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; }
+
+        /* Bong Bóng Tin Nhắn Theo Quy Chuẩn AI Cao Cấp */
+        .message-row { display: flex; width: 100%; gap: 1.25rem; animation: msgSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .message-row.user { justify-content: flex-end; }
+        
+        .avatar-box {
+            width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0;
+        }
+        .message-row.bot .avatar-box { background: var(--accent-gradient); color: white; }
+        .message-row.user .avatar-box { display: none; } /* ChatGPT ẩn avatar user để tối giản không gian */
 
         .message {
-            max-width: 80%; padding: 0.85rem 1.25rem; border-radius: 18px; 
-            font-size: 0.95rem; line-height: 1.6; word-break: break-word;
-            position: relative; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); animation: msgSlideUp 0.2s ease-out;
+            max-width: 78%; padding: 1rem 1.5rem; border-radius: 14px; 
+            font-size: 1rem; line-height: 1.625; word-break: break-word;
         }
-        .message.user { background-color: var(--accent-color); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .message.bot { background-color: var(--panel-bg); color: var(--text-main); align-self: flex-start; border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+        .message.user { background-color: var(--panel-surface); color: var(--text-main); border-bottom-right-radius: 4px; }
+        .message.bot { background-color: transparent; color: #e5e7eb; padding-left: 0; padding-right: 0; width: 100%; }
 
-        .message.bot.streaming { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 0 12px rgba(59, 130, 246, 0.1); }
-        .message.bot.streaming::after { content: "▊"; margin-left: 4px; color: var(--accent-color); font-size: 0.95rem; vertical-align: middle; animation: blink-cursor 0.6s infinite; }
-        .message.system-error { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; align-self: center; max-width: 90%; font-size: 0.85rem; text-align: center; border-radius: 8px; padding: 0.75rem 1rem; }
+        /* Đóng khung code block/markdown đẹp mắt */
+        .message.bot strong { color: var(--text-main); font-weight: 600; }
+        .message.bot code { background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 6px; font-family: monospace; color: #f43f5e; font-size: 0.9rem; }
 
-        /* 📝 CẤU TRÚC ĐỀ THI TRẮC NGHIỆM MOODLE STYLE */
-        .moodle-quiz-card { width: 100%; display: flex; flex-direction: column; gap: 1.5rem; margin-top: 0.5rem; }
-        .quiz-item { background: rgba(0, 0, 0, 0.15); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 12px; display: flex; flex-direction: column; gap: 0.8rem; }
-        .quiz-question-title { font-weight: 600; color: var(--text-main); font-size: 0.98rem; }
-        .quiz-options-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .message.bot.streaming::after { content: "▊"; color: var(--accent-primary); animation: blink-cursor 0.6s infinite; margin-left: 4px; }
+        .message.system-error { background-color: var(--danger-surface); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; max-width: 600px; font-size: 0.88rem; border-radius: 10px; padding: 0.85rem 1.25rem; margin: auto; }
+
+        /* 📝 PHÂN HỆ ĐỀ THI TRẮC NGHIỆM MOODLE PRO STYLE */
+        .moodle-quiz-card { width: 100%; display: flex; flex-direction: column; gap: 1.5rem; background: var(--bg-sidebar); border: 1px solid var(--border-subtle); padding: 2rem; border-radius: 16px; margin-top: 0.5rem; }
+        .quiz-item { background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; gap: 1rem; }
+        .quiz-question-title { font-weight: 600; color: var(--text-main); font-size: 1.05rem; line-height: 1.4; }
+        .quiz-options-group { display: flex; flex-direction: column; gap: 0.65rem; }
         
         .quiz-option-row {
-            display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.85rem;
-            border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.02); transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 12px; padding: 0.85rem 1.25rem;
+            border: 1px solid var(--border-subtle); border-radius: 10px; cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.01); transition: all 0.2s ease;
         }
-        .quiz-option-row:hover { background-color: rgba(255, 255, 255, 0.06); border-color: var(--text-muted); }
-        .quiz-option-row input[type="radio"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); }
-        .quiz-option-text { font-size: 0.92rem; color: #e2e8f0; }
+        .quiz-option-row:hover { background-color: var(--panel-surface); border-color: var(--text-muted); }
+        .quiz-option-row input[type="radio"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-primary); }
+        .quiz-option-text { font-size: 0.95rem; color: #d1d5db; }
 
-        .quiz-option-row.moodle-correct { background-color: var(--success-bg) !important; border-color: var(--success-color) !important; color: #a7f3d0; }
-        .quiz-option-row.moodle-incorrect { background-color: var(--danger-bg) !important; border-color: var(--danger-color) !important; color: #fca5a5; }
+        /* Trạng thái chấm điểm Moodle Coursera */
+        .quiz-option-row.moodle-correct { background-color: var(--success-surface) !important; border-color: var(--success) !important; }
+        .quiz-option-row.moodle-correct .quiz-option-text { color: #34d399; font-weight: 500; }
+        .quiz-option-row.moodle-incorrect { background-color: var(--danger-surface) !important; border-color: var(--danger) !important; }
+        .quiz-option-row.moodle-incorrect .quiz-option-text { color: #f87171; }
         
-        .moodle-explanation-box { padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.88rem; line-height: 1.5; background-color: var(--info-bg); border-left: 4px solid var(--accent-color); margin-top: 0.4rem; animation: fadeIn 0.3s ease; }
-        .moodle-explanation-box.correct-pane { border-left-color: var(--success-color); }
-        .moodle-explanation-box.incorrect-pane { border-left-color: var(--danger-color); }
+        .moodle-explanation-box { padding: 1rem 1.25rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; background-color: rgba(99, 102, 241, 0.05); border-left: 4px solid var(--accent-primary); margin-top: 0.5rem; }
+        .moodle-explanation-box.correct-pane { border-left-color: var(--success); background-color: var(--success-surface); }
+        .moodle-explanation-box.incorrect-pane { border-left-color: var(--danger); background-color: var(--danger-surface); }
 
-        .moodle-submit-btn { background-color: var(--success-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; text-align: center; align-self: flex-start; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .moodle-submit-btn:hover { background-color: #059669; }
-        .moodle-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .moodle-score-banner { padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: bold; font-size: 1.1rem; text-align: center; background-color: var(--info-bg); border: 1px solid var(--accent-color); animation: fadeIn 0.3s ease; }
+        .moodle-submit-btn { background: var(--accent-gradient); color: white; border: none; padding: 0.85rem 2rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; align-self: flex-start; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
+        .moodle-submit-btn:hover { transform: translateY(-1px); opacity: 0.95; }
+        .moodle-score-banner { padding: 1.2rem; border-radius: 12px; font-weight: 700; font-size: 1.2rem; text-align: center; background-color: var(--info-surface); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; }
 
-        /* 💡 Bong bóng chờ load */
-        .typing-bubble { background-color: var(--panel-bg); border: 1px solid var(--border-color); padding: 0.85rem 1.25rem; border-radius: 18px; border-bottom-left-radius: 4px; align-self: flex-start; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); width: fit-content; }
-        .typing-dot { width: 8px; height: 8px; background-color: var(--text-muted); border-radius: 50%; opacity: 0.4; animation: pulse-dot 1.2s infinite ease-in-out; }
+        /* Bong bóng chờ AI xử lý */
+        .typing-bubble { background-color: var(--panel-surface); border: 1px solid var(--border-subtle); padding: 1rem 1.5rem; border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: fit-content; }
+        .typing-dot { width: 7px; height: 7px; background-color: var(--text-muted); border-radius: 50%; opacity: 0.4; animation: pulse-dot 1.2s infinite ease-in-out; }
         .typing-dot:nth-child(1) { animation-delay: 0s; }
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-        @keyframes pulse-dot { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; background-color: var(--accent-color); } }
+        @keyframes pulse-dot { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; background-color: var(--accent-primary); } }
 
-        .chat-input-area { padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; background-color: var(--bg-color); flex-shrink: 0; }
-        .chat-input-area input { flex-grow: 1; background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 1rem; color: var(--text-main); outline: none; }
-        .chat-input-area input:focus { border-color: var(--accent-color); }
+        /* Input Area Cố Định Phía Dưới Kiểu ChatGPT + Claude */
+        .chat-input-wrapper {
+            padding: 1.5rem 4rem 2rem 4rem; background-color: var(--bg-main); flex-shrink: 0;
+        }
+        .chat-input-area {
+            max-width: 800px; margin: auto; position: relative; background-color: var(--bg-sidebar); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); transition: border-color 0.2s ease;
+        }
+        .chat-input-area:focus-within { border-color: var(--accent-primary); }
+        .chat-input-area input { flex-grow: 1; background: transparent; border: none; padding: 0.6rem 0.5rem; color: var(--text-main); outline: none; font-size: 1rem; }
+        .chat-input-area input::placeholder { color: var(--text-muted); }
         .chat-input-area input:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-send { background-color: var(--accent-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .btn-send:hover:not(:disabled) { background-color: var(--accent-hover); }
-        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-send {
+            background: var(--accent-primary); color: white; border: none; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;
+        }
+        .btn-send:hover:not(:disabled) { background: #4f46e5; transform: scale(1.02); }
+        .btn-send:disabled { background: var(--panel-surface); color: var(--text-muted); opacity: 0.5; cursor: not-allowed; }
 
         #chat-anchor { height: 1px; width: 100%; clear: both; flex-shrink: 0; }
-        @keyframes msgSlideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 4. RESPONSIVE OPTIMIZATION (MOBILE EMBEDDED) --- */
+        @media (max-width: 1024px) {
+            .chat-messages { padding: 1.5rem 2rem; }
+            .chat-input-wrapper { padding: 1rem 2rem 1.5rem 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            
+            .main-chat { margin-left: 0; width: 100vw; }
+            .menu-toggle-btn { display: block; }
+            .suggested-cards-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .empty-dashboard h2 { font-size: 1.6rem; }
+            .message { max-width: 90%; }
+        }
+
+        @keyframes msgSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         @keyframes blink-cursor { 50% { opacity: 0; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="login-container" id="login-screen">
+        <div class="login-brand">AceQuiz AI</div>
         <h1>Chào mừng quay trở lại</h1>
-        <p>Đăng nhập bằng Gmail để bắt đầu phân tích tài liệu học tập</p>
+        <p>Hệ thống phân tích học phần liên kết và cày đề trắc nghiệm Moodle dành riêng cho sinh viên.</p>
         <button class="btn-google" id="btn-login-mock">
-            <img src="https://www.google.com/favicon.ico" width="16" height="16" alt="Google">
+            <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="Google">
             Đăng nhập với Google
         </button>
     </div>
 
     <div class="app-container" id="app-screen">
-        <aside class="sidebar">
-            <div class="logo-area"><h2>AceQuiz AI</h2></div>
-            <div class="usage-counter" id="usage-panel">Số lượt dùng còn lại: <span id="tokens-left">100</span>/100</div>
+        
+        <aside class="sidebar" id="app-sidebar">
+            <div class="logo-area">
+                <span>AceQuiz AI</span>
+                <button class="menu-toggle-btn" style="color: var(--text-muted);" id="btn-close-sidebar-mobile">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="usage-counter" id="usage-panel">Lượt sử dụng miễn phí còn: <span id="tokens-left">100</span>/100</div>
             
             <div class="upload-box" id="drop-zone">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <div style="font-weight: 600; margin-top: 0.5rem; font-size: 0.9rem;">Tải thêm slide bài học</div>
-                <p>Hỗ trợ lưu trữ nhiều file cả học kỳ</p>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div>Tải thêm slide bài học</div>
+                <p>Kéo thả hoặc click chọn file .PDF</p>
                 <input type="file" id="file-input" accept=".pdf">
             </div>
 
-            <div class="file-list-header">
-                <span>DANH SÁCH TÀI LIỆU MÔN HỌC</span>
-            </div>
+            <div class="file-list-header">Danh sách tài liệu ôn thi</div>
             <ul class="file-list" id="file-list-ui"></ul>
             
             <div class="sidebar-footer">
                 <button class="btn-logout" id="btn-logout-mock">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     Đăng xuất
                 </button>
             </div>
@@ -221,15 +429,26 @@
 
         <main class="main-chat">
             <div class="chat-header">
-                <span>Hộp thoại phân tích dữ liệu liên kết</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="btn-toggle-sidebar-mobile">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <span class="chat-title-info">Hộp thoại khảo thí học phần</span>
+                </div>
                 <span class="selected-counter-badge" id="selected-badge">Đã chọn: 0 file</span>
             </div>
+
             <div class="chat-messages" id="chat-box">
                 <div id="chat-anchor"></div>
             </div>
-            <div class="chat-input-area">
-                <input type="text" id="user-input" placeholder="Mặc định tạo đề MCQ Moodle. Gõ 'tóm tắt' để xem lý thuyết..." maxlength="1000">
-                <button class="btn-send" id="btn-send-msg">Gửi</button>
+
+            <div class="chat-input-wrapper">
+                <div class="chat-input-area">
+                    <input type="text" id="user-input" placeholder="Gõ số câu trắc nghiệm cần làm (ví dụ: 15, 30) hoặc gõ 'tóm tắt'..." maxlength="1000">
+                    <button class="btn-send" id="btn-send-msg">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
+                </div>
             </div>
         </main>
     </div>
@@ -237,7 +456,7 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         
-        // 🎯 ĐÃ GHÉP CHUẨN CƠ ĐỊNH LINK BACKEND RENDER LIVE CỦA ÔNG
+        // 🎯 GIỮ NGUYÊN HOÀN TOÀN LOGIC ĐƯỜNG TRUYỀN ĐẾN SERVER RENDER CỦA MẠNH
         const BACKEND_URL = "https://spdf-t9x9.onrender.com/api/process";
 
         const state = {
@@ -248,6 +467,7 @@
 
         const loginScreen = document.getElementById('login-screen');
         const appScreen   = document.getElementById('app-screen');
+        const appSidebar   = document.getElementById('app-sidebar');
         const btnLoginMock  = document.getElementById('btn-login-mock');
         const btnLogoutMock = document.getElementById('btn-logout-mock');
         const fileInput     = document.getElementById('file-input');
@@ -259,11 +479,15 @@
         const tokensLeftSpan = document.getElementById('tokens-left');
         const usagePanel    = document.getElementById('usage-panel');
         const selectedBadge = document.getElementById('selected-badge');
+        
+        // Mobile Toggle Elements
+        const btnToggleSidebarMobile = document.getElementById('btn-toggle-sidebar-mobile');
+        const btnCloseSidebarMobile = document.getElementById('btn-close-sidebar-mobile');
 
         function renderMarkdownSafe(text) {
             let clean = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             clean = clean.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-            clean = clean.replace(/`(.*?)`/g, "<code style='background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #f43f5e;'>$1</code>");
+            clean = clean.replace(/`(.*?)`/g, "<code>$1</code>");
             return clean;
         }
 
@@ -293,7 +517,7 @@
             updateSelectedBadgeCount();
             if (state.isLoggedIn) {
                 loginScreen.style.display = 'none';
-                appScreen.style.display = 'grid';
+                appScreen.style.display = 'block';
                 forceScrollBottom();
             }
         }
@@ -306,9 +530,13 @@
             });
         }
 
+        // Mobile Sidebar Handlers
+        btnToggleSidebarMobile.addEventListener('click', () => appSidebar.classList.add('open'));
+        btnCloseSidebarMobile.addEventListener('click', () => appSidebar.classList.remove('open'));
+
         btnLoginMock.addEventListener('click', () => {
             loginScreen.style.display = 'none';
-            appScreen.style.display = 'grid';
+            appScreen.style.display = 'block';
             state.isLoggedIn = true;
             saveState();
             forceScrollBottom();
@@ -321,7 +549,7 @@
             resetApplicationState();
         });
 
-        // --- Slide Loading Section ---
+        // Drag & Drop Upload PDF
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
@@ -335,10 +563,11 @@
 
         async function handleFile(file) {
             if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
-                appendMessage('system-error', 'Lỗi: Hệ thống chỉ chấp nhận định dạng .PDF.');
+                appendMessage('system-error', 'Hệ thống chỉ chấp nhận định dạng file .PDF học phần.');
                 return;
             }
-            appendMessage('bot', `Đang nạp file "${file.name}" vào kho lưu trữ học phần...`);
+            
+            const typingId = showTypingIndicator();
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -349,20 +578,22 @@
                     fullText += tc.items.map(item => item.str).join(" ") + "\n";
                 }
                 
+                removeTypingIndicator(typingId);
                 state.uploadedFiles.push({ 
                     file_name: file.name, 
                     page_count: pdf.numPages, 
-                    content: fullText.substring(0, 20000),
+                    content: fullText.substring(0, 25000),
                     checked: true 
                 });
                 
                 renderFileList();
                 saveState();
                 updateSelectedBadgeCount();
-                appendMessage('bot', `Đã đồng bộ thành công "${file.name}" (${pdf.numPages} trang). Hệ thống mặc định chọn file này để tạo đề kiểm tra tương tác.`);
+                renderChatHistory(); // Load lại dashboard gợi ý nếu danh sách file thay đổi
             } catch(err) {
+                removeTypingIndicator(typingId);
                 console.error(err);
-                appendMessage('system-error', 'Lỗi: Không thể giải mã hoặc đọc file PDF này.');
+                appendMessage('system-error', 'Lỗi cấu trúc: Không thể giải mã hoặc trích xuất văn bản từ slide PDF này.');
             }
         }
 
@@ -407,7 +638,7 @@
                     renderFileList(); 
                     saveState();
                     updateSelectedBadgeCount();
-                    appendMessage('system-error', `Đã xóa file khỏi kho lưu trữ môn học.`);
+                    renderChatHistory();
                 });
 
                 li.appendChild(checkbox);
@@ -422,28 +653,68 @@
             selectedBadge.textContent = `Đã chọn: ${count} file`;
         }
 
+        // RENDER CHAT CHUYÊN NGHIỆP CÓ DASHBOARD ĐÓN ĐẦU
         function renderChatHistory() {
             chatBox.innerHTML = '<div id="chat-anchor"></div>';
             const anchor = document.getElementById('chat-anchor');
 
-            const welcomeDiv = document.createElement('div');
-            welcomeDiv.className = 'message bot';
-            welcomeDiv.innerHTML = 'Xin chào! Hệ thống đã kích hoạt **Mặc định tạo đề MCQ Moodle**. Hãy tích chọn những slide cần cày, gõ số câu (ví dụ: `15`, `30`) để làm bài thi thử ngay. Nếu cần xem lý thuyết cốt lõi, hãy gõ kèm từ `tóm tắt`.';
-            chatBox.insertBefore(welcomeDiv, anchor);
+            // 🎯 PREMIUM UPGRADE: Nếu chưa gõ câu nào, hiện Dashboard Gợi Ý như ChatGPT + Claude
+            if (state.conversationHistory.length === 0) {
+                const dashboard = document.createElement('div');
+                dashboard.className = 'empty-dashboard';
+                dashboard.innerHTML = `
+                    <h2>Học phần tốc chiến cùng <span>AceQuiz AI</span></h2>
+                    <div class="suggested-cards-grid">
+                        <div class="suggest-card" onclick="triggerQuickAction('20 câu trắc nghiệm tổng hợp')">
+                            <h4>📝 Khảo thí 20 câu MCQ</h4>
+                            <p>Quét nhanh kiến thức các slide đã chọn để tạo đề thi thử tương tác Moodle.</p>
+                        </div>
+                        <div class="suggest-card" onclick="triggerQuickAction('tóm tắt lý thuyết cốt lõi')">
+                            <h4>💡 Tóm tắt chương khó</h4>
+                            <p>Trích xuất toàn bộ công thức, định nghĩa và kiến thức lõi dạng gạch đầu dòng.</p>
+                        </div>
+                        <div class="suggest-card" onclick="triggerQuickAction('làm bộ đề trắc nghiệm tốc chiến 10 câu')">
+                            <h4>⚡ Đề thi rút gọn 10 câu</h4>
+                            <p>Tập trung cày nhanh các câu hỏi phân loại mức độ trung bình khá.</p>
+                        </div>
+                        <div class="suggest-card" onclick="triggerQuickAction('tổng hợp lý thuyết quan trọng nhất')">
+                            <h4>🧠 Bản đồ khái niệm</h4>
+                            <p>Liên kết chéo thông tin giữa các chương để làm rõ keyword ôn tập.</p>
+                        </div>
+                    </div>
+                `;
+                chatBox.insertBefore(dashboard, anchor);
+                forceScrollBottom();
+                return;
+            }
 
             state.conversationHistory.forEach((msg, historyIndex) => {
+                const row = document.createElement('div');
+                row.className = `message-row ${msg.role === 'assistant' ? 'bot' : 'user'}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar-box';
+                avatar.textContent = msg.role === 'assistant' ? 'AI' : 'U';
+                
                 const div = document.createElement('div');
                 div.className = `message ${msg.role === 'assistant' ? 'bot' : 'user'}`;
                 
                 if (msg.isQuiz) {
                     renderInteractiveQuizComponent(div, msg.quizData, msg.userAnswers, msg.isSubmitted, historyIndex);
                 } else {
-                    div.style.whiteSpace = 'pre-wrap';
                     div.innerHTML = msg.role === 'assistant' ? renderMarkdownSafe(msg.content) : msg.content;
                 }
-                chatBox.insertBefore(div, anchor);
+                
+                row.appendChild(avatar);
+                row.appendChild(div);
+                chatBox.insertBefore(row, anchor);
             });
             forceScrollBottom();
+        }
+
+        function triggerQuickAction(commandText) {
+            userInput.value = commandText;
+            handleUserAction();
         }
 
         btnSendMsg.addEventListener('click', handleUserAction);
@@ -452,20 +723,33 @@
         async function handleUserAction() {
             const text = userInput.value.trim();
             if (!text) return;
-            if (state.currentTokens <= 0) { appendMessage('system-error', 'Bạn đã hết 100 lượt sử dụng miễn phí.'); return; }
+            if (state.currentTokens <= 0) { appendMessage('system-error', 'Bạn đã sử dụng hết 100 lượt tính toán miễn phí cấp cho tài khoản này.'); return; }
 
             const activeDocuments = state.uploadedFiles.filter(f => f.checked);
             if (activeDocuments.length === 0) {
-                appendMessage('system-error', 'Lỗi: Bạn chưa tích chọn bất kỳ file slide nào ở cột bên trái để phân tích.');
+                appendMessage('system-error', 'Vui lòng tích chọn ít nhất một file slide bài học ở cột bên trái để AI có dữ liệu phân tích.');
                 return;
             }
 
-            appendMessage('user', text);
+            // Tắt drawer mobile nếu đang mở
+            appSidebar.classList.remove('open');
+
+            // Đẩy tin nhắn User vào hàng đợi
+            const anchor = document.getElementById('chat-anchor');
+            const uRow = document.createElement('div');
+            uRow.className = 'message-row user';
+            const uDiv = document.createElement('div');
+            uDiv.className = 'message user';
+            uDiv.textContent = text;
+            uRow.appendChild(uDiv);
+            chatBox.insertBefore(uRow, anchor);
+
             state.conversationHistory.push({ role: "user", content: text });
             saveState();
             userInput.value = '';
 
-            const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp lý thuyết", "review"];
+            // Kiểm tra tính năng
+            const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp", "review", "keyword"];
             const isSummarizeRequest = summarizeKeywords.some(kw => text.toLowerCase().includes(kw));
             const feature = isSummarizeRequest ? "summarize" : "quiz";
 
@@ -496,7 +780,7 @@
 
                 if (!response.ok) {
                     const errData = await response.json();
-                    throw new Error(errData.error || "Có lỗi xảy ra ở Server.");
+                    throw new Error(errData.error || "Lỗi xử lý hệ thống từ xa.");
                 }
 
                 removeTypingIndicator(typingId);
@@ -506,8 +790,19 @@
                 if (feature === "summarize") {
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder("utf-8");
-                    const botEl = createEmptyBotMessage();
-                    botEl.classList.add('streaming'); 
+                    
+                    const botRow = document.createElement('div');
+                    botRow.className = 'message-row bot';
+                    const botAvatar = document.createElement('div');
+                    botAvatar.className = 'avatar-box';
+                    botAvatar.textContent = 'AI';
+                    const botEl = document.createElement('div');
+                    botEl.className = 'message bot streaming';
+                    
+                    botRow.appendChild(botAvatar);
+                    botRow.appendChild(botEl);
+                    chatBox.insertBefore(botRow, anchor);
+                    
                     let currentText = "";
 
                     while (true) {
@@ -541,9 +836,16 @@
                     const resJson = await response.json();
                     const quizArrayData = resJson.data;
 
-                    const anchor = document.getElementById('chat-anchor');
+                    const botRow = document.createElement('div');
+                    botRow.className = 'message-row bot';
+                    const botAvatar = document.createElement('div');
+                    botAvatar.className = 'avatar-box';
+                    botAvatar.textContent = 'AI';
                     const botEl = document.createElement('div');
                     botEl.className = 'message bot';
+                    
+                    botRow.appendChild(botAvatar);
+                    botRow.appendChild(botEl);
                     
                     const newHistoryIndex = state.conversationHistory.length;
                     
@@ -560,7 +862,7 @@
                     saveState();
 
                     renderInteractiveQuizComponent(botEl, quizArrayData, {}, false, newHistoryIndex);
-                    chatBox.insertBefore(botEl, anchor);
+                    chatBox.insertBefore(botRow, anchor);
                     forceScrollBottom();
                 }
 
@@ -572,17 +874,18 @@
             }
         }
 
-        // --- Form Render Moodle Engine ---
+        // --- RENDER PHÂN HỆ KHẢO THÍ CHUẨN COURSERA / MOODLE ---
         function renderInteractiveQuizComponent(containerElement, quizData, savedUserAnswers, isSubmitted, historyIndex) {
             containerElement.innerHTML = ''; 
             const quizCard = document.createElement('div');
             quizCard.className = 'moodle-quiz-card';
 
             const headerTitle = document.createElement('div');
-            headerTitle.style.fontWeight = 'bold';
-            headerTitle.style.color = 'var(--accent-color)';
-            headerTitle.style.marginBottom = '0.2rem';
-            headerTitle.textContent = `📝 BỘ ĐỀ KHẢO THÍ HỌC TẬP (${quizData.length} CÂU HỎI)`;
+            headerTitle.style.fontWeight = '700';
+            headerTitle.style.color = '#a5b4fc';
+            headerTitle.style.fontSize = '1.1rem';
+            headerTitle.style.marginBottom = '0.5rem';
+            headerTitle.textContent = `📝 HỆ THỐNG KIỂM TRA ĐỀ CỐT LÕI (${quizData.length} CÂU HỎI)`;
             quizCard.appendChild(headerTitle);
 
             quizData.forEach((q, qIdx) => {
@@ -639,9 +942,9 @@
                     const expBox = document.createElement('div');
                     const isUserRight = savedUserAnswers[qIdx] === q.answer;
                     expBox.className = `moodle-explanation-box ${isUserRight ? 'correct-pane' : 'incorrect-pane'}`;
-                    expBox.innerHTML = `<strong>${isUserRight ? '✅ Đúng chính xác!' : '❌ Chưa chính xác!'}</strong><br/>` +
+                    expBox.innerHTML = `<strong>${isUserRight ? '✅ Câu trả lời chính xác!' : '❌ Chưa đúng!'}</strong><br/>` +
                                        `• <strong>Đáp án chuẩn:</strong> ${q.answer}<br/>` +
-                                       `• <strong>Giải thích lý do:</strong> ${q.explanation}`;
+                                       `• <strong>Lý do học thuật:</strong> ${q.explanation}`;
                     quizItem.appendChild(expBox);
                 }
 
@@ -655,12 +958,12 @@
                 });
                 const scoreBanner = document.createElement('div');
                 scoreBanner.className = 'moodle-score-banner';
-                scoreBanner.innerHTML = `📊 KẾT QUẢ: ĐẠT ĐIỂM ${score}/${quizData.length} CÂU ĐÚNG (${Math.round((score/quizData.length)*100)}%)`;
+                scoreBanner.innerHTML = `📊 ĐIỂM SỐ ĐẠT ĐỢT NÀY: ${score}/${quizData.length} CÂU ĐÚNG (${Math.round((score/quizData.length)*100)}%)`;
                 quizCard.appendChild(scoreBanner);
             } else {
                 const submitBtn = document.createElement('button');
                 submitBtn.className = 'moodle-submit-btn';
-                submitBtn.textContent = "Nộp bài chấm điểm";
+                submitBtn.textContent = "Nộp bài & Chấm điểm";
                 submitBtn.addEventListener('click', () => {
                     state.conversationHistory[historyIndex].isSubmitted = true;
                     saveState();
@@ -675,21 +978,16 @@
 
         function appendMessage(sender, text) {
             const anchor = document.getElementById('chat-anchor');
+            const row = document.createElement('div');
+            row.className = `message-row ${sender === 'user' ? 'user' : 'bot'}`;
+            
             const div = document.createElement('div');
             div.className = `message ${sender}`;
-            div.style.whiteSpace = 'pre-wrap';
             div.innerHTML = sender === 'bot' ? renderMarkdownSafe(text) : text;
-            chatBox.insertBefore(div, anchor);
+            
+            row.appendChild(div);
+            chatBox.insertBefore(row, anchor);
             forceScrollBottom(); 
-        }
-
-        function createEmptyBotMessage() {
-            const anchor = document.getElementById('chat-anchor');
-            const div = document.createElement('div');
-            div.className = 'message bot';
-            div.style.whiteSpace = 'pre-wrap';
-            chatBox.insertBefore(div, anchor);
-            return div;
         }
 
         function showTypingIndicator() {
@@ -728,7 +1026,7 @@
             localStorage.removeItem('ai_study_app_state');
             fileListUi.innerHTML = ''; fileInput.value = ''; userInput.value = '';
             updateTokenUI(); setInputState(true); updateSelectedBadgeCount();
-            chatBox.innerHTML = `<div class="message bot">Xin chào! Hãy tải file PDF bài học lên, tôi sẽ giúp bạn tóm tắt hoặc tạo đề trắc nghiệm ôn tập ngay lập tức.</div><div id="chat-anchor"></div>`;
+            renderChatHistory();
         }
 
         window.addEventListener('DOMContentLoaded', loadState);
