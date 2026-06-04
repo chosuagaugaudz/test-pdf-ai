@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PDF Assistant - Default MCQ Quiz Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <style>
+        /* --- CSS RESET & VARIABLE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --danger-color: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --success-color: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --info-bg: rgba(59, 130, 246, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- 1. MÀN HÌNH ĐĂNG NHẬP --- */
+        .login-container {
+            background-color: var(--panel-bg);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .login-container h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .login-container p { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem; }
+        .btn-google {
+            background-color: #ffffff; color: #1e293b; border: none; padding: 0.75rem 1.5rem;
+            border-radius: 6px; font-weight: 600; width: 100%; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px; transition: background 0.2s ease;
+        }
+        .btn-google:hover { background-color: #f1f5f9; }
+
+        /* --- 2. MÀN HÌNH CHÍNH --- */
+        .app-container {
+            display: none; width: 100vw; height: 100vh; grid-template-columns: 340px 1fr;
+        }
+
+        .sidebar {
+            background-color: var(--panel-bg); border-right: 1px solid var(--border-color);
+            padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; height: 100%; overflow: hidden;
+        }
+
+        .logo-area h2 { font-size: 1.4rem; color: var(--accent-color); }
+        .usage-counter { background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; }
+        .usage-counter.warning { background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+        .usage-counter span { color: var(--success-color); font-weight: bold; }
+        .usage-counter.warning span { color: var(--danger-color); }
+
+        .upload-box {
+            border: 2px dashed var(--border-color); padding: 1.5rem 1rem; text-align: center;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; flex-shrink: 0;
+        }
+        .upload-box.dragover { border-color: var(--accent-color); background-color: rgba(59, 130, 246, 0.05); }
+        .upload-box p { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+        #file-input { display: none; }
+
+        .file-list-header { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: -0.5rem; display: flex; justify-content: space-between; }
+
+        .file-list { list-style: none; overflow-y: auto; flex-grow: 1; padding-right: 2px; }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.04); padding: 0.6rem 0.75rem; border-radius: 6px;
+            font-size: 0.85rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;
+            border: 1px solid var(--border-color); transition: all 0.2s ease;
+        }
+        .file-item.active { border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.03); }
+        .file-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-color); cursor: pointer; flex-shrink: 0; }
+        
+        .file-info-wrapper { display: flex; flex-direction: column; overflow: hidden; flex-grow: 1; cursor: pointer; }
+        .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-weight: 500; }
+        .file-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+
+        .btn-delete-file { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; padding: 4px; border-radius: 4px; flex-shrink: 0; }
+        .btn-delete-file:hover { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
+
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+        .btn-logout {
+            background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color);
+            padding: 0.6rem 1rem; border-radius: 6px; width: 100%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease;
+        }
+        .btn-logout:hover { background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-color: var(--danger-color); }
+
+        /* --- 3. BONG BÓNG CHAT --- */
+        .main-chat { display: flex; flex-direction: column; height: 100%; background-color: var(--bg-color); overflow: hidden; }
+        .chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); font-weight: 600; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
+        .selected-counter-badge { font-size: 0.8rem; font-weight: normal; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 20px; color: var(--accent-color); }
+        
+        .chat-messages {
+            flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex;
+            flex-direction: column; gap: 1.2rem; scroll-behavior: auto; min-height: 0;
+        }
+
+        .message {
+            max-width: 80%; padding: 0.85rem 1.25rem; border-radius: 18px; 
+            font-size: 0.95rem; line-height: 1.6; word-break: break-word;
+            position: relative; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); animation: msgSlideUp 0.2s ease-out;
+        }
+        .message.user { background-color: var(--accent-color); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message.bot { background-color: var(--panel-bg); color: var(--text-main); align-self: flex-start; border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+
+        .message.bot.streaming { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 0 12px rgba(59, 130, 246, 0.1); }
+        .message.bot.streaming::after { content: "▊"; margin-left: 4px; color: var(--accent-color); font-size: 0.95rem; vertical-align: middle; animation: blink-cursor 0.6s infinite; }
+        .message.system-error { background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; align-self: center; max-width: 90%; font-size: 0.85rem; text-align: center; border-radius: 8px; padding: 0.75rem 1rem; }
+
+        /* 📝 CẤU TRÚC ĐỀ THI TRẮC NGHIỆM MOODLE STYLE */
+        .moodle-quiz-card { width: 100%; display: flex; flex-direction: column; gap: 1.5rem; margin-top: 0.5rem; }
+        .quiz-item { background: rgba(0, 0, 0, 0.15); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 12px; display: flex; flex-direction: column; gap: 0.8rem; }
+        .quiz-question-title { font-weight: 600; color: var(--text-main); font-size: 0.98rem; }
+        .quiz-options-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        
+        .quiz-option-row {
+            display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.85rem;
+            border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.02); transition: all 0.2s ease;
+        }
+        .quiz-option-row:hover { background-color: rgba(255, 255, 255, 0.06); border-color: var(--text-muted); }
+        .quiz-option-row input[type="radio"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); }
+        .quiz-option-text { font-size: 0.92rem; color: #e2e8f0; }
+
+        .quiz-option-row.moodle-correct { background-color: var(--success-bg) !important; border-color: var(--success-color) !important; color: #a7f3d0; }
+        .quiz-option-row.moodle-incorrect { background-color: var(--danger-bg) !important; border-color: var(--danger-color) !important; color: #fca5a5; }
+        
+        .moodle-explanation-box { padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.88rem; line-height: 1.5; background-color: var(--info-bg); border-left: 4px solid var(--accent-color); margin-top: 0.4rem; animation: fadeIn 0.3s ease; }
+        .moodle-explanation-box.correct-pane { border-left-color: var(--success-color); }
+        .moodle-explanation-box.incorrect-pane { border-left-color: var(--danger-color); }
+
+        .moodle-submit-btn { background-color: var(--success-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; text-align: center; align-self: flex-start; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .moodle-submit-btn:hover { background-color: #059669; }
+        .moodle-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .moodle-score-banner { padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: bold; font-size: 1.1rem; text-align: center; background-color: var(--info-bg); border: 1px solid var(--accent-color); animation: fadeIn 0.3s ease; }
+
+        /* 💡 Bong bóng chờ load */
+        .typing-bubble { background-color: var(--panel-bg); border: 1px solid var(--border-color); padding: 0.85rem 1.25rem; border-radius: 18px; border-bottom-left-radius: 4px; align-self: flex-start; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); width: fit-content; }
+        .typing-dot { width: 8px; height: 8px; background-color: var(--text-muted); border-radius: 50%; opacity: 0.4; animation: pulse-dot 1.2s infinite ease-in-out; }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse-dot { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; background-color: var(--accent-color); } }
+
+        .chat-input-area { padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; background-color: var(--bg-color); flex-shrink: 0; }
+        .chat-input-area input { flex-grow: 1; background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 1rem; color: var(--text-main); outline: none; }
+        .chat-input-area input:focus { border-color: var(--accent-color); }
+        .chat-input-area input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-send { background-color: var(--accent-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-send:hover:not(:disabled) { background-color: var(--accent-hover); }
+        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #chat-anchor { height: 1px; width: 100%; clear: both; flex-shrink: 0; }
+        @keyframes msgSlideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink-cursor { 50% { opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="login-container" id="login-screen">
+        <h1>Chào mừng quay trở lại</h1>
+        <p>Đăng nhập bằng Gmail để bắt đầu phân tích tài liệu học tập</p>
+        <button class="btn-google" id="btn-login-mock">
+            <img src="https://www.google.com/favicon.ico" width="16" height="16" alt="Google">
+            Đăng nhập với Google
+        </button>
+    </div>
+
+    <div class="app-container" id="app-screen">
+        <aside class="sidebar">
+            <div class="logo-area"><h2>AI Study PDF</h2></div>
+            <div class="usage-counter" id="usage-panel">Số lượt dùng còn lại: <span id="tokens-left">100</span>/100</div>
+            
+            <div class="upload-box" id="drop-zone">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div style="font-weight: 600; margin-top: 0.5rem; font-size: 0.9rem;">Tải thêm slide bài học</div>
+                <p>Hỗ trợ lưu trữ nhiều file cả học kỳ</p>
+                <input type="file" id="file-input" accept=".pdf">
+            </div>
+
+            <div class="file-list-header">
+                <span>DANH SÁCH TÀI LIỆU MÔN HỌC</span>
+            </div>
+            <ul class="file-list" id="file-list-ui"></ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="btn-logout-mock">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-chat">
+            <div class="chat-header">
+                <span>Hộp thoại phân tích dữ liệu liên kết</span>
+                <span class="selected-counter-badge" id="selected-badge">Đã chọn: 0 file</span>
+            </div>
+            <div class="chat-messages" id="chat-box">
+                <div id="chat-anchor"></div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Mặc định tạo đề MCQ Moodle. Gõ 'tóm tắt' để xem lý thuyết..." maxlength="1000">
+                <button class="btn-send" id="btn-send-msg">Gửi</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        const BACKEND_URL = "http://127.0.0.1:3000/api/process";
+
+        const state = {
+            maxTokens: 100, currentTokens: 100,
+            uploadedFiles: [], conversationHistory: [],
+            userId: "usth-student-mock-id", isLoggedIn: false
+        };
+
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen   = document.getElementById('app-screen');
+        const btnLoginMock  = document.getElementById('btn-login-mock');
+        const btnLogoutMock = document.getElementById('btn-logout-mock');
+        const fileInput     = document.getElementById('file-input');
+        const dropZone      = document.getElementById('drop-zone');
+        const fileListUi    = document.getElementById('file-list-ui');
+        const btnSendMsg    = document.getElementById('btn-send-msg');
+        const userInput     = document.getElementById('user-input');
+        const chatBox       = document.getElementById('chat-box');
+        const tokensLeftSpan = document.getElementById('tokens-left');
+        const usagePanel    = document.getElementById('usage-panel');
+        const selectedBadge = document.getElementById('selected-badge');
+
+        function renderMarkdownSafe(text) {
+            let clean = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            clean = clean.replace(/\*\*(.*?)\*\*/g, "<strong>$1");
+            clean = clean.replace(/`(.*?)`/g, "<code style='background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #f43f5e;'>$1</code>");
+            return clean;
+        }
+
+        function saveState() {
+            localStorage.setItem('ai_study_app_state', JSON.stringify({
+                currentTokens: state.currentTokens,
+                uploadedFiles: state.uploadedFiles,
+                conversationHistory: state.conversationHistory,
+                isLoggedIn: state.isLoggedIn
+            }));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('ai_study_app_state');
+            if (saved) {
+                try {
+                    const p = JSON.parse(saved);
+                    state.currentTokens      = p.currentTokens      ?? 100;
+                    state.uploadedFiles      = p.uploadedFiles      ?? [];
+                    state.conversationHistory = p.conversationHistory ?? [];
+                    state.isLoggedIn         = p.isLoggedIn         ?? false;
+                } catch(e) { console.error(e); }
+            }
+            updateTokenUI();
+            renderFileList();
+            renderChatHistory();
+            updateSelectedBadgeCount();
+            if (state.isLoggedIn) {
+                loginScreen.style.display = 'none';
+                appScreen.style.display = 'grid';
+                forceScrollBottom();
+            }
+        }
+
+        function forceScrollBottom() {
+            requestAnimationFrame(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+                const anchor = document.getElementById('chat-anchor');
+                if (anchor) anchor.scrollIntoView({ behavior: 'auto', block: 'end' });
+            });
+        }
+
+        btnLoginMock.addEventListener('click', () => {
+            loginScreen.style.display = 'none';
+            appScreen.style.display = 'grid';
+            state.isLoggedIn = true;
+            saveState();
+            forceScrollBottom();
+            userInput.focus();
+        });
+
+        btnLogoutMock.addEventListener('click', () => {
+            appScreen.style.display = 'none';
+            loginScreen.style.display = 'block';
+            resetApplicationState();
+        });
+
+        // --- Slide Loading Section ---
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        async function handleFile(file) {
+            if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+                appendMessage('system-error', 'Lỗi: Hệ thống chỉ chấp nhận định dạng .PDF.');
+                return;
+            }
+            appendMessage('bot', `Đang nạp file "${file.name}" vào kho lưu trữ học phần...`);
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = "";
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const tc = await page.getTextContent();
+                    fullText += tc.items.map(item => item.str).join(" ") + "\n";
+                }
+                
+                state.uploadedFiles.push({ 
+                    file_name: file.name, 
+                    page_count: pdf.numPages, 
+                    content: fullText.substring(0, 20000),
+                    checked: true 
+                });
+                
+                renderFileList();
+                saveState();
+                updateSelectedBadgeCount();
+                appendMessage('bot', `Đã đồng bộ thành công "${file.name}" (${pdf.numPages} trang). Hệ thống mặc định chọn file này để tạo đề kiểm tra tương tác.`);
+            } catch(err) {
+                console.error(err);
+                appendMessage('system-error', 'Lỗi: Không thể giải mã hoặc đọc file PDF này.');
+            }
+        }
+
+        function renderFileList() {
+            fileListUi.innerHTML = '';
+            state.uploadedFiles.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = `file-item ${file.checked ? 'active' : ''}`;
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = file.checked ?? true;
+                checkbox.addEventListener('change', (e) => {
+                    state.uploadedFiles[index].checked = e.target.checked;
+                    li.classList.toggle('active', e.target.checked);
+                    saveState();
+                    updateSelectedBadgeCount();
+                });
+
+                const infoWrapper = document.createElement('div');
+                infoWrapper.className = 'file-info-wrapper';
+                infoWrapper.addEventListener('click', () => { checkbox.click(); });
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'file-name';
+                nameSpan.textContent = file.file_name;
+                nameSpan.title = file.file_name;
+
+                const metaSpan = document.createElement('span');
+                metaSpan.className = 'file-meta';
+                metaSpan.textContent = `${file.page_count} trang`;
+
+                infoWrapper.appendChild(nameSpan);
+                infoWrapper.appendChild(metaSpan);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-delete-file';
+                deleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    state.uploadedFiles.splice(index, 1);
+                    renderFileList(); 
+                    saveState();
+                    updateSelectedBadgeCount();
+                    appendMessage('system-error', `Đã xóa file khỏi kho lưu trữ môn học.`);
+                });
+
+                li.appendChild(checkbox);
+                li.appendChild(infoWrapper);
+                li.appendChild(deleteBtn);
+                fileListUi.appendChild(li);
+            });
+        }
+
+        function updateSelectedBadgeCount() {
+            const count = state.uploadedFiles.filter(f => f.checked).length;
+            selectedBadge.textContent = `Đã chọn: ${count} file`;
+        }
+
+        function renderChatHistory() {
+            chatBox.innerHTML = '<div id="chat-anchor"></div>';
+            const anchor = document.getElementById('chat-anchor');
+
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'message bot';
+            welcomeDiv.innerHTML = 'Xin chào! Hệ thống đã kích hoạt **Mặc định tạo đề MCQ Moodle**. Hãy tích chọn những slide cần cày, gõ số câu (ví dụ: `15`, `30`) để làm bài thi thử ngay. Nếu cần xem lý thuyết cốt lõi, hãy gõ kèm từ `tóm tắt`.';
+            chatBox.insertBefore(welcomeDiv, anchor);
+
+            state.conversationHistory.forEach((msg, historyIndex) => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.role === 'assistant' ? 'bot' : 'user'}`;
+                
+                if (msg.isQuiz) {
+                    renderInteractiveQuizComponent(div, msg.quizData, msg.userAnswers, msg.isSubmitted, historyIndex);
+                } else {
+                    div.style.whiteSpace = 'pre-wrap';
+                    div.innerHTML = msg.role === 'assistant' ? renderMarkdownSafe(msg.content) : msg.content;
+                }
+                chatBox.insertBefore(div, anchor);
+            });
+            forceScrollBottom();
+        }
+
+        btnSendMsg.addEventListener('click', handleUserAction);
+        userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUserAction(); } });
+
+        async function handleUserAction() {
+            const text = userInput.value.trim();
+            if (!text) return;
+            if (state.currentTokens <= 0) { appendMessage('system-error', 'Bạn đã hết 100 lượt sử dụng miễn phí.'); return; }
+
+            const activeDocuments = state.uploadedFiles.filter(f => f.checked);
+            if (activeDocuments.length === 0) {
+                appendMessage('system-error', 'Lỗi: Bạn chưa tích chọn bất kỳ file slide nào ở cột bên trái để phân tích.');
+                return;
+            }
+
+            appendMessage('user', text);
+            state.conversationHistory.push({ role: "user", content: text });
+            saveState();
+            userInput.value = '';
+
+            // 🎯 THAY ĐỔI LỚN: ĐẢO NGƯỢC LOGIC ĐỂ MẶC ĐỊNH LÀ LUỒNG QUIZ MCQ
+            const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp lý thuyết", "review"];
+            const isSummarizeRequest = summarizeKeywords.some(kw => text.toLowerCase().includes(kw));
+            
+            // Nếu có từ khóa tóm tắt thì chạy tóm tắt, KHÔNG CÓ THÌ MẶC ĐỊNH LÀM QUIZ TRẮC NGHIỆM
+            const feature = isSummarizeRequest ? "summarize" : "quiz";
+
+            // 🎯 BẪY SỐ THÔNG MINH: Chỉ cần tìm thấy bất kì cụm số nào là bắt làm số câu quiz luôn
+            let numQuestionsRequested = 5; 
+            if (feature === "quiz") {
+                const numberMatch = text.match(/(\d+)/);
+                if (numberMatch) {
+                    numQuestionsRequested = parseInt(numberMatch[1]);
+                    if (numQuestionsRequested > 50) numQuestionsRequested = 50; 
+                }
+            }
+
+            const payload = {
+                feature, user_id: state.userId, user_message: text,
+                documents: activeDocuments, 
+                conversation_history: state.conversationHistory.slice(0, -1).map(h => ({ role: h.role, content: h.isQuiz ? "Bộ đề trắc nghiệm" : h.content })),
+                quiz_params: { num_questions: numQuestionsRequested, difficulty: "mixed" }
+            };
+
+            const typingId = showTypingIndicator();
+
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || "Có lỗi xảy ra ở Server.");
+                }
+
+                removeTypingIndicator(typingId);
+                state.currentTokens--;
+                updateTokenUI();
+
+                if (feature === "summarize") {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    const botEl = createEmptyBotMessage();
+                    botEl.classList.add('streaming'); 
+                    let currentText = "";
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        const lines = decoder.decode(value).split("\n");
+                        for (const line of lines) {
+                            if (!line.startsWith("data: ")) continue;
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                if (data.done) break;
+                                if (data.error) {
+                                    botEl.className = "message system-error";
+                                    botEl.innerHTML = "⚠️ " + data.error;
+                                    currentText = "⚠️ " + data.error;
+                                    forceScrollBottom(); break;
+                                }
+                                if (data.text) {
+                                    currentText += data.text;
+                                    botEl.innerHTML = renderMarkdownSafe(currentText);
+                                    forceScrollBottom(); 
+                                }
+                            } catch(e) {}
+                        }
+                    }
+                    botEl.classList.remove('streaming');
+                    state.conversationHistory.push({ role: "assistant", content: currentText });
+                    saveState();
+
+                } else {
+                    const resJson = await response.json();
+                    const quizArrayData = resJson.data;
+
+                    const anchor = document.getElementById('chat-anchor');
+                    const botEl = document.createElement('div');
+                    botEl.className = 'message bot';
+                    
+                    const newHistoryIndex = state.conversationHistory.length;
+                    
+                    const quizStateItem = {
+                        role: "assistant",
+                        isQuiz: true,
+                        quizData: quizArrayData,
+                        userAnswers: {}, 
+                        isSubmitted: false,
+                        content: "Bộ đề trắc nghiệm tương tác"
+                    };
+                    
+                    state.conversationHistory.push(quizStateItem);
+                    saveState();
+
+                    renderInteractiveQuizComponent(botEl, quizArrayData, {}, false, newHistoryIndex);
+                    chatBox.insertBefore(botEl, anchor);
+                    forceScrollBottom();
+                }
+
+            } catch(err) {
+                removeTypingIndicator(typingId);
+                state.conversationHistory.pop();
+                saveState();
+                appendMessage('system-error', `Lỗi kết nối: ${err.message}`);
+            }
+        }
+
+        // --- Form Render Moodle Engine ---
+        function renderInteractiveQuizComponent(containerElement, quizData, savedUserAnswers, isSubmitted, historyIndex) {
+            containerElement.innerHTML = ''; 
+            const quizCard = document.createElement('div');
+            quizCard.className = 'moodle-quiz-card';
+
+            const headerTitle = document.createElement('div');
+            headerTitle.style.fontWeight = 'bold';
+            headerTitle.style.color = 'var(--accent-color)';
+            headerTitle.style.marginBottom = '0.2rem';
+            headerTitle.textContent = `📝 BỘ ĐỀ KHẢO THÍ HỌC TẬP (${quizData.length} CÂU HỎI)`;
+            quizCard.appendChild(headerTitle);
+
+            quizData.forEach((q, qIdx) => {
+                const quizItem = document.createElement('div');
+                quizItem.className = 'quiz-item';
+
+                const qTitle = document.createElement('div');
+                qTitle.className = 'quiz-question-title';
+                qTitle.textContent = `Câu ${qIdx + 1}: ${q.question}`;
+                quizItem.appendChild(qTitle);
+
+                const optionsGroup = document.createElement('div');
+                optionsGroup.className = 'quiz-options-group';
+
+                Object.keys(q.options).forEach(optKey => {
+                    const optionRow = document.createElement('label');
+                    optionRow.className = 'quiz-option-row';
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `quiz_q_${historyIndex}_${qIdx}`;
+                    radio.value = optKey;
+                    
+                    if (savedUserAnswers && savedUserAnswers[qIdx] === optKey) {
+                        radio.checked = true;
+                    }
+
+                    if (isSubmitted) {
+                        radio.disabled = true; 
+                        if (optKey === q.answer) {
+                            optionRow.classList.add('moodle-correct');
+                        } else if (savedUserAnswers[qIdx] === optKey && savedUserAnswers[qIdx] !== q.answer) {
+                            optionRow.classList.add('moodle-incorrect');
+                        }
+                    } else {
+                        radio.addEventListener('change', (e) => {
+                            state.conversationHistory[historyIndex].userAnswers[qIdx] = e.target.value;
+                            saveState();
+                        });
+                    }
+
+                    const optText = document.createElement('span');
+                    optText.className = 'quiz-option-text';
+                    optText.textContent = `${optKey}. ${q.options[optKey]}`;
+
+                    optionRow.appendChild(radio);
+                    optionRow.appendChild(optText);
+                    optionsGroup.appendChild(optionRow);
+                });
+
+                quizItem.appendChild(optionsGroup);
+
+                if (isSubmitted) {
+                    const expBox = document.createElement('div');
+                    const isUserRight = savedUserAnswers[qIdx] === q.answer;
+                    expBox.className = `moodle-explanation-box ${isUserRight ? 'correct-pane' : 'incorrect-pane'}`;
+                    expBox.innerHTML = `<strong>${isUserRight ? '✅ Đúng chính xác!' : '❌ Chưa chính xác!'}</strong><br/>` +
+                                       `• <strong>Đáp án chuẩn:</strong> ${q.answer}<br/>` +
+                                       `• <strong>Giải thích lý do:</strong> ${q.explanation}`;
+                    quizItem.appendChild(expBox);
+                }
+
+                quizCard.appendChild(quizItem);
+            });
+
+            if (isSubmitted) {
+                let score = 0;
+                quizData.forEach((q, idx) => {
+                    if (savedUserAnswers[idx] === q.answer) score++;
+                });
+                const scoreBanner = document.createElement('div');
+                scoreBanner.className = 'moodle-score-banner';
+                scoreBanner.innerHTML = `📊 KẾT QUẢ: ĐẠT ĐIỂM ${score}/${quizData.length} CÂU ĐÚNG (${Math.round((score/quizData.length)*100)}%)`;
+                quizCard.appendChild(scoreBanner);
+            } else {
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'moodle-submit-btn';
+                submitBtn.textContent = "Nộp bài chấm điểm";
+                submitBtn.addEventListener('click', () => {
+                    state.conversationHistory[historyIndex].isSubmitted = true;
+                    saveState();
+                    renderInteractiveQuizComponent(containerElement, quizData, state.conversationHistory[historyIndex].userAnswers, true, historyIndex);
+                    forceScrollBottom();
+                });
+                quizCard.appendChild(submitBtn);
+            }
+
+            containerElement.appendChild(quizCard);
+        }
+
+        function appendMessage(sender, text) {
+            const anchor = document.getElementById('chat-anchor');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.style.whiteSpace = 'pre-wrap';
+            div.innerHTML = sender === 'bot' ? renderMarkdownSafe(text) : text;
+            chatBox.insertBefore(div, anchor);
+            forceScrollBottom(); 
+        }
+
+        function createEmptyBotMessage() {
+            const anchor = document.getElementById('chat-anchor');
+            const div = document.createElement('div');
+            div.className = 'message bot';
+            div.style.whiteSpace = 'pre-wrap';
+            chatBox.insertBefore(div, anchor);
+            return div;
+        }
+
+        function showTypingIndicator() {
+            const anchor = document.getElementById('chat-anchor');
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'typing-bubble';
+            div.id = id;
+            div.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
+            chatBox.insertBefore(div, anchor);
+            forceScrollBottom();
+            setInputState(false);
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+            setInputState(true);
+        }
+
+        function setInputState(enabled) {
+            userInput.disabled = !enabled;
+            btnSendMsg.disabled = !enabled;
+            if (enabled) userInput.focus();
+        }
+
+        function updateTokenUI() {
+            tokensLeftSpan.textContent = state.currentTokens.toString();
+            usagePanel.classList.toggle('warning', state.currentTokens === 0);
+        }
+
+        function resetApplicationState() {
+            state.currentTokens = 100;
+            state.uploadedFiles = []; state.conversationHistory = []; state.isLoggedIn = false;
+            localStorage.removeItem('ai_study_app_state');
+            fileListUi.innerHTML = ''; fileInput.value = ''; userInput.value = '';
+            updateTokenUI(); setInputState(true); updateSelectedBadgeCount();
+            chatBox.innerHTML = `<div class="message bot">Xin chào! Hãy tải file PDF bài học lên, tôi sẽ giúp bạn tóm tắt hoặc tạo đề trắc nghiệm ôn tập ngay lập tức.</div><div id="chat-anchor"></div>`;
+        }
+
+        window.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>
