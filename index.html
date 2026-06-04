@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AceQuiz AI - Hệ thống ôn thi trắc nghiệm thông minh</title>
+    <title>AceQuiz AI - Nền tảng học tập và khảo thí thông minh</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
-        /* --- DESIGN SYSTEM STYLING V2 (AI SAAS SERIES A STANDARD) --- */
+        /* --- CORE DESIGN SYSTEM V4.0 (MUTATION THEME SYSTEM) --- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         * {
@@ -14,24 +14,48 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
         }
 
-        :root {
-            --bg-main: #0b0f19;
-            --bg-sidebar: #111827;
-            --panel-surface: #1f2937;
-            --panel-hover: #374151;
-            --accent-primary: #6366f1;
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --border-subtle: #374151;
+        /* CONFIG THEME VARIABLES CHUẨN CLAUDE + CHATGPT */
+        html[data-theme="light"] {
+            --bg-main: #fafaf8;        /* Warm Neutral Claude Style */
+            --bg-sidebar: #f5f2eb;     /* Sand Muted Notion Style */
+            --surface: #ffffff;
+            --text-main: #111827;      /* Charcoal sâu sắc */
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #14b8a6;         /* Teal tối giản, dịu mắt */
+            --accent-hover: #0d9488;
+            --accent-light: #f0fdfa;
+            --panel-surface: #f3f4f6;
+            --panel-hover: #e5e7eb;
             --success: #10b981;
-            --success-surface: rgba(16, 185, 129, 0.12);
+            --success-bg: #ecfdf5;
             --danger: #ef4444;
-            --danger-surface: rgba(239, 68, 68, 0.12);
-            --info-surface: rgba(99, 102, 241, 0.08);
-            --sidebar-width: 300px;
+            --danger-bg: #fef2f2;
+            --info-bg: #f0f9ff;
+            --shadow-premium: rgba(0, 0, 0, 0.03);
+        }
+
+        html[data-theme="dark"] {
+            --bg-main: #18181b;        /* Tone tối dịu của ChatGPT/Claude */
+            --bg-sidebar: #111827;     /* Soft dark sâu lắng */
+            --surface: #1f2937;
+            --text-main: #f5f5f5;      /* Trắng ngà dịu mắt */
+            --text-muted: #9ca3af;
+            --border: #374151;
+            --accent: #14b8a6;         /* Giữ nguyên Teal dịu nhẹ */
+            --accent-hover: #0d9488;
+            --accent-light: rgba(20, 184, 166, 0.15);
+            --panel-surface: #2a2b32;
+            --panel-hover: #374151;
+            --success: #34d399;
+            --success-bg: rgba(52, 211, 153, 0.12);
+            --danger: #f87171;
+            --danger-bg: rgba(248, 113, 113, 0.12);
+            --info-bg: rgba(14, 165, 233, 0.1);
+            --shadow-premium: rgba(0, 0, 0, 0.3);
         }
 
         body {
@@ -43,346 +67,202 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 1. MÀN HÌNH ĐĂNG NHẬP PREMIUM --- */
+        /* --- 1. MÀN HÌNH ĐĂNG NHẬP ADAPTIVE THEME --- */
         .login-container {
-            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0%, transparent 60%), #111827;
-            padding: 3rem 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            background: var(--surface);
+            padding: 3.5rem 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px var(--shadow-premium);
             width: 100%;
-            max-width: 440px;
+            max-width: 450px;
             text-align: center;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--border);
             margin: auto;
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 0.4s ease;
         }
-
-        .login-brand {
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .login-container p {
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
+        .login-brand { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; letter-spacing: -1px; }
+        .login-container p { color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.6; }
         .btn-google {
-            background-color: #ffffff;
-            color: #0f172a;
-            border: none;
-            padding: 0.85rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border); padding: 0.85rem 1.5rem;
+            border-radius: 12px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 1rem; transition: all 0.2s ease;
         }
+        .btn-google:hover { background-color: var(--panel-hover); transform: translateY(-1px); }
 
-        .btn-google:hover {
-            background-color: #f3f4f6;
-            transform: translateY(-1px);
-        }
+        /* --- 2. LAYOUT SIDEBAR TRƯỆT TIÊU 100% KHI COLLAPSE --- */
+        .app-container { display: none; width: 100vw; height: 100vh; position: relative; }
 
-        /* --- 2. BỐ CỤC CHUẨN ĐẸP CLAUDE + CHATGPT --- */
-        .app-container {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* Sidebar Gọn Gàng */
         .sidebar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: var(--sidebar-width);
-            height: 100%;
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-subtle);
-            padding: 1.5rem 1.25rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            z-index: 10;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: absolute; top: 0; left: 0; width: 280px; height: 100%;
+            background-color: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem;
+            display: flex; flex-direction: column; gap: 1.25rem; z-index: 10;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease, border 0.3s ease;
         }
-
-        .logo-area {
-            font-size: 1.35rem;
-            font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .usage-counter {
-            background-color: rgba(99, 102, 241, 0.06);
-            border: 1px solid rgba(99, 102, 241, 0.15);
-            padding: 0.85rem 1rem;
-            border-radius: 10px;
-            font-size: 0.88rem;
-            color: var(--text-muted);
-        }
-        .usage-counter span { color: var(--accent-primary); font-weight: 600; }
-        .usage-counter.warning { background-color: var(--danger-surface); border-color: rgba(239, 68, 68, 0.2); }
-        .usage-counter.warning span { color: var(--danger); }
-
-        /* Drag & Drop Upload Kính Mờ */
-        .upload-box {
-            border: 2px dashed var(--border-subtle);
-            padding: 1.5rem 1rem;
-            text-align: center;
-            border-radius: 12px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.01);
-            transition: all 0.2s ease-in-out;
-        }
-        .upload-box:hover, .upload-box.dragover {
-            border-color: var(--accent-primary);
-            background-color: rgba(99, 102, 241, 0.04);
-        }
-        .upload-box svg { color: var(--accent-primary); transition: transform 0.2s ease; }
-        .upload-box:hover svg { transform: translateY(-2px); }
-        .upload-box div { font-size: 0.9rem; font-weight: 500; margin-top: 0.5rem; }
-        .upload-box p { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
-        #file-input { display: none; }
-
-        .file-list-header {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .file-list {
-            list-style: none;
-            overflow-y: auto;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .file-list::-webkit-scrollbar { width: 4px; }
-        .file-list::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
         
-        .file-item {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 0.75rem;
-            border-radius: 10px;
-            font-size: 0.88rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid var(--border-subtle);
-            transition: all 0.2s ease;
+        .sidebar.collapsed {
+            width: 0px !important;
+            padding: 1.5rem 0px !important;
+            transform: translateX(-100%);
+            border-right: none !important;
+            pointer-events: none;
         }
-        .file-item.active {
-            border-color: rgba(99, 102, 241, 0.4);
-            background: rgba(99, 102, 241, 0.04);
+        .sidebar.collapsed * { display: none !important; }
+        
+        .resize-handle {
+            position: absolute; top: 0; left: 280px; width: 4px; height: 100%;
+            cursor: col-resize; z-index: 11; background: transparent; transition: background 0.2s;
         }
-        .file-item input[type="checkbox"] {
-            width: 17px;
-            height: 17px;
-            accent-color: var(--accent-primary);
-            cursor: pointer;
-            border-radius: 4px;
+        .resize-handle:hover, .resize-handle.active { background: var(--accent); }
+        .resize-handle.hidden { display: none !important; }
+
+        .logo-area { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 1.25rem; color: var(--text-main); }
+        
+        .btn-icon {
+            background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;
         }
+        .btn-icon:hover { background: var(--panel-hover); color: var(--text-main); }
+
+        .btn-icon[data-tooltip]::after {
+            content: attr(data-tooltip); position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 100; font-weight: normal;
+        }
+        .btn-icon[data-tooltip]:hover::after { opacity: 1; }
+
+        .usage-counter { background: var(--surface); border: 1px solid var(--border); padding: 0.75rem; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); }
+        .usage-counter span { color: var(--accent); font-weight: 600; }
+
+        .upload-box { border: 2px dashed var(--border); padding: 1.25rem 0.75rem; text-align: center; border-radius: 12px; cursor: pointer; background: var(--surface); transition: all 0.2s; position: relative; }
+        .upload-box:hover { border-color: var(--accent); background: var(--accent-light); }
+        .upload-box div { font-size: 0.88rem; font-weight: 600; margin-top: 0.5rem; }
+        .upload-box p { font-size: 0.78rem; color: var(--text-muted); }
+        
+        /* Progress state bọc lót */
+        .upload-progress-text { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-top: 4px; display: none; }
+
+        .file-list-header { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+        .file-list { list-style: none; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 0.35rem; }
+        
+        .file-item-container { display: flex; flex-direction: column; gap: 2px; }
+        .file-item { background: var(--surface); padding: 0.65rem; border-radius: 10px; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); transition: all 0.2s; }
+        .file-item.active { border-color: var(--accent); background: var(--accent-light); }
+        .file-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
         
         .file-info-wrapper { display: flex; flex-direction: column; overflow: hidden; flex-grow: 1; cursor: pointer; }
         .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
         .file-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .btn-delete-file { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; padding: 4px; border-radius: 6px; }
+        .btn-delete-file:hover { color: var(--danger); background: var(--danger-bg); }
 
-        .btn-delete-file {
-            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
-            display: flex; align-items: center; padding: 6px; border-radius: 6px;
-        }
-        .btn-delete-file:hover { color: var(--danger); background: var(--danger-surface); }
+        /* Cây thư mục hiển thị đề thi cũ kèm tên file bọc lót tường minh */
+        .quiz-history-tree { list-style: none; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 2px; margin-bottom: 0.5rem; }
+        .history-quiz-item { font-size: 0.78rem; color: var(--text-muted); padding: 5px 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 2px solid var(--border); }
+        .history-quiz-item:hover { color: var(--accent); background: var(--panel-surface); border-left-color: var(--accent); }
+        .history-quiz-score { font-weight: 600; font-size: 0.75rem; background: var(--accent-light); color: var(--accent); padding: 1px 6px; border-radius: 10px; }
 
-        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-subtle); }
-        .btn-logout {
-            background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle);
-            padding: 0.75rem 1rem; border-radius: 10px; width: 100%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease;
-        }
-        .btn-logout:hover { background-color: var(--danger-surface); color: var(--danger); border-color: var(--danger); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .btn-logout { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 500; font-size: 0.9rem; }
+        .btn-logout:hover { background-color: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
 
-        /* --- 3. KHU VỰC CHAT CHÍNH (FOCUS-FIRST) --- */
-        .main-chat {
-            margin-left: var(--sidebar-width);
-            width: calc(100vw - var(--sidebar-width));
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-main);
-            position: relative;
-        }
-
-        .chat-header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: rgba(11, 15, 25, 0.8);
-            backdrop-filter: blur(12px);
-            z-index: 5;
-        }
-        .menu-toggle-btn {
-            display: none; background: transparent; border: none; color: var(--text-main); cursor: pointer;
-        }
-        .chat-title-info { font-weight: 600; font-size: 1.05rem; }
-        .selected-counter-badge {
-            font-size: 0.8rem; font-weight: 500; background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2); padding: 6px 14px; border-radius: 20px; color: #818cf8;
-        }
+        /* --- 3. WORKSPACE WRAPPER CHUẨN CAO CẤP --- */
+        .workspace-wrapper { height: 100%; transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         
-        .chat-messages {
-            flex-grow: 1;
-            padding: 2rem 4rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-        .chat-messages::-webkit-scrollbar { width: 6px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
+        .top-navbar { height: 56px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: relative; z-index: 5; }
+        .navbar-left-cluster { display: flex; align-items: center; gap: 12px; }
+        .tabs-group { display: flex; gap: 1.5rem; height: 100%; }
+        .tab-btn { background: transparent; border: none; font-size: 0.92rem; font-weight: 600; color: var(--text-muted); cursor: pointer; height: 100%; position: relative; display: flex; align-items: center; gap: 8px; }
+        .tab-btn.active { color: var(--accent); }
+        .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent); }
+        
+        .navbar-right-cluster { display: flex; align-items: center; gap: 12px; }
+        .theme-select-menu { background: var(--surface); border: 1px solid var(--border); padding: 0.4rem; border-radius: 10px; color: var(--text-main); font-size: 0.85rem; font-weight: 500; outline: none; cursor: pointer; }
 
-        /* Màn Hình Trống Gợi Ý Hành Động (Empty State) */
-        .empty-dashboard {
-            max-width: 720px; margin: auto; text-align: center; display: flex; flex-direction: column; gap: 2.5rem; padding: 2rem 0;
-        }
-        .empty-dashboard h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
-        .empty-dashboard h2 span { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .suggested-cards-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: left;
-        }
-        .suggest-card {
-            background: var(--bg-sidebar); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 12px; cursor: pointer; transition: all 0.2s ease;
-        }
-        .suggest-card:hover { border-color: var(--accent-primary); background: rgba(99, 102, 241, 0.03); transform: translateY(-1px); }
-        .suggest-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-main); }
+        .view-panel { flex-grow: 1; display: none; width: 100%; height: calc(100vh - 56px); overflow: hidden; }
+        .view-panel.active { display: flex; }
+
+        /* --- CHAT WORKSPACE (CHATGPT CORE LINKED) --- */
+        .chat-view-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .chat-messages { flex-grow: 1; padding: 2rem 20%; overflow-y: auto; display: flex; flex-direction: column; gap: 2rem; }
+        
+        .empty-dashboard { max-width: 680px; margin: auto; text-align: center; display: flex; flex-direction: column; gap: 2rem; }
+        .empty-dashboard h2 { font-size: 1.8rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+        .empty-dashboard h2 span { color: var(--accent); }
+        .suggested-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: left; }
+        .suggest-card { background: var(--surface); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .suggest-card:hover { border-color: var(--accent); background: var(--accent-light); transform: translateY(-1px); }
+        .suggest-card h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.25rem; }
         .suggest-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; }
 
-        /* Bong Bóng Tin Nhắn Theo Quy Chuẩn AI Cao Cấp */
-        .message-row { display: flex; width: 100%; gap: 1.25rem; animation: msgSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .message-row { display: flex; width: 100%; gap: 1.25rem; animation: msgSlideUp 0.3s ease; }
         .message-row.user { justify-content: flex-end; }
+        .avatar-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; background: var(--panel-surface); color: var(--text-main); }
+        .message-row.bot .avatar-box { background: var(--accent-light); color: var(--accent); border: 1px solid var(--border); }
         
-        .avatar-box {
-            width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0;
-        }
-        .message-row.bot .avatar-box { background: var(--accent-gradient); color: white; }
-        .message-row.user .avatar-box { display: none; } /* ChatGPT ẩn avatar user để tối giản không gian */
+        .message { max-width: 85%; font-size: 0.98rem; line-height: 1.65; word-break: break-word; }
+        .message.user { background-color: var(--panel-surface); padding: 0.85rem 1.25rem; border-radius: 14px; }
+        .message.bot { color: var(--text-main); white-space: pre-wrap; }
+        .message.bot strong { font-weight: 600; color: var(--text-main); }
+        .message.bot code { background: var(--panel-surface); padding: 2px 5px; border-radius: 4px; font-family: monospace; color: #dc2626; font-size: 0.9rem; }
+        .message.bot.streaming::after { content: "▊"; color: var(--accent); animation: blink-cursor 0.6s infinite; margin-left: 4px; }
+        .message.system-error { background-color: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); max-width: 600px; font-size: 0.88rem; border-radius: 10px; padding: 0.85rem 1.25rem; margin: auto; }
 
-        .message {
-            max-width: 78%; padding: 1rem 1.5rem; border-radius: 14px; 
-            font-size: 1rem; line-height: 1.625; word-break: break-word;
-        }
-        .message.user { background-color: var(--panel-surface); color: var(--text-main); border-bottom-right-radius: 4px; }
-        .message.bot { background-color: transparent; color: #e5e7eb; padding-left: 0; padding-right: 0; width: 100%; }
+        .chat-input-wrapper { padding: 1rem 20% 2rem 20%; background-color: var(--bg-main); flex-shrink: 0; }
+        .chat-input-area { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 20px var(--shadow-premium); }
+        .chat-input-area:focus-within { border-color: var(--accent); }
+        .chat-input-area input { flex-grow: 1; background: transparent; border: none; padding: 0.6rem 0.2rem; color: var(--text-main); outline: none; font-size: 1rem; }
+        
+        .btn-send { background: var(--accent); color: white; border: none; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-send:hover:not(:disabled) { background: var(--accent-hover); }
+        .btn-send:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
-        /* Đóng khung code block/markdown đẹp mắt */
-        .message.bot strong { color: var(--text-main); font-weight: 600; }
-        .message.bot code { background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 6px; font-family: monospace; color: #f43f5e; font-size: 0.9rem; }
+        /* --- QUIZ WORKSPACE VIEW (MOODLE + COURSERA CORE BIỆT LẬP) --- */
+        .quiz-view-container { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 280px; }
+        .quiz-main-area { padding: 2rem 4rem; overflow-y: auto; height: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
+        .quiz-sidebar-panel { background: var(--bg-sidebar); border-left: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; height: 100%; }
+        
+        .quiz-meta-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 12px; font-size: 0.9rem; }
+        .quiz-timer-box { font-weight: 700; font-size: 1.1rem; color: var(--danger); display: flex; align-items: center; gap: 6px; }
+        
+        .moodle-progress-bar-container { background: var(--border); height: 8px; border-radius: 4px; width: 100%; overflow: hidden; margin-top: -0.5rem; }
+        .moodle-progress-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
 
-        .message.bot.streaming::after { content: "▊"; color: var(--accent-primary); animation: blink-cursor 0.6s infinite; margin-left: 4px; }
-        .message.system-error { background-color: var(--danger-surface); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; max-width: 600px; font-size: 0.88rem; border-radius: 10px; padding: 0.85rem 1.25rem; margin: auto; }
+        .quiz-questions-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+        .moodle-quiz-item { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 14px; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 4px 12px var(--shadow-premium); }
+        
+        /* 🎯 PREMIUM UX INDICATOR: Thẻ thông báo nguồn file PDF chống hiểu lầm */
+        .quiz-source-file-badge { font-size: 0.76rem; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 6px; width: fit-content; border: 1px solid rgba(20, 184, 166, 0.2); margin-bottom: -4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
-        /* 📝 PHÂN HỆ ĐỀ THI TRẮC NGHIỆM MOODLE PRO STYLE */
-        .moodle-quiz-card { width: 100%; display: flex; flex-direction: column; gap: 1.5rem; background: var(--bg-sidebar); border: 1px solid var(--border-subtle); padding: 2rem; border-radius: 16px; margin-top: 0.5rem; }
-        .quiz-item { background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; gap: 1rem; }
         .quiz-question-title { font-weight: 600; color: var(--text-main); font-size: 1.05rem; line-height: 1.4; }
         .quiz-options-group { display: flex; flex-direction: column; gap: 0.65rem; }
         
-        .quiz-option-row {
-            display: flex; align-items: center; gap: 12px; padding: 0.85rem 1.25rem;
-            border: 1px solid var(--border-subtle); border-radius: 10px; cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.01); transition: all 0.2s ease;
-        }
-        .quiz-option-row:hover { background-color: var(--panel-surface); border-color: var(--text-muted); }
-        .quiz-option-row input[type="radio"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-primary); }
-        .quiz-option-text { font-size: 0.95rem; color: #d1d5db; }
+        .quiz-option-row { display: flex; align-items: center; gap: 12px; padding: 0.85rem 1.25rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; background-color: var(--surface); transition: all 0.2s; }
+        .quiz-option-row:hover { background-color: var(--panel-surface); }
+        .quiz-option-row input[type="radio"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
 
-        /* Trạng thái chấm điểm Moodle Coursera */
-        .quiz-option-row.moodle-correct { background-color: var(--success-surface) !important; border-color: var(--success) !important; }
-        .quiz-option-row.moodle-correct .quiz-option-text { color: #34d399; font-weight: 500; }
-        .quiz-option-row.moodle-incorrect { background-color: var(--danger-surface) !important; border-color: var(--danger) !important; }
-        .quiz-option-row.moodle-incorrect .quiz-option-text { color: #f87171; }
+        .quiz-option-row.moodle-correct { background-color: var(--success-bg) !important; border-color: var(--success) !important; color: var(--success); font-weight: 600; }
+        .quiz-option-row.moodle-incorrect { background-color: var(--danger-bg) !important; border-color: var(--danger) !important; color: var(--danger); }
         
-        .moodle-explanation-box { padding: 1rem 1.25rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; background-color: rgba(99, 102, 241, 0.05); border-left: 4px solid var(--accent-primary); margin-top: 0.5rem; }
-        .moodle-explanation-box.correct-pane { border-left-color: var(--success); background-color: var(--success-surface); }
-        .moodle-explanation-box.incorrect-pane { border-left-color: var(--danger); background-color: var(--danger-surface); }
+        .moodle-explanation-box { padding: 1rem 1.25rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; background-color: var(--surface); border-left: 4px solid var(--accent); margin-top: 0.5rem; border: 1px solid var(--border); }
+        .moodle-explanation-box.correct-pane { border-left-color: var(--success); background-color: var(--success-bg); }
+        .moodle-explanation-box.incorrect-pane { border-left-color: var(--danger); background-color: var(--danger-bg); }
 
-        .moodle-submit-btn { background: var(--accent-gradient); color: white; border: none; padding: 0.85rem 2rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; align-self: flex-start; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
-        .moodle-submit-btn:hover { transform: translateY(-1px); opacity: 0.95; }
-        .moodle-score-banner { padding: 1.2rem; border-radius: 12px; font-weight: 700; font-size: 1.2rem; text-align: center; background-color: var(--info-surface); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; }
+        .moodle-submit-btn { background: var(--accent); color: white; border: none; padding: 0.85rem 2rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; align-self: flex-start; }
+        .moodle-submit-btn:hover { background: var(--accent-hover); }
+        .moodle-score-banner { padding: 1.2rem; border-radius: 12px; font-weight: 700; font-size: 1.2rem; text-align: center; background-color: var(--accent-light); border: 1px solid var(--accent); }
 
-        /* Bong bóng chờ AI xử lý */
-        .typing-bubble { background-color: var(--panel-surface); border: 1px solid var(--border-subtle); padding: 1rem 1.5rem; border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: fit-content; }
-        .typing-dot { width: 7px; height: 7px; background-color: var(--text-muted); border-radius: 50%; opacity: 0.4; animation: pulse-dot 1.2s infinite ease-in-out; }
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .nav-grid-title { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .question-nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .nav-num-btn { background: var(--surface); border: 1px solid var(--border); height: 40px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .nav-num-btn.filled { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+        .nav-num-btn.correct { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+        .nav-num-btn.incorrect { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
 
-        @keyframes pulse-dot { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; background-color: var(--accent-primary); } }
-
-        /* Input Area Cố Định Phía Dưới Kiểu ChatGPT + Claude */
-        .chat-input-wrapper {
-            padding: 1.5rem 4rem 2rem 4rem; background-color: var(--bg-main); flex-shrink: 0;
-        }
-        .chat-input-area {
-            max-width: 800px; margin: auto; position: relative; background-color: var(--bg-sidebar); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); transition: border-color 0.2s ease;
-        }
-        .chat-input-area:focus-within { border-color: var(--accent-primary); }
-        .chat-input-area input { flex-grow: 1; background: transparent; border: none; padding: 0.6rem 0.5rem; color: var(--text-main); outline: none; font-size: 1rem; }
-        .chat-input-area input::placeholder { color: var(--text-muted); }
-        .chat-input-area input:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-send {
-            background: var(--accent-primary); color: white; border: none; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;
-        }
-        .btn-send:hover:not(:disabled) { background: #4f46e5; transform: scale(1.02); }
-        .btn-send:disabled { background: var(--panel-surface); color: var(--text-muted); opacity: 0.5; cursor: not-allowed; }
+        .quiz-dashboard-empty { margin: auto; text-align: center; max-width: 400px; display: flex; flex-direction: column; gap: 1rem; color: var(--text-muted); }
 
         #chat-anchor { height: 1px; width: 100%; clear: both; flex-shrink: 0; }
-
-        /* --- 4. RESPONSIVE OPTIMIZATION (MOBILE EMBEDDED) --- */
-        @media (max-width: 1024px) {
-            .chat-messages { padding: 1.5rem 2rem; }
-            .chat-input-wrapper { padding: 1rem 2rem 1.5rem 2rem; }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            
-            .main-chat { margin-left: 0; width: 100vw; }
-            .menu-toggle-btn { display: block; }
-            .suggested-cards-grid { grid-template-columns: 1fr; gap: 0.75rem; }
-            .empty-dashboard h2 { font-size: 1.6rem; }
-            .message { max-width: 90%; }
-        }
-
-        @keyframes msgSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @media (max-width: 1024px) { .chat-messages { padding: 2rem 10%; } .chat-input-wrapper { padding: 1rem 10% 2rem 10%; } }
+        @media (max-width: 768px) { .quiz-view-container { grid-template-columns: 1fr; } .quiz-sidebar-panel { display: none; } }
+        @keyframes msgSlideUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
         @keyframes blink-cursor { 50% { opacity: 0; } }
     </style>
 </head>
@@ -390,12 +270,9 @@
 
     <div class="login-container" id="login-screen">
         <div class="login-brand">AceQuiz AI</div>
-        <h1>Chào mừng quay trở lại</h1>
-        <p>Hệ thống phân tích học phần liên kết và cày đề trắc nghiệm Moodle dành riêng cho sinh viên.</p>
-        <button class="btn-google" id="btn-login-mock">
-            <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="Google">
-            Đăng nhập với Google
-        </button>
+        <h1>Học trình Tốc chiến</h1>
+        <p>Hệ thống liên kết tri thức, trích xuất lý thuyết cốt lõi và cày đề trắc nghiệm thông minh chuẩn Series A.</p>
+        <button class="btn-google" id="btn-login-mock">Kết nối tài khoản sinh viên</button>
     </div>
 
     <div class="app-container" id="app-screen">
@@ -403,86 +280,186 @@
         <aside class="sidebar" id="app-sidebar">
             <div class="logo-area">
                 <span>AceQuiz AI</span>
-                <button class="menu-toggle-btn" style="color: var(--text-muted);" id="btn-close-sidebar-mobile">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <button class="btn-icon" id="btn-collapse-sidebar" data-tooltip="Thu gọn thanh bên">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><line x1="18" y1="12" x2="7" y2="12"/></svg>
                 </button>
             </div>
-            <div class="usage-counter" id="usage-panel">Lượt sử dụng miễn phí còn: <span id="tokens-left">100</span>/100</div>
+            
+            <div class="usage-counter" id="usage-panel">Hạn mức ôn thi còn: <span id="tokens-left">100</span>/100</div>
             
             <div class="upload-box" id="drop-zone">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <div>Tải thêm slide bài học</div>
-                <p>Kéo thả hoặc click chọn file .PDF</p>
-                <input type="file" id="file-input" accept=".pdf">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div id="upload-box-title">Nạp Slide học phần</div>
+                <p id="upload-box-desc">Kéo thả nhiều file PDF cùng lúc</p>
+                <div class="upload-progress-text" id="upload-progress-node">Đang dịch văn bản...</div>
+                
+                <input type="file" id="file-input" accept=".pdf" multiple style="display: none !important;">
             </div>
 
-            <div class="file-list-header">Danh sách tài liệu ôn thi</div>
+            <div class="file-list-header">Kho học phần cả học kỳ</div>
             <ul class="file-list" id="file-list-ui"></ul>
             
             <div class="sidebar-footer">
-                <button class="btn-logout" id="btn-logout-mock">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Đăng xuất
-                </button>
+                <button class="btn-logout" id="btn-logout-mock">Đăng xuất</button>
             </div>
         </aside>
+        
+        <div class="resize-handle" id="sidebar-resize-bar"></div>
 
-        <main class="main-chat">
-            <div class="chat-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="menu-toggle-btn" id="btn-toggle-sidebar-mobile">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <div class="workspace-wrapper" id="content-workspace-area" style="margin-left: 280px; width: calc(100vw - 280px);">
+            
+            <header class="top-navbar">
+                <div class="navbar-left-cluster">
+                    <button class="btn-icon" id="btn-expand-sidebar-floating" data-tooltip="Mở rộng thanh bên" style="display: none; margin-right: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                     </button>
-                    <span class="chat-title-info">Hộp thoại khảo thí học phần</span>
+                    
+                    <nav class="tabs-group">
+                        <button class="tab-btn active" id="tab-trigger-chat" onclick="switchWorkspace('chat')">Khung thoại AI Assistant</button>
+                        <button class="tab-btn" id="tab-trigger-quiz" onclick="switchWorkspace('quiz')">Workspace Khảo thí Moodle</button>
+                    </nav>
                 </div>
-                <span class="selected-counter-badge" id="selected-badge">Đã chọn: 0 file</span>
+
+                <div class="navbar-right-cluster">
+                    <span id="active-file-indicator" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></span>
+                    <select class="theme-select-menu" id="theme-switcher-node">
+                        <option value="light">☀️ Light</option>
+                        <option value="dark">🌙 Dark</option>
+                        <option value="system">💻 System</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="view-panel active" id="panel-workspace-chat">
+                <div class="chat-view-container">
+                    <div class="chat-messages" id="chat-box">
+                        <div id="chat-anchor"></div>
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <div class="chat-input-area">
+                            <input type="text" id="user-input" placeholder="Hỏi tự do, yêu cầu tóm tắt chi tiết hoặc gõ số câu trắc nghiệm (vd: tạo 15 câu khó)...">
+                            <button class="btn-send" id="btn-send-msg">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="chat-messages" id="chat-box">
-                <div id="chat-anchor"></div>
-            </div>
+            <div class="view-panel" id="panel-workspace-quiz">
+                <div class="quiz-view-container">
+                    <div class="quiz-main-area" id="quiz-render-engine-root"></div>
+                    
+                    <div class="quiz-sidebar-panel">
+                        <div class="nav-grid-title">Thời gian làm bài</div>
+                        <div class="quiz-timer-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span id="moodle-timer-clock">00:00</span>
+                        </div>
+                        
+                        <div class="nav-grid-title">Tiến độ hoàn thành</div>
+                        <div class="moodle-progress-bar-container">
+                            <div class="moodle-progress-fill" id="moodle-progress-fill-node"></div>
+                        </div>
 
-            <div class="chat-input-wrapper">
-                <div class="chat-input-area">
-                    <input type="text" id="user-input" placeholder="Gõ số câu trắc nghiệm cần làm (ví dụ: 15, 30) hoặc gõ 'tóm tắt'..." maxlength="1000">
-                    <button class="btn-send" id="btn-send-msg">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
+                        <div class="nav-grid-title" style="margin-top: 0.5rem;">Bản đồ câu hỏi</div>
+                        <div class="question-nav-grid" id="moodle-navigator-grid-root"></div>
+                    </div>
                 </div>
             </div>
-        </main>
+
+        </div>
     </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         
-        // 🎯 GIỮ NGUYÊN HOÀN TOÀN LOGIC ĐƯỜNG TRUYỀN ĐẾN SERVER RENDER CỦA MẠNH
         const BACKEND_URL = "https://spdf-t9x9.onrender.com/api/process";
 
         const state = {
-            maxTokens: 100, currentTokens: 100,
-            uploadedFiles: [], conversationHistory: [],
-            userId: "usth-student-mock-id", isLoggedIn: false
+            currentTokens: 100,
+            uploadedFiles: [],
+            conversationHistory: [],
+            quizHistoryStore: {},
+            activeQuizInstance: null,
+            sidebarWidth: 280,
+            isSidebarCollapsed: false,
+            currentTheme: "light",
+            userId: "usth-student-mock-id",
+            isLoggedIn: false
         };
 
         const loginScreen = document.getElementById('login-screen');
         const appScreen   = document.getElementById('app-screen');
-        const appSidebar   = document.getElementById('app-sidebar');
-        const btnLoginMock  = document.getElementById('btn-login-mock');
-        const btnLogoutMock = document.getElementById('btn-logout-mock');
-        const fileInput     = document.getElementById('file-input');
-        const dropZone      = document.getElementById('drop-zone');
-        const fileListUi    = document.getElementById('file-list-ui');
-        const btnSendMsg    = document.getElementById('btn-send-msg');
-        const userInput     = document.getElementById('user-input');
-        const chatBox       = document.getElementById('chat-box');
-        const tokensLeftSpan = document.getElementById('tokens-left');
-        const usagePanel    = document.getElementById('usage-panel');
-        const selectedBadge = document.getElementById('selected-badge');
+        const appSidebar  = document.getElementById('app-sidebar');
+        const resizeHandle = document.getElementById('sidebar-resize-bar');
+        const contentWorkspaceArea = document.getElementById('content-workspace-area');
+        const btnCollapseSidebar = document.getElementById('btn-collapse-sidebar');
+        const btnExpandSidebarFloating = document.getElementById('btn-expand-sidebar-floating');
+        const themeSwitcherNode = document.getElementById('theme-switcher-node');
         
-        // Mobile Toggle Elements
-        const btnToggleSidebarMobile = document.getElementById('btn-toggle-sidebar-mobile');
-        const btnCloseSidebarMobile = document.getElementById('btn-close-sidebar-mobile');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileListUi = document.getElementById('file-list-ui');
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const btnSendMsg = document.getElementById('btn-send-msg');
+        const tokensLeftSpan = document.getElementById('tokens-left');
+        const usagePanel = document.getElementById('usage-panel');
+        const selectedBadge = document.getElementById('selected-badge');
+        const activeFileIndicator = document.getElementById('active-file-indicator');
+        
+        const quizRenderEngineRoot = document.getElementById('quiz-render-engine-root');
+        const moodleTimerClock = document.getElementById('moodle-timer-clock');
+        const moodleProgressFillNode = document.getElementById('moodle-progress-fill-node');
+        const moodleNavigatorGridRoot = document.getElementById('moodle-navigator-grid-root');
+
+        let liveExamTimerInterval = null;
+
+        // THEME LAUNCHER
+        themeSwitcherNode.addEventListener('change', (e) => { state.currentTheme = e.target.value; applyThemeSystem(); saveAppState(); });
+        function applyThemeSystem() {
+            let activeTheme = state.currentTheme;
+            if (activeTheme === 'system') activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', activeTheme);
+        }
+
+        // SIDEBAR LAYOUT
+        let isResizing = false;
+        resizeHandle.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; });
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing || state.isSidebarCollapsed) return;
+            let targetWidth = e.clientX;
+            if (targetWidth < 220) targetWidth = 220;
+            if (targetWidth > 450) targetWidth = 450;
+            state.sidebarWidth = targetWidth;
+            applySidebarDimensions();
+        });
+        document.addEventListener('mouseup', () => { if (isResizing) { isResizing = false; document.body.style.cursor = 'default'; saveAppState(); } });
+
+        btnCollapseSidebar.addEventListener('click', () => { state.isSidebarCollapsed = true; applySidebarDimensions(); saveAppState(); });
+        btnExpandSidebarFloating.addEventListener('click', () => { state.isSidebarCollapsed = false; applySidebarDimensions(); saveAppState(); });
+
+        function applySidebarDimensions() {
+            if (state.isSidebarCollapsed) {
+                appSidebar.classList.add('collapsed'); resizeHandle.classList.add('hidden'); btnExpandSidebarFloating.style.display = 'flex';
+                contentWorkspaceArea.style.marginLeft = '0px'; contentWorkspaceArea.style.width = '100vw';
+            } else {
+                appSidebar.classList.remove('collapsed'); resizeHandle.classList.remove('hidden'); btnExpandSidebarFloating.style.display = 'none';
+                appSidebar.style.width = `${state.sidebarWidth}px`; resizeHandle.style.left = `${state.sidebarWidth}px`;
+                contentWorkspaceArea.style.marginLeft = `${state.sidebarWidth}px`; contentWorkspaceArea.style.width = `calc(100vw - ${state.sidebarWidth}px)`;
+            }
+        }
+
+        function switchWorkspace(target) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            if (target === 'chat') {
+                document.getElementById('tab-trigger-chat').classList.add('active'); document.getElementById('panel-workspace-chat').classList.add('active'); forceScrollBottom();
+            } else {
+                document.getElementById('tab-trigger-quiz').classList.add('active'); document.getElementById('panel-workspace-quiz').classList.add('active'); renderMoodleQuizWorkspaceArea();
+            }
+        }
 
         function renderMarkdownSafe(text) {
             let clean = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -491,545 +468,431 @@
             return clean;
         }
 
-        function saveState() {
-            localStorage.setItem('ai_study_app_state', JSON.stringify({
-                currentTokens: state.currentTokens,
-                uploadedFiles: state.uploadedFiles,
-                conversationHistory: state.conversationHistory,
-                isLoggedIn: state.isLoggedIn
+        function saveAppState() {
+            localStorage.setItem('acequiz_pro_v5_state', JSON.stringify({
+                currentTokens: state.currentTokens, uploadedFiles: state.uploadedFiles, conversationHistory: state.conversationHistory,
+                quizHistoryStore: state.quizHistoryStore, activeQuizInstance: state.activeQuizInstance, sidebarWidth: state.sidebarWidth,
+                isSidebarCollapsed: state.isSidebarCollapsed, currentTheme: state.currentTheme, isLoggedIn: state.isLoggedIn
             }));
         }
 
-        function loadState() {
-            const saved = localStorage.getItem('ai_study_app_state');
+        function loadAppState() {
+            const saved = localStorage.getItem('acequiz_pro_v5_state');
             if (saved) {
                 try {
                     const p = JSON.parse(saved);
-                    state.currentTokens      = p.currentTokens      ?? 100;
-                    state.uploadedFiles      = p.uploadedFiles      ?? [];
-                    state.conversationHistory = p.conversationHistory ?? [];
-                    state.isLoggedIn         = p.isLoggedIn         ?? false;
+                    state.currentTokens = p.currentTokens ?? 100; state.uploadedFiles = p.uploadedFiles ?? []; state.conversationHistory = p.conversationHistory ?? [];
+                    state.quizHistoryStore = p.quizHistoryStore ?? {}; state.activeQuizInstance = p.activeQuizInstance ?? null;
+                    state.sidebarWidth = p.sidebarWidth ?? 280; state.isSidebarCollapsed = p.isSidebarCollapsed ?? false;
+                    state.currentTheme = p.currentTheme ?? "light"; state.isLoggedIn = p.isLoggedIn ?? false;
                 } catch(e) { console.error(e); }
             }
-            updateTokenUI();
-            renderFileList();
-            renderChatHistory();
-            updateSelectedBadgeCount();
-            if (state.isLoggedIn) {
-                loginScreen.style.display = 'none';
-                appScreen.style.display = 'block';
-                forceScrollBottom();
-            }
+            themeSwitcherNode.value = state.currentTheme; applyThemeSystem(); applySidebarDimensions(); updateTokenUI();
+            renderFileListAndQuizHistoryTree(); renderChatHistory(); updateSelectedBadgeCount();
+            if (state.isLoggedIn) { loginScreen.style.display = 'none'; appScreen.style.display = 'block'; if (state.activeQuizInstance) switchWorkspace('quiz'); else forceScrollBottom(); }
         }
 
-        function forceScrollBottom() {
-            requestAnimationFrame(() => {
-                chatBox.scrollTop = chatBox.scrollHeight;
-                const anchor = document.getElementById('chat-anchor');
-                if (anchor) anchor.scrollIntoView({ behavior: 'auto', block: 'end' });
-            });
-        }
+        function forceScrollBottom() { requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; const anchor = document.getElementById('chat-anchor'); if (anchor) anchor.scrollIntoView({ behavior: 'auto', block: 'end' }); }); }
 
-        // Mobile Sidebar Handlers
-        btnToggleSidebarMobile.addEventListener('click', () => appSidebar.classList.add('open'));
-        btnCloseSidebarMobile.addEventListener('click', () => appSidebar.classList.remove('open'));
-
-        btnLoginMock.addEventListener('click', () => {
-            loginScreen.style.display = 'none';
-            appScreen.style.display = 'block';
-            state.isLoggedIn = true;
-            saveState();
-            forceScrollBottom();
-            userInput.focus();
+        document.getElementById('btn-login-mock').addEventListener('click', () => {
+            loginScreen.style.display = 'none'; appScreen.style.display = 'block'; state.isLoggedIn = true; saveAppState(); applySidebarDimensions(); forceScrollBottom(); userInput.focus();
         });
 
-        btnLogoutMock.addEventListener('click', () => {
-            appScreen.style.display = 'none';
-            loginScreen.style.display = 'block';
-            resetApplicationState();
+        document.getElementById('btn-logout-mock').addEventListener('click', () => { if(confirm("Xác nhận đăng xuất?")) { localStorage.removeItem('acequiz_pro_v5_state'); location.reload(); } });
+
+        // 🎯 FIX BUG CHUẨN ĐÉT: Chặn đứng hiện tượng Double Trigger File Picker
+        dropZone.addEventListener('click', (e) => {
+            // Chặn nổi bọt nếu click trúng chính thẻ input ẩn hoặc vùng thừa
+            if (e.target === fileInput) return;
+            
+            console.log("FILE PICKER OPENED"); // Log Debug 1 theo yêu cầu của Tester
+            fileInput.click();
         });
 
-        // Drag & Drop Upload PDF
-        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('click', (e) => {
+            // Cô lập sự kiện click bên trong thẻ input không cho trồi lên dropZone làm kích hoạt vòng lặp vô tận
+            e.stopPropagation();
+        });
+
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault(); dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        dropZone.addEventListener('drop', (e) => { 
+            e.preventDefault(); 
+            dropZone.classList.remove('dragover'); 
+            if (e.dataTransfer.files.length > 0) {
+                console.log("FILE SELECTED via Drag&Drop");
+                handleMultipleFiles(e.dataTransfer.files); 
+            }
         });
 
-        async function handleFile(file) {
-            if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
-                appendMessage('system-error', 'Hệ thống chỉ chấp nhận định dạng file .PDF học phần.');
-                return;
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                console.log("FILE SELECTED via File Picker"); // Log Debug 2
+                handleMultipleFiles(e.target.files);
+            }
+        });
+
+        async function handleMultipleFiles(files) {
+            console.log("UPLOAD STARTED"); // Log Debug 3
+            
+            // Premium UX: Cập nhật giao diện Trạng thái Đang xử lý tức thì
+            const titleNode = document.getElementById('upload-box-title');
+            const descNode  = document.getElementById('upload-box-desc');
+            const progNode  = document.getElementById('upload-progress-node');
+            
+            titleNode.textContent = "Đang đọc tài liệu...";
+            descNode.textContent = `Nạp thành công ${files.length} file.`;
+            progNode.style.display = "block";
+
+            for(let file of files) {
+                if (!file.name.endsWith('.pdf')) continue;
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = "";
+                    for (let i = 1; i <= pdf.numPages; i++) { 
+                        const page = await pdf.getPage(i); 
+                        const tc = await page.getTextContent(); 
+                        fullText += tc.items.map(item => item.str).join(" ") + "\n"; 
+                    }
+                    
+                    state.uploadedFiles.push({ 
+                        file_name: file.name, 
+                        page_count: pdf.numPages, 
+                        content: fullText.substring(0, 25000), 
+                        checked: true 
+                    });
+                    
+                    if (!state.quizHistoryStore[file.name]) state.quizHistoryStore[file.name] = [];
+                    saveAppState();
+                } catch(err) { 
+                    console.error(err);
+                    alert(`Không thể đọc tài liệu: ${file.name}`); 
+                }
             }
             
-            const typingId = showTypingIndicator();
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                let fullText = "";
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const tc = await page.getTextContent();
-                    fullText += tc.items.map(item => item.str).join(" ") + "\n";
-                }
-                
-                removeTypingIndicator(typingId);
-                state.uploadedFiles.push({ 
-                    file_name: file.name, 
-                    page_count: pdf.numPages, 
-                    content: fullText.substring(0, 25000),
-                    checked: true 
-                });
-                
-                renderFileList();
-                saveState();
-                updateSelectedBadgeCount();
-                renderChatHistory(); // Load lại dashboard gợi ý nếu danh sách file thay đổi
-            } catch(err) {
-                removeTypingIndicator(typingId);
-                console.error(err);
-                appendMessage('system-error', 'Lỗi cấu trúc: Không thể giải mã hoặc trích xuất văn bản từ slide PDF này.');
-            }
+            // Reset lại giao diện Dragzone sau khi nạp xong hoàn tất
+            titleNode.textContent = "Nạp Slide học phần";
+            descNode.textContent = "Kéo thả nhiều file PDF cùng lúc";
+            progNode.style.display = "none";
+            fileInput.value = ''; // Làm sạch bộ nhớ đệm picker
+
+            renderFileListAndQuizHistoryTree(); 
+            updateSelectedBadgeCount(); 
+            renderChatHistory();
         }
 
-        function renderFileList() {
+        function renderFileListAndQuizHistoryTree() {
             fileListUi.innerHTML = '';
             state.uploadedFiles.forEach((file, index) => {
-                const li = document.createElement('li');
-                li.className = `file-item ${file.checked ? 'active' : ''}`;
+                const container = document.createElement('div'); container.className = 'file-item-container';
+                const li = document.createElement('li'); li.className = `file-item ${file.checked ? 'active' : ''}`;
                 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = file.checked ?? true;
-                checkbox.addEventListener('change', (e) => {
-                    state.uploadedFiles[index].checked = e.target.checked;
-                    li.classList.toggle('active', e.target.checked);
-                    saveState();
-                    updateSelectedBadgeCount();
-                });
+                const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = file.checked ?? true;
+                checkbox.addEventListener('change', (e) => { state.uploadedFiles[index].checked = e.target.checked; li.classList.toggle('active', e.target.checked); saveAppState(); updateSelectedBadgeCount(); });
 
-                const infoWrapper = document.createElement('div');
-                infoWrapper.className = 'file-info-wrapper';
+                const infoWrapper = document.createElement('div'); infoWrapper.className = 'file-info-wrapper';
                 infoWrapper.addEventListener('click', () => { checkbox.click(); });
 
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'file-name';
-                nameSpan.textContent = file.file_name;
-                nameSpan.title = file.file_name;
+                const nameSpan = document.createElement('span'); nameSpan.className = 'file-name'; nameSpan.textContent = file.file_name;
+                const metaSpan = document.createElement('span'); metaSpan.className = 'file-meta'; metaSpan.textContent = `📄 ${file.page_count} trang`;
+                infoWrapper.appendChild(nameSpan); infoWrapper.appendChild(metaSpan);
 
-                const metaSpan = document.createElement('span');
-                metaSpan.className = 'file-meta';
-                metaSpan.textContent = `${file.page_count} trang`;
-
-                infoWrapper.appendChild(nameSpan);
-                infoWrapper.appendChild(metaSpan);
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn-delete-file';
-                deleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+                const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn-delete-file';
+                deleteBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
                 deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    state.uploadedFiles.splice(index, 1);
-                    renderFileList(); 
-                    saveState();
-                    updateSelectedBadgeCount();
-                    renderChatHistory();
+                    e.stopPropagation(); const deletedName = state.uploadedFiles[index].file_name; state.uploadedFiles.splice(index, 1); delete state.quizHistoryStore[deletedName];
+                    if (state.activeQuizInstance && state.activeQuizInstance.sourceFile === deletedName) { state.activeQuizInstance = null; clearInterval(liveExamTimerInterval); }
+                    renderFileListAndQuizHistoryTree(); saveAppState(); updateSelectedBadgeCount(); renderChatHistory();
                 });
 
-                li.appendChild(checkbox);
-                li.appendChild(infoWrapper);
-                li.appendChild(deleteBtn);
-                fileListUi.appendChild(li);
+                li.appendChild(checkbox); li.appendChild(infoWrapper); li.appendChild(deleteBtn); container.appendChild(li);
+
+                const historyList = state.quizHistoryStore[file.file_name] || [];
+                if (historyList.length > 0) {
+                    const ulTree = document.createElement('ul'); ulTree.className = 'quiz-history-tree';
+                    historyList.forEach((quiz, qIndex) => {
+                        const liTree = document.createElement('li'); liTree.className = 'history-quiz-item'; 
+                        // UX Update: Ghi rõ tên bài test thuộc file nào trong cây thư mục con
+                        liTree.innerHTML = `<span>📝 Bài thi thử #${qIndex + 1}</span>`;
+                        
+                        const scoreBadge = document.createElement('span'); scoreBadge.className = 'history-quiz-score';
+                        if (quiz.isSubmitted) {
+                            let r = 0; quiz.quizData.forEach((item, idx) => { if (quiz.userAnswers[idx] === item.answer) r++; }); scoreBadge.textContent = `${r}/${quiz.quizData.length}`;
+                        } else { scoreBadge.textContent = "Đang làm"; scoreBadge.style.background = "var(--panel-surface)"; scoreBadge.style.color = "var(--text-muted)"; }
+                        liTree.appendChild(scoreBadge);
+                        liTree.addEventListener('click', () => {
+                            state.activeQuizInstance = { sourceFile: file.file_name, historyIndex: qIndex, quizData: quiz.quizData, timerSeconds: quiz.timeSpent || 0, isTimerActive: !quiz.isSubmitted };
+                            saveAppState(); switchWorkspace('quiz');
+                        });
+                        ulTree.appendChild(liTree);
+                    });
+                    container.appendChild(ulTree);
+                }
+                fileListUi.appendChild(container);
             });
         }
 
         function updateSelectedBadgeCount() {
-            const count = state.uploadedFiles.filter(f => f.checked).length;
-            selectedBadge.textContent = `Đã chọn: ${count} file`;
+            const activeDocs = state.uploadedFiles.filter(f => f.checked);
+            if (activeDocs.length === 1) activeFileIndicator.textContent = `🎯 Tài liệu: ${activeDocs[0].file_name}`;
+            else if (activeDocs.length > 1) activeFileIndicator.textContent = `🎯 Kết nối: ${activeDocs.length} Slide`;
+            else activeFileIndicator.textContent = `⚠️ Chưa chọn tài liệu`;
         }
 
-        // RENDER CHAT CHUYÊN NGHIỆP CÓ DASHBOARD ĐÓN ĐẦU
         function renderChatHistory() {
             chatBox.innerHTML = '<div id="chat-anchor"></div>';
             const anchor = document.getElementById('chat-anchor');
 
-            // 🎯 PREMIUM UPGRADE: Nếu chưa gõ câu nào, hiện Dashboard Gợi Ý như ChatGPT + Claude
             if (state.conversationHistory.length === 0) {
                 const dashboard = document.createElement('div');
                 dashboard.className = 'empty-dashboard';
                 dashboard.innerHTML = `
-                    <h2>Học phần tốc chiến cùng <span>AceQuiz AI</span></h2>
+                    <h2>Học phần Tốc chiến với <span>AceQuiz AI</span></h2>
                     <div class="suggested-cards-grid">
-                        <div class="suggest-card" onclick="triggerQuickAction('20 câu trắc nghiệm tổng hợp')">
-                            <h4>📝 Khảo thí 20 câu MCQ</h4>
-                            <p>Quét nhanh kiến thức các slide đã chọn để tạo đề thi thử tương tác Moodle.</p>
+                        <div class="suggest-card" onclick="populateSuggestedPrompt('Hãy tạo bộ đề thi trắc nghiệm khảo thí gồm 15 câu hỏi cốt lõi từ tài liệu này.')">
+                            <h4>📝 Khảo thí trắc nghiệm 15 câu</h4>
+                            <p>Tự động phân tích sâu nội dung slide để biên soạn bộ câu hỏi tương tác Moodle.</p>
                         </div>
-                        <div class="suggest-card" onclick="triggerQuickAction('tóm tắt lý thuyết cốt lõi')">
-                            <h4>💡 Tóm tắt chương khó</h4>
-                            <p>Trích xuất toàn bộ công thức, định nghĩa và kiến thức lõi dạng gạch đầu dòng.</p>
+                        <div class="suggest-card" onclick="populateSuggestedPrompt('Tóm tắt lý thuyết chi tiết theo từng chương dưới dạng gạch đầu dòng ngắn gọn.')">
+                            <h4>💡 Trích xuất tóm tắt cốt lõi</h4>
+                            <p>Tổng hợp công thức, thuật ngữ trọng tâm định hướng ra đề thi cuối kỳ.</p>
                         </div>
-                        <div class="suggest-card" onclick="triggerQuickAction('làm bộ đề trắc nghiệm tốc chiến 10 câu')">
-                            <h4>⚡ Đề thi rút gọn 10 câu</h4>
-                            <p>Tập trung cày nhanh các câu hỏi phân loại mức độ trung bình khá.</p>
-                        </div>
-                        <div class="suggest-card" onclick="triggerQuickAction('tổng hợp lý thuyết quan trọng nhất')">
-                            <h4>🧠 Bản đồ khái niệm</h4>
-                            <p>Liên kết chéo thông tin giữa các chương để làm rõ keyword ôn tập.</p>
-                        </div>
-                    </div>
-                `;
-                chatBox.insertBefore(dashboard, anchor);
-                forceScrollBottom();
-                return;
+                    </div>`;
+                chatBox.insertBefore(dashboard, anchor); return;
             }
 
-            state.conversationHistory.forEach((msg, historyIndex) => {
-                const row = document.createElement('div');
-                row.className = `message-row ${msg.role === 'assistant' ? 'bot' : 'user'}`;
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'avatar-box';
-                avatar.textContent = msg.role === 'assistant' ? 'AI' : 'U';
-                
-                const div = document.createElement('div');
-                div.className = `message ${msg.role === 'assistant' ? 'bot' : 'user'}`;
-                
-                if (msg.isQuiz) {
-                    renderInteractiveQuizComponent(div, msg.quizData, msg.userAnswers, msg.isSubmitted, historyIndex);
-                } else {
-                    div.innerHTML = msg.role === 'assistant' ? renderMarkdownSafe(msg.content) : msg.content;
-                }
-                
-                row.appendChild(avatar);
-                row.appendChild(div);
-                chatBox.insertBefore(row, anchor);
+            state.conversationHistory.forEach((msg) => {
+                const row = document.createElement('div'); row.className = `message-row ${msg.role === 'assistant' ? 'bot' : 'user'}`;
+                const avatar = document.createElement('div'); avatar.className = 'avatar-box'; avatar.textContent = msg.role === 'assistant' ? 'AI' : 'U';
+                const div = document.createElement('div'); div.className = `message ${msg.role === 'assistant' ? 'bot' : 'user'}`;
+                div.innerHTML = msg.role === 'assistant' ? renderMarkdownSafe(msg.content) : msg.content;
+                row.appendChild(avatar); row.appendChild(div); chatBox.insertBefore(row, anchor);
             });
             forceScrollBottom();
         }
 
-        function triggerQuickAction(commandText) {
-            userInput.value = commandText;
-            handleUserAction();
-        }
-
-        btnSendMsg.addEventListener('click', handleUserAction);
-        userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUserAction(); } });
+        function populateSuggestedPrompt(promptText) { userInput.value = promptText; userInput.focus(); }
 
         async function handleUserAction() {
             const text = userInput.value.trim();
             if (!text) return;
-            if (state.currentTokens <= 0) { appendMessage('system-error', 'Bạn đã sử dụng hết 100 lượt tính toán miễn phí cấp cho tài khoản này.'); return; }
 
             const activeDocuments = state.uploadedFiles.filter(f => f.checked);
-            if (activeDocuments.length === 0) {
-                appendMessage('system-error', 'Vui lòng tích chọn ít nhất một file slide bài học ở cột bên trái để AI có dữ liệu phân tích.');
-                return;
-            }
+            if (activeDocuments.length === 0) { alert("Vui lòng tích chọn slide học trình bên thanh điều hướng."); return; }
 
-            // Tắt drawer mobile nếu đang mở
-            appSidebar.classList.remove('open');
-
-            // Đẩy tin nhắn User vào hàng đợi
             const anchor = document.getElementById('chat-anchor');
-            const uRow = document.createElement('div');
-            uRow.className = 'message-row user';
-            const uDiv = document.createElement('div');
-            uDiv.className = 'message user';
-            uDiv.textContent = text;
-            uRow.appendChild(uDiv);
-            chatBox.insertBefore(uRow, anchor);
+            const uRow = document.createElement('div'); uRow.className = 'message-row user';
+            const uDiv = document.createElement('div'); uDiv.className = 'message user'; uDiv.textContent = text;
+            uRow.appendChild(uDiv); chatBox.insertBefore(uRow, anchor);
 
             state.conversationHistory.push({ role: "user", content: text });
-            saveState();
-            userInput.value = '';
+            saveAppState(); userInput.value = '';
 
-            // Kiểm tra tính năng
-            const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp", "review", "keyword"];
-            const isSummarizeRequest = summarizeKeywords.some(kw => text.toLowerCase().includes(kw));
-            const feature = isSummarizeRequest ? "summarize" : "quiz";
+            const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp", "bản đồ", "keyword", "so sánh", "liệt kê", "công thức", "mindmap", "flashcard"];
+            const hasQuizKeywords = ["đề", "trắc nghiệm", "mcq", "quiz", "câu hỏi", "kiểm tra", "test"];
+            
+            let feature = "summarize";
+            if (hasQuizKeywords.some(kw => text.toLowerCase().includes(kw)) && !text.toLowerCase().includes("tóm tắt")) {
+                feature = "quiz";
+            }
 
-            let numQuestionsRequested = 5; 
+            let numQuestionsRequested = 10;
             if (feature === "quiz") {
                 const numberMatch = text.match(/(\d+)/);
                 if (numberMatch) {
                     numQuestionsRequested = parseInt(numberMatch[1]);
-                    if (numQuestionsRequested > 50) numQuestionsRequested = 50; 
+                    if (numQuestionsRequested > 50) numQuestionsRequested = 50;
+                } else if (text.toLowerCase().includes("ngắn") || text.toLowerCase().includes("ít")) {
+                    numQuestionsRequested = 5;
+                } else if (text.toLowerCase().includes("dài") || text.toLowerCase().includes("cuối kỳ")) {
+                    numQuestionsRequested = 25;
                 }
             }
 
             const payload = {
-                feature, user_id: state.userId, user_message: text,
-                documents: activeDocuments, 
-                conversation_history: state.conversationHistory.slice(0, -1).map(h => ({ role: h.role, content: h.isQuiz ? "Bộ đề trắc nghiệm" : h.content })),
+                feature, user_id: state.userId, user_message: text, documents: activeDocuments,
+                conversation_history: state.conversationHistory.slice(0, -1).map(h => ({ role: h.role, content: h.content })),
                 quiz_params: { num_questions: numQuestionsRequested, difficulty: "mixed" }
             };
 
             const typingId = showTypingIndicator();
 
             try {
-                const response = await fetch(BACKEND_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.error || "Lỗi xử lý hệ thống từ xa.");
-                }
+                const response = await fetch(BACKEND_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Mạng lỗi.");
 
                 removeTypingIndicator(typingId);
-                state.currentTokens--;
-                updateTokenUI();
+                state.currentTokens--; updateTokenUI();
 
                 if (feature === "summarize") {
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder("utf-8");
-                    
-                    const botRow = document.createElement('div');
-                    botRow.className = 'message-row bot';
-                    const botAvatar = document.createElement('div');
-                    botAvatar.className = 'avatar-box';
-                    botAvatar.textContent = 'AI';
-                    const botEl = document.createElement('div');
-                    botEl.className = 'message bot streaming';
-                    
-                    botRow.appendChild(botAvatar);
-                    botRow.appendChild(botEl);
-                    chatBox.insertBefore(botRow, anchor);
+                    const reader = response.body.getReader(); const decoder = new TextDecoder("utf-8");
+                    const botRow = document.createElement('div'); botRow.className = 'message-row bot';
+                    const botAvatar = document.createElement('div'); botAvatar.className = 'avatar-box'; botAvatar.textContent = 'AI';
+                    const botEl = document.createElement('div'); botEl.className = 'message bot streaming';
+                    botRow.appendChild(botAvatar); botRow.appendChild(botEl); chatBox.insertBefore(botRow, anchor);
                     
                     let currentText = "";
-
                     while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
+                        const { value, done } = await reader.read(); if (done) break;
                         const lines = decoder.decode(value).split("\n");
                         for (const line of lines) {
                             if (!line.startsWith("data: ")) continue;
                             try {
                                 const data = JSON.parse(line.substring(6));
-                                if (data.done) break;
-                                if (data.error) {
-                                    botEl.className = "message system-error";
-                                    botEl.innerHTML = "⚠️ " + data.error;
-                                    currentText = "⚠️ " + data.error;
-                                    forceScrollBottom(); break;
-                                }
-                                if (data.text) {
-                                    currentText += data.text;
-                                    botEl.innerHTML = renderMarkdownSafe(currentText);
-                                    forceScrollBottom(); 
-                                }
+                                if (data.text) { currentText += data.text; botEl.innerHTML = renderMarkdownSafe(currentText); forceScrollBottom(); }
                             } catch(e) {}
                         }
                     }
                     botEl.classList.remove('streaming');
-                    state.conversationHistory.push({ role: "assistant", content: currentText });
-                    saveState();
-
+                    state.conversationHistory.push({ role: "assistant", content: currentText }); saveAppState();
                 } else {
-                    const resJson = await response.json();
-                    const quizArrayData = resJson.data;
-
-                    const botRow = document.createElement('div');
-                    botRow.className = 'message-row bot';
-                    const botAvatar = document.createElement('div');
-                    botAvatar.className = 'avatar-box';
-                    botAvatar.textContent = 'AI';
-                    const botEl = document.createElement('div');
-                    botEl.className = 'message bot';
+                    const resJson = await response.json(); const quizArrayData = resJson.data;
+                    const primaryTargetFileName = activeDocuments[0].file_name;
                     
-                    botRow.appendChild(botAvatar);
-                    botRow.appendChild(botEl);
+                    if (!state.quizHistoryStore[primaryTargetFileName]) state.quizHistoryStore[primaryTargetFileName] = [];
+                    const newQuizRecord = { quizId: "quiz_" + Date.now(), date: new Date().toLocaleDateString('vi-VN'), quizData: quizArrayData, userAnswers: {}, isSubmitted: false, timeSpent: 0 };
                     
-                    const newHistoryIndex = state.conversationHistory.length;
+                    state.quizHistoryStore[primaryTargetFileName].push(newQuizRecord);
+                    state.activeQuizInstance = { sourceFile: primaryTargetFileName, historyIndex: state.quizHistoryStore[primaryTargetFileName].length - 1, quizData: quizArrayData, timerSeconds: 0, isTimerActive: true };
                     
-                    const quizStateItem = {
-                        role: "assistant",
-                        isQuiz: true,
-                        quizData: quizArrayData,
-                        userAnswers: {}, 
-                        isSubmitted: false,
-                        content: "Bộ đề trắc nghiệm tương tác"
-                    };
-                    
-                    state.conversationHistory.push(quizStateItem);
-                    saveState();
-
-                    renderInteractiveQuizComponent(botEl, quizArrayData, {}, false, newHistoryIndex);
-                    chatBox.insertBefore(botRow, anchor);
-                    forceScrollBottom();
+                    state.conversationHistory.push({ role: "assistant", content: `✨ Gia sư AI đã biên soạn xong bộ đề trắc nghiệm gồm ${quizArrayData.length} câu theo đúng mô tả của bạn. Hãy click vào thẻ "Workspace Khảo thí Moodle" ở trên đầu để tiến hành bấm giờ làm bài thử ngay.` });
+                    saveAppState(); renderFileListAndQuizHistoryTree(); renderChatHistory();
+                    switchWorkspace('quiz');
                 }
-
             } catch(err) {
-                removeTypingIndicator(typingId);
-                state.conversationHistory.pop();
-                saveState();
-                appendMessage('system-error', `Lỗi kết nối: ${err.message}`);
+                removeTypingIndicator(typingId); state.conversationHistory.pop(); saveAppState(); alert(`Lỗi: ${err.message}`);
             }
         }
 
-        // --- RENDER PHÂN HỆ KHẢO THÍ CHUẨN COURSERA / MOODLE ---
-        function renderInteractiveQuizComponent(containerElement, quizData, savedUserAnswers, isSubmitted, historyIndex) {
-            containerElement.innerHTML = ''; 
-            const quizCard = document.createElement('div');
-            quizCard.className = 'moodle-quiz-card';
+        // --- INTERACTIVE MOODLE QUIZ INTERFACE WORKSPACE ---
+        function renderMoodleQuizWorkspaceArea() {
+            clearInterval(liveExamTimerInterval);
+            quizRenderEngineRoot.innerHTML = ''; moodleNavigatorGridRoot.innerHTML = '';
+            moodleTimerClock.textContent = "00:00"; moodleProgressFillNode.style.width = "0%";
 
-            const headerTitle = document.createElement('div');
-            headerTitle.style.fontWeight = '700';
-            headerTitle.style.color = '#a5b4fc';
-            headerTitle.style.fontSize = '1.1rem';
-            headerTitle.style.marginBottom = '0.5rem';
-            headerTitle.textContent = `📝 HỆ THỐNG KIỂM TRA ĐỀ CỐT LÕI (${quizData.length} CÂU HỎI)`;
-            quizCard.appendChild(headerTitle);
+            const active = state.activeQuizInstance;
+            if (!active) {
+                quizRenderEngineRoot.innerHTML = `
+                    <div class="quiz-dashboard-empty">
+                        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5h-4a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-4"/><path d="M9 14l2 2l4 -4"/></svg>
+                        <h3>Chưa nạp phiên thi thử nào</h3>
+                        <p>Hãy chat tự do ở Khung thoại trợ lý (ví dụ gõ: "tạo 10 câu trắc nghiệm"), hệ thống sẽ tự động bốc tách dữ liệu và dựng đề thi tại đây.</p>
+                    </div>`;
+                return;
+            }
 
-            quizData.forEach((q, qIdx) => {
-                const quizItem = document.createElement('div');
-                quizItem.className = 'quiz-item';
+            const targetStoreItem = state.quizHistoryStore[active.sourceFile][active.historyIndex];
+            
+            if (active.isTimerActive && !targetStoreItem.isSubmitted) {
+                liveExamTimerInterval = setInterval(() => {
+                    active.timerSeconds++; targetStoreItem.timeSpent = active.timerSeconds;
+                    let min = Math.floor(active.timerSeconds / 60).toString().padStart(2, '0');
+                    let sec = (active.timerSeconds % 60).toString().padStart(2, '0');
+                    moodleTimerClock.textContent = `${min}:${sec}`; saveAppState();
+                }, 1000);
+            } else {
+                let min = Math.floor((targetStoreItem.timeSpent || 0) / 60).toString().padStart(2, '0');
+                let sec = ((targetStoreItem.timeSpent || 0) % 60).toString().padStart(2, '0');
+                moodleTimerClock.textContent = `${min}:${sec}`;
+            }
 
-                const qTitle = document.createElement('div');
-                qTitle.className = 'quiz-question-title';
-                qTitle.textContent = `Câu ${qIdx + 1}: ${q.question}`;
-                quizItem.appendChild(qTitle);
+            const totalQ = active.quizData.length;
+            const answeredCount = Object.keys(targetStoreItem.userAnswers).length;
+            moodleProgressFillNode.style.width = `${(answeredCount / totalQ) * 100}%`;
 
-                const optionsGroup = document.createElement('div');
-                optionsGroup.className = 'quiz-options-group';
+            const quizContainerCard = document.createElement('div'); quizContainerCard.className = 'moodle-quiz-card';
+            const topMeta = document.createElement('div'); topMeta.className = 'quiz-meta-header';
+            topMeta.innerHTML = `<div><strong>Nguồn File gốc:</strong> ${active.sourceFile}</div><div><strong>Form:</strong> ${targetStoreItem.isSubmitted ? '🔴 Đã nộp chấm điểm' : '🟢 Live phòng thi'}</div>`;
+            quizContainerCard.appendChild(topMeta);
 
+            const stack = document.createElement('div'); stack.className = 'quiz-questions-stack';
+
+            active.quizData.forEach((q, qIdx) => {
+                const quizItem = document.createElement('div'); quizItem.className = 'moodle-quiz-item'; quizItem.id = `moodle-question-anchor-${qIdx}`;
+                
+                // 🎯 PREMIUM UX INDICATOR: Thêm thẻ thông báo nguồn gốc file PDF rõ ràng cho từng câu hỏi chống nhầm lẫn
+                const sourceBadge = document.createElement('div');
+                sourceBadge.className = 'quiz-source-file-badge';
+                sourceBadge.textContent = `📍 Nguồn: ${active.sourceFile}`;
+                quizItem.appendChild(sourceBadge);
+
+                const title = document.createElement('div'); title.className = 'quiz-question-title'; title.textContent = `Câu hỏi ${qIdx + 1}: ${q.question}`;
+                quizItem.appendChild(title);
+
+                const group = document.createElement('div'); group.className = 'quiz-options-group';
                 Object.keys(q.options).forEach(optKey => {
-                    const optionRow = document.createElement('label');
-                    optionRow.className = 'quiz-option-row';
+                    const row = document.createElement('label'); row.className = 'quiz-option-row';
+                    const radio = document.createElement('input'); radio.type = 'radio'; radio.name = `moodle_live_quiz_${qIdx}`; radio.value = optKey;
+                    if (targetStoreItem.userAnswers[qIdx] === optKey) radio.checked = true;
 
-                    const radio = document.createElement('input');
-                    radio.type = 'radio';
-                    radio.name = `quiz_q_${historyIndex}_${qIdx}`;
-                    radio.value = optKey;
-                    
-                    if (savedUserAnswers && savedUserAnswers[qIdx] === optKey) {
-                        radio.checked = true;
-                    }
-
-                    if (isSubmitted) {
-                        radio.disabled = true; 
-                        if (optKey === q.answer) {
-                            optionRow.classList.add('moodle-correct');
-                        } else if (savedUserAnswers[qIdx] === optKey && savedUserAnswers[qIdx] !== q.answer) {
-                            optionRow.classList.add('moodle-incorrect');
-                        }
+                    if (targetStoreItem.isSubmitted) {
+                        radio.disabled = true;
+                        if (optKey === q.answer) row.classList.add('moodle-correct');
+                        if (targetStoreItem.userAnswers[qIdx] === optKey && optKey !== q.answer) row.classList.add('moodle-incorrect');
                     } else {
                         radio.addEventListener('change', (e) => {
-                            state.conversationHistory[historyIndex].userAnswers[qIdx] = e.target.value;
-                            saveState();
+                            targetStoreItem.userAnswers[qIdx] = e.target.value; saveAppState(); renderMoodleQuizWorkspaceArea();
                         });
                     }
-
-                    const optText = document.createElement('span');
-                    optText.className = 'quiz-option-text';
-                    optText.textContent = `${optKey}. ${q.options[optKey]}`;
-
-                    optionRow.appendChild(radio);
-                    optionRow.appendChild(optText);
-                    optionsGroup.appendChild(optionRow);
+                    const txt = document.createElement('span'); txt.className = 'quiz-option-text'; txt.textContent = `${optKey}. ${q.options[optKey]}`;
+                    row.appendChild(radio); row.appendChild(txt); group.appendChild(row);
                 });
+                quizItem.appendChild(group);
 
-                quizItem.appendChild(optionsGroup);
-
-                if (isSubmitted) {
-                    const expBox = document.createElement('div');
-                    const isUserRight = savedUserAnswers[qIdx] === q.answer;
-                    expBox.className = `moodle-explanation-box ${isUserRight ? 'correct-pane' : 'incorrect-pane'}`;
-                    expBox.innerHTML = `<strong>${isUserRight ? '✅ Câu trả lời chính xác!' : '❌ Chưa đúng!'}</strong><br/>` +
-                                       `• <strong>Đáp án chuẩn:</strong> ${q.answer}<br/>` +
-                                       `• <strong>Lý do học thuật:</strong> ${q.explanation}`;
-                    quizItem.appendChild(expBox);
+                if (targetStoreItem.isSubmitted) {
+                    const exp = document.createElement('div'); const isRight = targetStoreItem.userAnswers[qIdx] === q.answer;
+                    exp.className = `moodle-explanation-box ${isRight ? 'correct-pane' : 'incorrect-pane'}`;
+                    exp.innerHTML = `<strong>${isRight ? '✓ Câu trả lời chính xác' : '✕ Bạn chọn sai'}</strong><br/>• <strong>Đáp án chuẩn:</strong> ${q.answer}<br/>• <strong>Lý do trong file "${active.sourceFile}":</strong> ${q.explanation}`;
+                    quizItem.appendChild(exp);
                 }
+                stack.appendChild(quizItem);
 
-                quizCard.appendChild(quizItem);
+                const navBtn = document.createElement('button'); navBtn.className = 'nav-num-btn'; navBtn.textContent = qIdx + 1;
+                if (targetStoreItem.userAnswers[qIdx]) navBtn.classList.add('filled');
+                if (targetStoreItem.isSubmitted) navBtn.className = targetStoreItem.userAnswers[qIdx] === q.answer ? 'nav-num-btn correct' : 'nav-num-btn incorrect';
+                
+                navBtn.addEventListener('click', () => { document.getElementById(`moodle-question-anchor-${qIdx}`).scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+                moodleNavigatorGridRoot.appendChild(navBtn);
             });
 
-            if (isSubmitted) {
-                let score = 0;
-                quizData.forEach((q, idx) => {
-                    if (savedUserAnswers[idx] === q.answer) score++;
+            quizContainerCard.appendChild(stack);
+
+            if (targetStoreItem.isSubmitted) {
+                let score = 0; active.quizData.forEach((q, idx) => { if (targetStoreItem.userAnswers[idx] === q.answer) score++; });
+                const banner = document.createElement('div'); banner.className = 'moodle-score-banner'; banner.innerHTML = `📊 ĐIỂM THI THỬ: ĐẠT ${score}/${totalQ} CÂU ĐÚNG (${Math.round((score/totalQ)*100)}%)`;
+                quizContainerCard.appendChild(banner);
+
+                const retryBtn = document.createElement('button'); retryBtn.className = 'moodle-submit-btn'; retryBtn.style.backgroundColor = 'var(--text-main)'; retryBtn.style.color = 'var(--surface)'; retryBtn.textContent = "Làm lại đề thi này";
+                retryBtn.addEventListener('click', () => {
+                    targetStoreItem.userAnswers = {}; targetStoreItem.isSubmitted = false; targetStoreItem.timeSpent = 0; active.timerSeconds = 0; active.isTimerActive = true;
+                    saveAppState(); renderFileListAndQuizHistoryTree(); renderMoodleQuizWorkspaceArea();
                 });
-                const scoreBanner = document.createElement('div');
-                scoreBanner.className = 'moodle-score-banner';
-                scoreBanner.innerHTML = `📊 ĐIỂM SỐ ĐẠT ĐỢT NÀY: ${score}/${quizData.length} CÂU ĐÚNG (${Math.round((score/quizData.length)*100)}%)`;
-                quizCard.appendChild(scoreBanner);
+                quizContainerCard.appendChild(retryBtn);
             } else {
-                const submitBtn = document.createElement('button');
-                submitBtn.className = 'moodle-submit-btn';
-                submitBtn.textContent = "Nộp bài & Chấm điểm";
+                const submitBtn = document.createElement('button'); submitBtn.className = 'moodle-submit-btn'; submitBtn.textContent = "Nộp bài kết thúc";
                 submitBtn.addEventListener('click', () => {
-                    state.conversationHistory[historyIndex].isSubmitted = true;
-                    saveState();
-                    renderInteractiveQuizComponent(containerElement, quizData, state.conversationHistory[historyIndex].userAnswers, true, historyIndex);
-                    forceScrollBottom();
+                    if (confirm("Nộp bài khảo thí? Hệ thống sẽ tự động chấm điểm.")) {
+                        targetStoreItem.isSubmitted = true; active.isTimerActive = false; clearInterval(liveExamTimerInterval);
+                        saveAppState(); renderFileListAndQuizHistoryTree(); renderMoodleQuizWorkspaceArea();
+                    }
                 });
-                quizCard.appendChild(submitBtn);
+                submitBtn.className = 'moodle-submit-btn';
+                quizContainerCard.appendChild(submitBtn);
             }
-
-            containerElement.appendChild(quizCard);
-        }
-
-        function appendMessage(sender, text) {
-            const anchor = document.getElementById('chat-anchor');
-            const row = document.createElement('div');
-            row.className = `message-row ${sender === 'user' ? 'user' : 'bot'}`;
-            
-            const div = document.createElement('div');
-            div.className = `message ${sender}`;
-            div.innerHTML = sender === 'bot' ? renderMarkdownSafe(text) : text;
-            
-            row.appendChild(div);
-            chatBox.insertBefore(row, anchor);
-            forceScrollBottom(); 
+            quizRenderEngineRoot.appendChild(quizContainerCard);
         }
 
         function showTypingIndicator() {
-            const anchor = document.getElementById('chat-anchor');
-            const id = 'typing-' + Date.now();
-            const div = document.createElement('div');
-            div.className = 'typing-bubble';
-            div.id = id;
+            const anchor = document.getElementById('chat-anchor'); const id = 'typing-' + Date.now(); const div = document.createElement('div'); div.className = 'typing-bubble'; div.id = id;
             div.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
-            chatBox.insertBefore(div, anchor);
-            forceScrollBottom();
-            setInputState(false);
-            return id;
+            chatBox.insertBefore(div, anchor); forceScrollBottom(); setInputState(false); return id;
         }
+        function removeTypingIndicator(id) { const el = document.getElementById(id); if (el) el.remove(); setInputState(true); }
+        function setInputState(enabled) { userInput.disabled = !enabled; btnSendMsg.disabled = !enabled; if (enabled) userInput.focus(); }
+        function updateTokenUI() { tokensLeftSpan.textContent = state.currentTokens.toString(); usagePanel.classList.toggle('warning', state.currentTokens === 0); }
 
-        function removeTypingIndicator(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-            setInputState(true);
-        }
-
-        function setInputState(enabled) {
-            userInput.disabled = !enabled;
-            btnSendMsg.disabled = !enabled;
-            if (enabled) userInput.focus();
-        }
-
-        function updateTokenUI() {
-            tokensLeftSpan.textContent = state.currentTokens.toString();
-            usagePanel.classList.toggle('warning', state.currentTokens === 0);
-        }
-
-        function resetApplicationState() {
-            state.currentTokens = 100;
-            state.uploadedFiles = []; state.conversationHistory = []; state.isLoggedIn = false;
-            localStorage.removeItem('ai_study_app_state');
-            fileListUi.innerHTML = ''; fileInput.value = ''; userInput.value = '';
-            updateTokenUI(); setInputState(true); updateSelectedBadgeCount();
-            renderChatHistory();
-        }
-
-        window.addEventListener('DOMContentLoaded', loadState);
+        window.addEventListener('DOMContentLoaded', loadAppState);
     </script>
 </body>
 </html>
