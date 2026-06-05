@@ -15,17 +15,15 @@ const PORT = process.env.PORT || 3000;
 // 1. CẤU HÌNH BẢO MẬT & MIDDLEWARE CHI TIẾT
 // ============================================================================
 
-// Thiết lập CORS an toàn để Frontend Vercel có thể giao tiếp với Backend Render
 const corsOptions = {
-    origin: '*', // Chấp nhận mọi domain (có thể thay bằng link Vercel sau)
+    origin: '*', 
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
-    optionsSuccessStatus: 200 // Tránh lỗi trên các trình duyệt cũ
+    optionsSuccessStatus: 200 
 };
 app.use(cors(corsOptions));
 
-// Mở rộng giới hạn body size lên 50MB để đọc các file PDF cực lớn mà không bị nghẽn
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -34,12 +32,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // ============================================================================
 
 const API_KEY = (process.env.GEMINI_API_KEY || '').trim();
-
-// TỰ ĐỘNG NHẬN DIỆN MODEL TỪ RENDER (Ví dụ: gemini-2.0-flash, gemini-2.5-pro...)
-// Nếu không cấu hình, mặc định sẽ dùng bản 2.0-flash mới nhất
 const MODEL_NAME = (process.env.MODEL_NAME || 'gemini-2.0-flash').trim();
 
-// Nếu quên gắn key trên Render, server sẽ báo lỗi và dừng lại ngay
 if (!API_KEY) {
     console.error("=========================================================");
     console.error("🚨 LỖI CHÍ MẠNG: KHÔNG TÌM THẤY GEMINI_API_KEY!");
@@ -48,16 +42,12 @@ if (!API_KEY) {
     process.exit(1);
 }
 
-// Khởi tạo con bot Google Gemini với key chuẩn
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // ============================================================================
 // 3. CÁC HÀM TIỆN ÍCH HỖ TRỢ XỬ LÝ DỮ LIỆU (HELPER FUNCTIONS)
 // ============================================================================
 
-/**
- * Hàm gom toàn bộ text từ mảng file PDF thành một khối ngữ cảnh thống nhất
- */
 const buildContextText = (documents) => {
     let context = "DANH SÁCH TÀI LIỆU CUNG CẤP TỪ NGƯỜI DÙNG:\n";
     documents.forEach((doc, index) => {
@@ -68,9 +58,6 @@ const buildContextText = (documents) => {
     return context;
 };
 
-/**
- * Hàm xây dựng câu lệnh (Prompt) chuẩn kỹ thuật prompt engineering cho luồng tạo đề thi
- */
 const buildQuizPrompt = (contextText, userMessage, numQ) => {
     return `
 Bạn là một chuyên gia giáo dục và giáo sư đại học. Dựa vào nội dung tài liệu sau đây:
@@ -107,14 +94,12 @@ Cấu trúc JSON bắt buộc phải chuẩn xác như sau:
 // ============================================================================
 
 app.post('/api/process', async (req, res) => {
-    // Tạo ID ngẫu nhiên để theo dõi Log của từng request một cách dễ dàng
     const requestId = Math.random().toString(36).substring(7);
     console.log(`\n[${new Date().toISOString()}] 📥 BẮT ĐẦU REQUEST [ID: ${requestId}]`);
 
     try {
         const { feature, user_message, documents, quiz_params } = req.body;
 
-        // --- BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ CỦA DỮ LIỆU ĐẦU VÀO ---
         if (!feature) {
             console.warn(`[${requestId}] ⚠️ Lỗi 400: Không có tham số feature.`);
             return res.status(400).json({ error: "Thiếu tham số 'feature' (quiz hoặc summarize)." });
@@ -125,26 +110,21 @@ app.post('/api/process', async (req, res) => {
             return res.status(400).json({ error: "Thiếu dữ liệu tài liệu (documents). Vui lòng tải file lên." });
         }
 
-        // --- BƯỚC 2: BUILD NGỮ CẢNH ---
         const contextText = buildContextText(documents);
         console.log(`[${requestId}] 📄 Đã ghép xong text từ ${documents.length} file PDF. Kích thước: ${contextText.length} ký tự.`);
         console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${MODEL_NAME}]`);
 
-        // ==========================================================
-        // LUỒNG 1: TẠO ĐỀ THI TRẮC NGHIỆM (TRẢ VỀ CẤU TRÚC JSON)
-        // ==========================================================
         if (feature === 'quiz') {
             const numQ = quiz_params?.num_questions || 10;
             console.log(`[${requestId}] 🎯 Chế độ: QUIZ | Số câu yêu cầu: ${numQ}`);
             
             const prompt = buildQuizPrompt(contextText, user_message, numQ);
             
-            // Gọi AI với thiết lập ép cứng trả về JSON
             const model = genAI.getGenerativeModel({ 
-                model: MODEL_NAME, // Dùng biến đọc từ Render
+                model: MODEL_NAME,
                 generationConfig: { 
                     responseMimeType: "application/json",
-                    temperature: 0.2 // Temperature thấp để AI không bịa đáp án
+                    temperature: 0.2 
                 }
             });
 
@@ -152,7 +132,6 @@ app.post('/api/process', async (req, res) => {
             const responseText = result.response.text();
             
             try {
-                // Parse thử text AI trả về xem có chuẩn JSON không
                 const jsonData = JSON.parse(responseText);
                 console.log(`[${requestId}] ✅ Hoàn thành JSON Quiz. Trả kết quả cho Frontend.`);
                 return res.status(200).json({ data: jsonData });
@@ -162,37 +141,29 @@ app.post('/api/process', async (req, res) => {
             }
         } 
         
-        // ==========================================================
-        // LUỒNG 2: CHAT & TÓM TẮT (TRẢ VỀ KIỂU CHỮ CHẠY - STREAMING)
-        // ==========================================================
         else if (feature === 'summarize') {
             console.log(`[${requestId}] 💬 Chế độ: SUMMARIZE (Chạy chữ Streaming)`);
             
             const prompt = `Dựa vào tài liệu sau:\n\n${contextText}\n\nYêu cầu của sinh viên: ${user_message}\n\nHãy trả lời chi tiết, chuyên nghiệp, sử dụng markdown để định dạng đẹp mắt bằng tiếng Việt.`;
             
-            // Khởi tạo AI cho luồng Chat
-            const model = genAI.getGenerativeModel({ model: MODEL_NAME }); // Dùng biến đọc từ Render
+            const model = genAI.getGenerativeModel({ model: MODEL_NAME }); 
             const result = await model.generateContentStream(prompt);
 
-            // Gửi header báo cho Vercel biết đây là luồng Streaming
             res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
             res.flushHeaders(); 
 
-            // Vòng lặp bắn từng cụm chữ về cho trình duyệt
             for await (const chunk of result.stream) {
                 const chunkText = chunk.text();
                 res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
             }
             
-            // Đóng luồng
             res.write('data: [DONE]\n\n');
             res.end();
             console.log(`[${requestId}] ✅ Đã stream xong toàn bộ đoạn hội thoại.`);
         } 
         
-        // --- NẾU FEATURE KHÔNG HỢP LỆ ---
         else {
             console.warn(`[${requestId}] ⚠️ Lỗi 400: Tham số feature [${feature}] không hợp lệ.`);
             return res.status(400).json({ error: "Tính năng không được hỗ trợ." });
@@ -200,9 +171,8 @@ app.post('/api/process', async (req, res) => {
 
     } catch (error) {
         console.error(`[${requestId}] 🚨 LỖI HỆ THỐNG:`, error.message);
-        console.error(error.stack); // In stack trace để dễ debug
+        console.error(error.stack); 
         
-        // Đảm bảo không bị lỗi "Headers already sent" nếu crash giữa chừng
         if (!res.headersSent) {
             res.status(500).json({ 
                 error: "Lỗi Server Internal: API Google có thể đang từ chối truy cập hoặc quá tải.", 
@@ -213,7 +183,7 @@ app.post('/api/process', async (req, res) => {
 });
 
 // ============================================================================
-// 5. API HEALTH CHECK (ĐỂ TRÌNH DUYỆT KIỂM TRA SERVER CÓ SỐNG KHÔNG)
+// 5. API HEALTH CHECK
 // ============================================================================
 
 app.get('/api/process', (req, res) => {
@@ -225,13 +195,15 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================================
-// 6. KHỞI ĐỘNG SERVER
+// 6. KHỞI ĐỘNG SERVER (ĐÃ FIX LỖI TIMEOUT 13 PHÚT TRÊN RENDER)
 // ============================================================================
 
-app.listen(PORT, () => {
+// Nốt chốt hạ '0.0.0.0' để Render không bao giờ bị Timeout nữa
+app.listen(PORT, '0.0.0.0', () => {
     console.log("=========================================================");
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
     console.log(`🔒 Chế độ bảo mật cực mạnh đã được kích hoạt.`);
+    console.log(`🌐 Đã bind port 0.0.0.0 để tương thích tuyệt đối với Render.`);
     console.log(`🤖 Đang cấu hình sử dụng Model AI: [${MODEL_NAME}]`);
     console.log("=========================================================");
 });
