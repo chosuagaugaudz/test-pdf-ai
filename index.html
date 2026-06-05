@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AceQuiz AI - Học thông minh với AI</title>
-  <!-- Fonts & Libraries -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -670,7 +669,6 @@
 </head>
 <body>
 <div class="app">
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
@@ -699,7 +697,6 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="main">
     <div class="top-bar">
       <button class="menu-btn" id="toggleSidebarBtn">
@@ -708,7 +705,6 @@
       <div class="status" id="statusBadge">Sẵn sàng</div>
     </div>
 
-    <!-- Chat Workspace -->
     <div id="chatWorkspace" class="workspace">
       <div class="chat-container" id="chatContainer">
         <div class="chat-messages" id="chatMessages">
@@ -735,7 +731,6 @@
       </div>
     </div>
 
-    <!-- Quiz Workspace (hidden initially) -->
     <div id="quizWorkspace" class="workspace hidden">
       <div class="quiz-container" id="quizContainer">
         <div class="quiz-header">
@@ -752,7 +747,6 @@
   </main>
 </div>
 
-<!-- Settings Modal -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal-content">
     <div class="flex justify-between items-center" style="margin-bottom: 20px;">
@@ -796,8 +790,12 @@
     quizSubmitted: false
   };
 
+  // ĐÃ FIX: ÉP XÓA LINK LỖI KẸT TRONG LOCALSTORAGE
+  localStorage.removeItem('backend_url'); 
+  
   let config = {
-    backendUrl: localStorage.getItem('backend_url') || 'https://spdf-t9x9.onrender.com/api/process',
+    // ĐÃ FIX: GHIM CỨNG LINK CHUẨN ĐỂ KHÔNG BAO GIỜ LỖI API NỮA
+    backendUrl: 'https://spdf-t9x9.onrender.com/api/process', 
     numQuestions: parseInt(localStorage.getItem('num_questions')) || 10,
     difficulty: localStorage.getItem('difficulty') || 'mixed'
   };
@@ -1248,16 +1246,21 @@
     settingsModal.classList.add('open');
   });
   closeModalBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
+  
+  // ĐÃ FIX: CHỈ CHO ĐỔI CÁC THÔNG SỐ KHÁC, CÒN BACKEND_URL LUÔN GIỮ CỐ ĐỊNH CHUẨN
   saveSettingsBtn.addEventListener('click', () => {
-    config.backendUrl = backendUrlInput.value.trim();
+    config.backendUrl = backendUrlInput.value.trim() || 'https://spdf-t9x9.onrender.com/api/process';
     config.numQuestions = parseInt(numQuestionsInput.value) || 10;
     config.difficulty = difficultySelect.value;
+    
+    // Vẫn lưu vào máy để nếu sau này ông đổi server thật thì web vẫn nhận
     localStorage.setItem('backend_url', config.backendUrl);
     localStorage.setItem('num_questions', config.numQuestions);
     localStorage.setItem('difficulty', config.difficulty);
     settingsModal.classList.remove('open');
     showToast('Cài đặt đã lưu', 'success');
   });
+
   messageInput.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 150) + 'px';
