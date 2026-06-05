@@ -6,154 +6,70 @@
     <title>AceQuiz AI - Nền tảng học tập và khảo thí thông minh</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
-        /* --- CORE DESIGN SYSTEM V4.0 (MUTATION THEME SYSTEM) --- */
+        /* --- CORE DESIGN SYSTEM V6 (MUTATION THEME SYSTEM) --- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease; }
 
-        /* CONFIG THEME VARIABLES CHUẨN CLAUDE + CHATGPT */
         html[data-theme="light"] {
-            --bg-main: #fafaf8;        /* Warm Neutral Claude Style */
-            --bg-sidebar: #f5f2eb;     /* Sand Muted Notion Style */
-            --surface: #ffffff;
-            --text-main: #111827;      /* Charcoal sâu sắc */
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --accent: #14b8a6;         /* Teal tối giản, dịu mắt */
-            --accent-hover: #0d9488;
-            --accent-light: #f0fdfa;
-            --panel-surface: #f3f4f6;
-            --panel-hover: #e5e7eb;
-            --success: #10b981;
-            --success-bg: #ecfdf5;
-            --danger: #ef4444;
-            --danger-bg: #fef2f2;
-            --info-bg: #f0f9ff;
-            --shadow-premium: rgba(0, 0, 0, 0.03);
+            --bg-main: #fafaf8; --bg-sidebar: #f5f2eb; --surface: #ffffff; --text-main: #111827; --text-muted: #6b7280;
+            --border: #e5e7eb; --accent: #14b8a6; --accent-hover: #0d9488; --accent-light: #f0fdfa; --panel-surface: #f3f4f6;
+            --panel-hover: #e5e7eb; --success: #10b981; --success-bg: #ecfdf5; --danger: #ef4444; --danger-bg: #fef2f2; --shadow-premium: rgba(0, 0, 0, 0.03);
         }
 
         html[data-theme="dark"] {
-            --bg-main: #18181b;        /* Tone tối dịu của ChatGPT/Claude */
-            --bg-sidebar: #111827;     /* Soft dark sâu lắng */
-            --surface: #1f2937;
-            --text-main: #f5f5f5;      /* Trắng ngà dịu mắt */
-            --text-muted: #9ca3af;
-            --border: #374151;
-            --accent: #14b8a6;         /* Giữ nguyên Teal dịu nhẹ */
-            --accent-hover: #0d9488;
-            --accent-light: rgba(20, 184, 166, 0.15);
-            --panel-surface: #2a2b32;
-            --panel-hover: #374151;
-            --success: #34d399;
-            --success-bg: rgba(52, 211, 153, 0.12);
-            --danger: #f87171;
-            --danger-bg: rgba(248, 113, 113, 0.12);
-            --info-bg: rgba(14, 165, 233, 0.1);
-            --shadow-premium: rgba(0, 0, 0, 0.3);
+            --bg-main: #18181b; --bg-sidebar: #111827; --surface: #1f2937; --text-main: #f5f5f5; --text-muted: #9ca3af;
+            --border: #374151; --accent: #14b8a6; --accent-hover: #0d9488; --accent-light: rgba(20, 184, 166, 0.15); --panel-surface: #2a2b32;
+            --panel-hover: #374151; --success: #34d399; --success-bg: rgba(52, 211, 153, 0.12); --danger: #f87171; --danger-bg: rgba(248, 113, 113, 0.12); --shadow-premium: rgba(0, 0, 0, 0.3);
         }
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+        body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; -webkit-font-smoothing: antialiased; }
 
-        /* --- 1. MÀN HÌNH ĐĂNG NHẬP ADAPTIVE THEME --- */
-        .login-container {
-            background: var(--surface);
-            padding: 3.5rem 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px var(--shadow-premium);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            border: 1px solid var(--border);
-            margin: auto;
-            animation: fadeIn 0.4s ease;
-        }
+        /* MÀN HÌNH ĐĂNG NHẬP */
+        .login-container { background: var(--surface); padding: 3.5rem 3rem; border-radius: 20px; box-shadow: 0 20px 40px var(--shadow-premium); width: 100%; max-width: 450px; text-align: center; border: 1px solid var(--border); margin: auto; animation: fadeIn 0.4s ease; }
         .login-brand { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; letter-spacing: -1px; }
         .login-container p { color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.95rem; line-height: 1.6; }
-        .btn-google {
-            background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border); padding: 0.85rem 1.5rem;
-            border-radius: 12px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 1rem; transition: all 0.2s ease;
-        }
+        .btn-google { background-color: var(--bg-main); color: var(--text-main); border: 1px solid var(--border); padding: 0.85rem 1.5rem; border-radius: 12px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 1rem; transition: all 0.2s ease; }
         .btn-google:hover { background-color: var(--panel-hover); transform: translateY(-1px); }
 
-        /* --- 2. LAYOUT SIDEBAR TRƯỆT TIÊU 100% KHI COLLAPSE --- */
+        /* BỐ CỤC CHÍNH */
         .app-container { display: none; width: 100vw; height: 100vh; position: relative; }
 
-        .sidebar {
-            position: absolute; top: 0; left: 0; width: 280px; height: 100%;
-            background-color: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem;
-            display: flex; flex-direction: column; gap: 1.25rem; z-index: 10;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease, border 0.3s ease;
-        }
-        
-        .sidebar.collapsed {
-            width: 0px !important;
-            padding: 1.5rem 0px !important;
-            transform: translateX(-100%);
-            border-right: none !important;
-            pointer-events: none;
-        }
+        /* SIDEBAR */
+        .sidebar { position: absolute; top: 0; left: 0; width: 280px; height: 100%; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1.25rem; z-index: 10; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sidebar.collapsed { width: 0px !important; padding: 1.5rem 0px !important; transform: translateX(-100%); border-right: none !important; pointer-events: none; }
         .sidebar.collapsed * { display: none !important; }
         
-        .resize-handle {
-            position: absolute; top: 0; left: 280px; width: 4px; height: 100%;
-            cursor: col-resize; z-index: 11; background: transparent; transition: background 0.2s;
-        }
+        .resize-handle { position: absolute; top: 0; left: 280px; width: 4px; height: 100%; cursor: col-resize; z-index: 11; background: transparent; transition: background 0.2s; }
         .resize-handle:hover, .resize-handle.active { background: var(--accent); }
         .resize-handle.hidden { display: none !important; }
 
         .logo-area { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 1.25rem; color: var(--text-main); }
-        
-        .btn-icon {
-            background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;
-        }
+        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .btn-icon:hover { background: var(--panel-hover); color: var(--text-main); }
-
-        .btn-icon[data-tooltip]::after {
-            content: attr(data-tooltip); position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%);
-            background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 100; font-weight: normal;
-        }
-        .btn-icon[data-tooltip]:hover::after { opacity: 1; }
 
         .usage-counter { background: var(--surface); border: 1px solid var(--border); padding: 0.75rem; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); }
         .usage-counter span { color: var(--accent); font-weight: 600; }
 
+        /* KHU VỰC UPLOAD */
         .upload-box { border: 2px dashed var(--border); padding: 1.25rem 0.75rem; text-align: center; border-radius: 12px; cursor: pointer; background: var(--surface); transition: all 0.2s; position: relative; }
         .upload-box:hover { border-color: var(--accent); background: var(--accent-light); }
         .upload-box div { font-size: 0.88rem; font-weight: 600; margin-top: 0.5rem; }
         .upload-box p { font-size: 0.78rem; color: var(--text-muted); }
-        
-        /* Progress state bọc lót */
         .upload-progress-text { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-top: 4px; display: none; }
 
         .file-list-header { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
         .file-list { list-style: none; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 0.35rem; }
-        
         .file-item-container { display: flex; flex-direction: column; gap: 2px; }
         .file-item { background: var(--surface); padding: 0.65rem; border-radius: 10px; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); transition: all 0.2s; }
         .file-item.active { border-color: var(--accent); background: var(--accent-light); }
         .file-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
-        
         .file-info-wrapper { display: flex; flex-direction: column; overflow: hidden; flex-grow: 1; cursor: pointer; }
         .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
         .file-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-        .btn-delete-file { background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; padding: 4px; border-radius: 6px; }
+        .btn-delete-file { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; }
         .btn-delete-file:hover { color: var(--danger); background: var(--danger-bg); }
 
-        /* Cây thư mục hiển thị đề thi cũ kèm tên file bọc lót tường minh */
         .quiz-history-tree { list-style: none; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 2px; margin-bottom: 0.5rem; }
         .history-quiz-item { font-size: 0.78rem; color: var(--text-muted); padding: 5px 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-left: 2px solid var(--border); }
         .history-quiz-item:hover { color: var(--accent); background: var(--panel-surface); border-left-color: var(--accent); }
@@ -163,58 +79,46 @@
         .btn-logout { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 500; font-size: 0.9rem; }
         .btn-logout:hover { background-color: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
 
-        /* --- 3. WORKSPACE WRAPPER CHUẨN CAO CẤP --- */
+        /* WORKSPACE CHÍNH */
         .workspace-wrapper { height: 100%; transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
-        
         .top-navbar { height: 56px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: relative; z-index: 5; }
         .navbar-left-cluster { display: flex; align-items: center; gap: 12px; }
         .tabs-group { display: flex; gap: 1.5rem; height: 100%; }
         .tab-btn { background: transparent; border: none; font-size: 0.92rem; font-weight: 600; color: var(--text-muted); cursor: pointer; height: 100%; position: relative; display: flex; align-items: center; gap: 8px; }
         .tab-btn.active { color: var(--accent); }
         .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent); }
-        
-        .navbar-right-cluster { display: flex; align-items: center; gap: 12px; }
-        .theme-select-menu { background: var(--surface); border: 1px solid var(--border); padding: 0.4rem; border-radius: 10px; color: var(--text-main); font-size: 0.85rem; font-weight: 500; outline: none; cursor: pointer; }
+        .theme-select-menu { background: var(--surface); border: 1px solid var(--border); padding: 0.4rem; border-radius: 10px; color: var(--text-main); font-size: 0.85rem; outline: none; cursor: pointer; }
 
         .view-panel { flex-grow: 1; display: none; width: 100%; height: calc(100vh - 56px); overflow: hidden; }
         .view-panel.active { display: flex; }
 
-        /* --- CHAT WORKSPACE (CHATGPT CORE LINKED) --- */
+        /* CHAT WORKSPACE */
         .chat-view-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
         .chat-messages { flex-grow: 1; padding: 2rem 20%; overflow-y: auto; display: flex; flex-direction: column; gap: 2rem; }
-        
         .empty-dashboard { max-width: 680px; margin: auto; text-align: center; display: flex; flex-direction: column; gap: 2rem; }
         .empty-dashboard h2 { font-size: 1.8rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
         .empty-dashboard h2 span { color: var(--accent); }
         .suggested-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: left; }
         .suggest-card { background: var(--surface); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
         .suggest-card:hover { border-color: var(--accent); background: var(--accent-light); transform: translateY(-1px); }
-        .suggest-card h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.25rem; }
-        .suggest-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; }
 
         .message-row { display: flex; width: 100%; gap: 1.25rem; animation: msgSlideUp 0.3s ease; }
         .message-row.user { justify-content: flex-end; }
         .avatar-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; background: var(--panel-surface); color: var(--text-main); }
         .message-row.bot .avatar-box { background: var(--accent-light); color: var(--accent); border: 1px solid var(--border); }
-        
         .message { max-width: 85%; font-size: 0.98rem; line-height: 1.65; word-break: break-word; }
         .message.user { background-color: var(--panel-surface); padding: 0.85rem 1.25rem; border-radius: 14px; }
         .message.bot { color: var(--text-main); white-space: pre-wrap; }
         .message.bot strong { font-weight: 600; color: var(--text-main); }
-        .message.bot code { background: var(--panel-surface); padding: 2px 5px; border-radius: 4px; font-family: monospace; color: #dc2626; font-size: 0.9rem; }
-        .message.bot.streaming::after { content: "▊"; color: var(--accent); animation: blink-cursor 0.6s infinite; margin-left: 4px; }
-        .message.system-error { background-color: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); max-width: 600px; font-size: 0.88rem; border-radius: 10px; padding: 0.85rem 1.25rem; margin: auto; }
+        .message.bot code { background: var(--panel-surface); padding: 2px 5px; border-radius: 4px; font-family: monospace; color: #dc2626; }
+        .message.system-error { background-color: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); max-width: 600px; padding: 0.85rem 1.25rem; margin: auto; border-radius: 10px; }
 
         .chat-input-wrapper { padding: 1rem 20% 2rem 20%; background-color: var(--bg-main); flex-shrink: 0; }
         .chat-input-area { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 20px var(--shadow-premium); }
-        .chat-input-area:focus-within { border-color: var(--accent); }
         .chat-input-area input { flex-grow: 1; background: transparent; border: none; padding: 0.6rem 0.2rem; color: var(--text-main); outline: none; font-size: 1rem; }
-        
         .btn-send { background: var(--accent); color: white; border: none; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-send:hover:not(:disabled) { background: var(--accent-hover); }
-        .btn-send:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
-        /* --- QUIZ WORKSPACE VIEW (MOODLE + COURSERA CORE BIỆT LẬP) --- */
+        /* QUIZ MOODLE WORKSPACE */
         .quiz-view-container { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 280px; }
         .quiz-main-area { padding: 2rem 4rem; overflow-y: auto; height: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
         .quiz-sidebar-panel { background: var(--bg-sidebar); border-left: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; height: 100%; }
@@ -225,45 +129,38 @@
         .moodle-progress-bar-container { background: var(--border); height: 8px; border-radius: 4px; width: 100%; overflow: hidden; margin-top: -0.5rem; }
         .moodle-progress-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
 
-        .quiz-questions-stack { display: flex; flex-direction: column; gap: 1.25rem; }
         .moodle-quiz-item { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 14px; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 4px 12px var(--shadow-premium); }
-        
-        /* 🎯 PREMIUM UX INDICATOR: Thẻ thông báo nguồn file PDF chống hiểu lầm */
-        .quiz-source-file-badge { font-size: 0.76rem; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 6px; width: fit-content; border: 1px solid rgba(20, 184, 166, 0.2); margin-bottom: -4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-
+        .quiz-source-file-badge { font-size: 0.76rem; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 6px; width: fit-content; border: 1px solid rgba(20, 184, 166, 0.2); margin-bottom: -4px; }
         .quiz-question-title { font-weight: 600; color: var(--text-main); font-size: 1.05rem; line-height: 1.4; }
         .quiz-options-group { display: flex; flex-direction: column; gap: 0.65rem; }
-        
         .quiz-option-row { display: flex; align-items: center; gap: 12px; padding: 0.85rem 1.25rem; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; background-color: var(--surface); transition: all 0.2s; }
         .quiz-option-row:hover { background-color: var(--panel-surface); }
-        .quiz-option-row input[type="radio"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
-
+        .quiz-option-row input[type="radio"] { width: 18px; height: 18px; accent-color: var(--accent); }
         .quiz-option-row.moodle-correct { background-color: var(--success-bg) !important; border-color: var(--success) !important; color: var(--success); font-weight: 600; }
         .quiz-option-row.moodle-incorrect { background-color: var(--danger-bg) !important; border-color: var(--danger) !important; color: var(--danger); }
         
-        .moodle-explanation-box { padding: 1rem 1.25rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; background-color: var(--surface); border-left: 4px solid var(--accent); margin-top: 0.5rem; border: 1px solid var(--border); }
+        .moodle-explanation-box { padding: 1rem 1.25rem; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; background-color: var(--surface); border-left: 4px solid var(--accent); border: 1px solid var(--border); }
         .moodle-explanation-box.correct-pane { border-left-color: var(--success); background-color: var(--success-bg); }
         .moodle-explanation-box.incorrect-pane { border-left-color: var(--danger); background-color: var(--danger-bg); }
 
         .moodle-submit-btn { background: var(--accent); color: white; border: none; padding: 0.85rem 2rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; align-self: flex-start; }
-        .moodle-submit-btn:hover { background: var(--accent-hover); }
         .moodle-score-banner { padding: 1.2rem; border-radius: 12px; font-weight: 700; font-size: 1.2rem; text-align: center; background-color: var(--accent-light); border: 1px solid var(--accent); }
-
-        .nav-grid-title { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .nav-grid-title { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
         .question-nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .nav-num-btn { background: var(--surface); border: 1px solid var(--border); height: 40px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .nav-num-btn { background: var(--surface); border: 1px solid var(--border); height: 40px; border-radius: 8px; font-weight: 600; cursor: pointer; }
         .nav-num-btn.filled { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
         .nav-num-btn.correct { background: var(--success-bg); color: var(--success); border-color: var(--success); }
         .nav-num-btn.incorrect { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
 
-        .quiz-dashboard-empty { margin: auto; text-align: center; max-width: 400px; display: flex; flex-direction: column; gap: 1rem; color: var(--text-muted); }
+        .typing-bubble { background-color: var(--panel-surface); padding: 0.85rem 1.25rem; border-radius: 14px; align-self: flex-start; display: flex; gap: 6px; }
+        .typing-dot { width: 7px; height: 7px; background-color: var(--text-muted); border-radius: 50%; opacity: 0.4; animation: pulse-dot 1.2s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-        #chat-anchor { height: 1px; width: 100%; clear: both; flex-shrink: 0; }
-        @media (max-width: 1024px) { .chat-messages { padding: 2rem 10%; } .chat-input-wrapper { padding: 1rem 10% 2rem 10%; } }
-        @media (max-width: 768px) { .quiz-view-container { grid-template-columns: 1fr; } .quiz-sidebar-panel { display: none; } }
         @keyframes msgSlideUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
-        @keyframes blink-cursor { 50% { opacity: 0; } }
+        @keyframes pulse-dot { 50% { opacity: 1; transform: scale(1.2); } }
     </style>
 </head>
 <body>
@@ -271,55 +168,46 @@
     <div class="login-container" id="login-screen">
         <div class="login-brand">AceQuiz AI</div>
         <h1>Học trình Tốc chiến</h1>
-        <p>Hệ thống liên kết tri thức, trích xuất lý thuyết cốt lõi và cày đề trắc nghiệm thông minh chuẩn Series A.</p>
+        <p>Hệ thống trích xuất lý thuyết và cày đề trắc nghiệm thông minh chuẩn Series A.</p>
         <button class="btn-google" id="btn-login-mock">Kết nối tài khoản sinh viên</button>
     </div>
 
     <div class="app-container" id="app-screen">
-        
         <aside class="sidebar" id="app-sidebar">
             <div class="logo-area">
                 <span>AceQuiz AI</span>
-                <button class="btn-icon" id="btn-collapse-sidebar" data-tooltip="Thu gọn thanh bên">
+                <button class="btn-icon" id="btn-collapse-sidebar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><line x1="18" y1="12" x2="7" y2="12"/></svg>
                 </button>
             </div>
-            
-            <div class="usage-counter" id="usage-panel">Hạn mức ôn thi còn: <span id="tokens-left">100</span>/100</div>
+            <div class="usage-counter" id="usage-panel">Hạn mức còn: <span id="tokens-left">100</span>/100</div>
             
             <div class="upload-box" id="drop-zone">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 <div id="upload-box-title">Nạp Slide học phần</div>
                 <p id="upload-box-desc">Kéo thả nhiều file PDF cùng lúc</p>
                 <div class="upload-progress-text" id="upload-progress-node">Đang dịch văn bản...</div>
-                
                 <input type="file" id="file-input" accept=".pdf" multiple style="display: none !important;">
             </div>
 
-            <div class="file-list-header">Kho học phần cả học kỳ</div>
+            <div class="file-list-header">Kho học phần</div>
             <ul class="file-list" id="file-list-ui"></ul>
-            
-            <div class="sidebar-footer">
-                <button class="btn-logout" id="btn-logout-mock">Đăng xuất</button>
-            </div>
+            <div class="sidebar-footer"><button class="btn-logout" id="btn-logout-mock">Đăng xuất</button></div>
         </aside>
         
         <div class="resize-handle" id="sidebar-resize-bar"></div>
 
         <div class="workspace-wrapper" id="content-workspace-area" style="margin-left: 280px; width: calc(100vw - 280px);">
-            
             <header class="top-navbar">
                 <div class="navbar-left-cluster">
-                    <button class="btn-icon" id="btn-expand-sidebar-floating" data-tooltip="Mở rộng thanh bên" style="display: none; margin-right: 8px;">
+                    <button class="btn-icon" id="btn-expand-sidebar-floating" style="display: none; margin-right: 8px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                     </button>
-                    
                     <nav class="tabs-group">
-                        <button class="tab-btn active" id="tab-trigger-chat" onclick="switchWorkspace('chat')">Khung thoại AI Assistant</button>
-                        <button class="tab-btn" id="tab-trigger-quiz" onclick="switchWorkspace('quiz')">Workspace Khảo thí Moodle</button>
+                        <button class="tab-btn active" id="tab-trigger-chat" onclick="switchWorkspace('chat')">Khung thoại AI</button>
+                        <button class="tab-btn" id="tab-trigger-quiz" onclick="switchWorkspace('quiz')">Khảo thí Moodle</button>
                     </nav>
                 </div>
-
                 <div class="navbar-right-cluster">
                     <span id="active-file-indicator" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></span>
                     <select class="theme-select-menu" id="theme-switcher-node">
@@ -332,12 +220,10 @@
 
             <div class="view-panel active" id="panel-workspace-chat">
                 <div class="chat-view-container">
-                    <div class="chat-messages" id="chat-box">
-                        <div id="chat-anchor"></div>
-                    </div>
+                    <div class="chat-messages" id="chat-box"><div id="chat-anchor"></div></div>
                     <div class="chat-input-wrapper">
                         <div class="chat-input-area">
-                            <input type="text" id="user-input" placeholder="Hỏi tự do, yêu cầu tóm tắt chi tiết hoặc gõ số câu trắc nghiệm (vd: tạo 15 câu khó)...">
+                            <input type="text" id="user-input" placeholder="Yêu cầu tóm tắt, tạo đề thi...">
                             <button class="btn-send" id="btn-send-msg">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                             </button>
@@ -349,237 +235,83 @@
             <div class="view-panel" id="panel-workspace-quiz">
                 <div class="quiz-view-container">
                     <div class="quiz-main-area" id="quiz-render-engine-root"></div>
-                    
                     <div class="quiz-sidebar-panel">
-                        <div class="nav-grid-title">Thời gian làm bài</div>
-                        <div class="quiz-timer-box">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span id="moodle-timer-clock">00:00</span>
-                        </div>
-                        
-                        <div class="nav-grid-title">Tiến độ hoàn thành</div>
-                        <div class="moodle-progress-bar-container">
-                            <div class="moodle-progress-fill" id="moodle-progress-fill-node"></div>
-                        </div>
-
-                        <div class="nav-grid-title" style="margin-top: 0.5rem;">Bản đồ câu hỏi</div>
+                        <div class="nav-grid-title">Thời gian</div>
+                        <div class="quiz-timer-box"><span id="moodle-timer-clock">00:00</span></div>
+                        <div class="nav-grid-title" style="margin-top: 1rem;">Tiến độ</div>
+                        <div class="moodle-progress-bar-container"><div class="moodle-progress-fill" id="moodle-progress-fill-node"></div></div>
+                        <div class="nav-grid-title" style="margin-top: 1.5rem;">Bản đồ câu hỏi</div>
                         <div class="question-nav-grid" id="moodle-navigator-grid-root"></div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-        
-        const BACKEND_URL = "https://acequiz-ai.onrender.com";
+        const BACKEND_URL = "https://spdf-t9x9.onrender.com/api/process";
 
-        const state = {
-            currentTokens: 100,
-            uploadedFiles: [],
-            conversationHistory: [],
-            quizHistoryStore: {},
-            activeQuizInstance: null,
-            sidebarWidth: 280,
-            isSidebarCollapsed: false,
-            currentTheme: "light",
-            userId: "usth-student-mock-id",
-            isLoggedIn: false
-        };
+        const state = { currentTokens: 100, uploadedFiles: [], conversationHistory: [], quizHistoryStore: {}, activeQuizInstance: null, sidebarWidth: 280, isSidebarCollapsed: false, currentTheme: "dark", isLoggedIn: false };
 
-        const loginScreen = document.getElementById('login-screen');
-        const appScreen   = document.getElementById('app-screen');
-        const appSidebar  = document.getElementById('app-sidebar');
-        const resizeHandle = document.getElementById('sidebar-resize-bar');
-        const contentWorkspaceArea = document.getElementById('content-workspace-area');
-        const btnCollapseSidebar = document.getElementById('btn-collapse-sidebar');
-        const btnExpandSidebarFloating = document.getElementById('btn-expand-sidebar-floating');
-        const themeSwitcherNode = document.getElementById('theme-switcher-node');
-        
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const fileListUi = document.getElementById('file-list-ui');
-        const chatBox = document.getElementById('chat-box');
-        const userInput = document.getElementById('user-input');
-        const btnSendMsg = document.getElementById('btn-send-msg');
-        const tokensLeftSpan = document.getElementById('tokens-left');
-        const usagePanel = document.getElementById('usage-panel');
-        const selectedBadge = document.getElementById('selected-badge');
-        const activeFileIndicator = document.getElementById('active-file-indicator');
-        
+        const loginScreen = document.getElementById('login-screen'); const appScreen = document.getElementById('app-screen');
+        const appSidebar = document.getElementById('app-sidebar'); const resizeHandle = document.getElementById('sidebar-resize-bar');
+        const contentWorkspaceArea = document.getElementById('content-workspace-area'); const themeSwitcherNode = document.getElementById('theme-switcher-node');
+        const dropZone = document.getElementById('drop-zone'); const fileInput = document.getElementById('file-input');
+        const fileListUi = document.getElementById('file-list-ui'); const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input'); const btnSendMsg = document.getElementById('btn-send-msg');
         const quizRenderEngineRoot = document.getElementById('quiz-render-engine-root');
-        const moodleTimerClock = document.getElementById('moodle-timer-clock');
-        const moodleProgressFillNode = document.getElementById('moodle-progress-fill-node');
-        const moodleNavigatorGridRoot = document.getElementById('moodle-navigator-grid-root');
-
         let liveExamTimerInterval = null;
 
-        // THEME LAUNCHER
-        themeSwitcherNode.addEventListener('change', (e) => { state.currentTheme = e.target.value; applyThemeSystem(); saveAppState(); });
-        function applyThemeSystem() {
-            let activeTheme = state.currentTheme;
-            if (activeTheme === 'system') activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', activeTheme);
-        }
+        themeSwitcherNode.addEventListener('change', (e) => { state.currentTheme = e.target.value; applyThemeSystem(); });
+        function applyThemeSystem() { let activeTheme = state.currentTheme; if (activeTheme === 'system') activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', activeTheme); }
 
-        // SIDEBAR LAYOUT
-        let isResizing = false;
-        resizeHandle.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; });
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizing || state.isSidebarCollapsed) return;
-            let targetWidth = e.clientX;
-            if (targetWidth < 220) targetWidth = 220;
-            if (targetWidth > 450) targetWidth = 450;
-            state.sidebarWidth = targetWidth;
-            applySidebarDimensions();
-        });
-        document.addEventListener('mouseup', () => { if (isResizing) { isResizing = false; document.body.style.cursor = 'default'; saveAppState(); } });
-
-        btnCollapseSidebar.addEventListener('click', () => { state.isSidebarCollapsed = true; applySidebarDimensions(); saveAppState(); });
-        btnExpandSidebarFloating.addEventListener('click', () => { state.isSidebarCollapsed = false; applySidebarDimensions(); saveAppState(); });
+        document.getElementById('btn-collapse-sidebar').addEventListener('click', () => { state.isSidebarCollapsed = true; applySidebarDimensions(); });
+        document.getElementById('btn-expand-sidebar-floating').addEventListener('click', () => { state.isSidebarCollapsed = false; applySidebarDimensions(); });
 
         function applySidebarDimensions() {
             if (state.isSidebarCollapsed) {
-                appSidebar.classList.add('collapsed'); resizeHandle.classList.add('hidden'); btnExpandSidebarFloating.style.display = 'flex';
+                appSidebar.classList.add('collapsed'); resizeHandle.classList.add('hidden'); document.getElementById('btn-expand-sidebar-floating').style.display = 'flex';
                 contentWorkspaceArea.style.marginLeft = '0px'; contentWorkspaceArea.style.width = '100vw';
             } else {
-                appSidebar.classList.remove('collapsed'); resizeHandle.classList.remove('hidden'); btnExpandSidebarFloating.style.display = 'none';
+                appSidebar.classList.remove('collapsed'); resizeHandle.classList.remove('hidden'); document.getElementById('btn-expand-sidebar-floating').style.display = 'none';
                 appSidebar.style.width = `${state.sidebarWidth}px`; resizeHandle.style.left = `${state.sidebarWidth}px`;
                 contentWorkspaceArea.style.marginLeft = `${state.sidebarWidth}px`; contentWorkspaceArea.style.width = `calc(100vw - ${state.sidebarWidth}px)`;
             }
         }
 
         function switchWorkspace(target) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-            if (target === 'chat') {
-                document.getElementById('tab-trigger-chat').classList.add('active'); document.getElementById('panel-workspace-chat').classList.add('active'); forceScrollBottom();
-            } else {
-                document.getElementById('tab-trigger-quiz').classList.add('active'); document.getElementById('panel-workspace-quiz').classList.add('active'); renderMoodleQuizWorkspaceArea();
-            }
+            document.querySelectorAll('.tab-btn, .view-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-trigger-${target}`).classList.add('active'); document.getElementById(`panel-workspace-${target}`).classList.add('active');
+            if (target === 'chat') forceScrollBottom(); else renderMoodleQuizWorkspaceArea();
         }
 
-        function renderMarkdownSafe(text) {
-            let clean = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            clean = clean.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-            clean = clean.replace(/`(.*?)`/g, "<code>$1</code>");
-            return clean;
-        }
+        function forceScrollBottom() { requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; const anchor = document.getElementById('chat-anchor'); if(anchor) anchor.scrollIntoView({ behavior: 'auto', block: 'end' }); }); }
 
-        function saveAppState() {
-            localStorage.setItem('acequiz_pro_v5_state', JSON.stringify({
-                currentTokens: state.currentTokens, uploadedFiles: state.uploadedFiles, conversationHistory: state.conversationHistory,
-                quizHistoryStore: state.quizHistoryStore, activeQuizInstance: state.activeQuizInstance, sidebarWidth: state.sidebarWidth,
-                isSidebarCollapsed: state.isSidebarCollapsed, currentTheme: state.currentTheme, isLoggedIn: state.isLoggedIn
-            }));
-        }
+        document.getElementById('btn-login-mock').addEventListener('click', () => { loginScreen.style.display = 'none'; appScreen.style.display = 'block'; state.isLoggedIn = true; applyThemeSystem(); applySidebarDimensions(); forceScrollBottom(); renderChatHistory(); });
 
-        function loadAppState() {
-            const saved = localStorage.getItem('acequiz_pro_v5_state');
-            if (saved) {
-                try {
-                    const p = JSON.parse(saved);
-                    state.currentTokens = p.currentTokens ?? 100; state.uploadedFiles = p.uploadedFiles ?? []; state.conversationHistory = p.conversationHistory ?? [];
-                    state.quizHistoryStore = p.quizHistoryStore ?? {}; state.activeQuizInstance = p.activeQuizInstance ?? null;
-                    state.sidebarWidth = p.sidebarWidth ?? 280; state.isSidebarCollapsed = p.isSidebarCollapsed ?? false;
-                    state.currentTheme = p.currentTheme ?? "light"; state.isLoggedIn = p.isLoggedIn ?? false;
-                } catch(e) { console.error(e); }
-            }
-            themeSwitcherNode.value = state.currentTheme; applyThemeSystem(); applySidebarDimensions(); updateTokenUI();
-            renderFileListAndQuizHistoryTree(); renderChatHistory(); updateSelectedBadgeCount();
-            if (state.isLoggedIn) { loginScreen.style.display = 'none'; appScreen.style.display = 'block'; if (state.activeQuizInstance) switchWorkspace('quiz'); else forceScrollBottom(); }
-        }
-
-        function forceScrollBottom() { requestAnimationFrame(() => { chatBox.scrollTop = chatBox.scrollHeight; const anchor = document.getElementById('chat-anchor'); if (anchor) anchor.scrollIntoView({ behavior: 'auto', block: 'end' }); }); }
-
-        document.getElementById('btn-login-mock').addEventListener('click', () => {
-            loginScreen.style.display = 'none'; appScreen.style.display = 'block'; state.isLoggedIn = true; saveAppState(); applySidebarDimensions(); forceScrollBottom(); userInput.focus();
-        });
-
-        document.getElementById('btn-logout-mock').addEventListener('click', () => { if(confirm("Xác nhận đăng xuất?")) { localStorage.removeItem('acequiz_pro_v5_state'); location.reload(); } });
-
-        // 🎯 FIX BUG CHUẨN ĐÉT: Chặn đứng hiện tượng Double Trigger File Picker
-        dropZone.addEventListener('click', (e) => {
-            // Chặn nổi bọt nếu click trúng chính thẻ input ẩn hoặc vùng thừa
-            if (e.target === fileInput) return;
-            
-            console.log("FILE PICKER OPENED"); // Log Debug 1 theo yêu cầu của Tester
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('click', (e) => {
-            // Cô lập sự kiện click bên trong thẻ input không cho trồi lên dropZone làm kích hoạt vòng lặp vô tận
-            e.stopPropagation();
-        });
-
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-        dropZone.addEventListener('drop', (e) => { 
-            e.preventDefault(); 
-            dropZone.classList.remove('dragover'); 
-            if (e.dataTransfer.files.length > 0) {
-                console.log("FILE SELECTED via Drag&Drop");
-                handleMultipleFiles(e.dataTransfer.files); 
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                console.log("FILE SELECTED via File Picker"); // Log Debug 2
-                handleMultipleFiles(e.target.files);
-            }
-        });
+        // UPLOAD (FIXED DOUBLE PICKER)
+        dropZone.addEventListener('click', (e) => { if (e.target === fileInput) return; fileInput.click(); });
+        fileInput.addEventListener('click', (e) => { e.stopPropagation(); });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; });
+        dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border)'; });
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--border)'; if (e.dataTransfer.files.length > 0) handleMultipleFiles(e.dataTransfer.files); });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length > 0) handleMultipleFiles(e.target.files); });
 
         async function handleMultipleFiles(files) {
-            console.log("UPLOAD STARTED"); // Log Debug 3
-            
-            // Premium UX: Cập nhật giao diện Trạng thái Đang xử lý tức thì
-            const titleNode = document.getElementById('upload-box-title');
-            const descNode  = document.getElementById('upload-box-desc');
-            const progNode  = document.getElementById('upload-progress-node');
-            
-            titleNode.textContent = "Đang đọc tài liệu...";
-            descNode.textContent = `Nạp thành công ${files.length} file.`;
-            progNode.style.display = "block";
-
+            document.getElementById('upload-box-title').textContent = "Đang đọc tài liệu...";
+            document.getElementById('upload-progress-node').style.display = "block";
             for(let file of files) {
                 if (!file.name.endsWith('.pdf')) continue;
                 try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    let fullText = "";
-                    for (let i = 1; i <= pdf.numPages; i++) { 
-                        const page = await pdf.getPage(i); 
-                        const tc = await page.getTextContent(); 
-                        fullText += tc.items.map(item => item.str).join(" ") + "\n"; 
-                    }
-                    
-                    state.uploadedFiles.push({ 
-                        file_name: file.name, 
-                        page_count: pdf.numPages, 
-                        content: fullText.substring(0, 25000), 
-                        checked: true 
-                    });
-                    
+                    const arrayBuffer = await file.arrayBuffer(); const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = ""; for (let i = 1; i <= pdf.numPages; i++) { const page = await pdf.getPage(i); const tc = await page.getTextContent(); fullText += tc.items.map(item => item.str).join(" ") + "\n"; }
+                    state.uploadedFiles.push({ file_name: file.name, page_count: pdf.numPages, content: fullText.substring(0, 25000), checked: true });
                     if (!state.quizHistoryStore[file.name]) state.quizHistoryStore[file.name] = [];
-                    saveAppState();
-                } catch(err) { 
-                    console.error(err);
-                    alert(`Không thể đọc tài liệu: ${file.name}`); 
-                }
+                } catch(err) { alert(`Không đọc được file: ${file.name}`); }
             }
-            
-            // Reset lại giao diện Dragzone sau khi nạp xong hoàn tất
-            titleNode.textContent = "Nạp Slide học phần";
-            descNode.textContent = "Kéo thả nhiều file PDF cùng lúc";
-            progNode.style.display = "none";
-            fileInput.value = ''; // Làm sạch bộ nhớ đệm picker
-
-            renderFileListAndQuizHistoryTree(); 
-            updateSelectedBadgeCount(); 
-            renderChatHistory();
+            document.getElementById('upload-box-title').textContent = "Nạp Slide học phần"; document.getElementById('upload-progress-node').style.display = "none"; fileInput.value = '';
+            renderFileListAndQuizHistoryTree();
         }
 
         function renderFileListAndQuizHistoryTree() {
@@ -587,311 +319,134 @@
             state.uploadedFiles.forEach((file, index) => {
                 const container = document.createElement('div'); container.className = 'file-item-container';
                 const li = document.createElement('li'); li.className = `file-item ${file.checked ? 'active' : ''}`;
-                
-                const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = file.checked ?? true;
-                checkbox.addEventListener('change', (e) => { state.uploadedFiles[index].checked = e.target.checked; li.classList.toggle('active', e.target.checked); saveAppState(); updateSelectedBadgeCount(); });
-
-                const infoWrapper = document.createElement('div'); infoWrapper.className = 'file-info-wrapper';
-                infoWrapper.addEventListener('click', () => { checkbox.click(); });
-
-                const nameSpan = document.createElement('span'); nameSpan.className = 'file-name'; nameSpan.textContent = file.file_name;
-                const metaSpan = document.createElement('span'); metaSpan.className = 'file-meta'; metaSpan.textContent = `📄 ${file.page_count} trang`;
-                infoWrapper.appendChild(nameSpan); infoWrapper.appendChild(metaSpan);
-
-                const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn-delete-file';
-                deleteBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation(); const deletedName = state.uploadedFiles[index].file_name; state.uploadedFiles.splice(index, 1); delete state.quizHistoryStore[deletedName];
-                    if (state.activeQuizInstance && state.activeQuizInstance.sourceFile === deletedName) { state.activeQuizInstance = null; clearInterval(liveExamTimerInterval); }
-                    renderFileListAndQuizHistoryTree(); saveAppState(); updateSelectedBadgeCount(); renderChatHistory();
-                });
-
-                li.appendChild(checkbox); li.appendChild(infoWrapper); li.appendChild(deleteBtn); container.appendChild(li);
+                const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = file.checked;
+                checkbox.addEventListener('change', (e) => { state.uploadedFiles[index].checked = e.target.checked; li.classList.toggle('active', e.target.checked); document.getElementById('active-file-indicator').textContent = `Tài liệu đang chọn: ${state.uploadedFiles.filter(f=>f.checked).length}`; });
+                const infoWrapper = document.createElement('div'); infoWrapper.className = 'file-info-wrapper'; infoWrapper.innerHTML = `<span class="file-name">${file.file_name}</span><span class="file-meta">📄 ${file.page_count} trang</span>`;
+                const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn-delete-file'; deleteBtn.innerHTML = `X`;
+                deleteBtn.addEventListener('click', () => { state.uploadedFiles.splice(index, 1); renderFileListAndQuizHistoryTree(); });
+                li.append(checkbox, infoWrapper, deleteBtn); container.appendChild(li);
 
                 const historyList = state.quizHistoryStore[file.file_name] || [];
                 if (historyList.length > 0) {
                     const ulTree = document.createElement('ul'); ulTree.className = 'quiz-history-tree';
                     historyList.forEach((quiz, qIndex) => {
-                        const liTree = document.createElement('li'); liTree.className = 'history-quiz-item'; 
-                        // UX Update: Ghi rõ tên bài test thuộc file nào trong cây thư mục con
-                        liTree.innerHTML = `<span>📝 Bài thi thử #${qIndex + 1}</span>`;
-                        
-                        const scoreBadge = document.createElement('span'); scoreBadge.className = 'history-quiz-score';
-                        if (quiz.isSubmitted) {
-                            let r = 0; quiz.quizData.forEach((item, idx) => { if (quiz.userAnswers[idx] === item.answer) r++; }); scoreBadge.textContent = `${r}/${quiz.quizData.length}`;
-                        } else { scoreBadge.textContent = "Đang làm"; scoreBadge.style.background = "var(--panel-surface)"; scoreBadge.style.color = "var(--text-muted)"; }
-                        liTree.appendChild(scoreBadge);
-                        liTree.addEventListener('click', () => {
-                            state.activeQuizInstance = { sourceFile: file.file_name, historyIndex: qIndex, quizData: quiz.quizData, timerSeconds: quiz.timeSpent || 0, isTimerActive: !quiz.isSubmitted };
-                            saveAppState(); switchWorkspace('quiz');
-                        });
+                        const liTree = document.createElement('li'); liTree.className = 'history-quiz-item'; liTree.innerHTML = `<span>📝 Bài thi #${qIndex + 1}</span>`;
+                        liTree.addEventListener('click', () => { state.activeQuizInstance = { sourceFile: file.file_name, historyIndex: qIndex, quizData: quiz.quizData, timerSeconds: quiz.timeSpent || 0, isTimerActive: !quiz.isSubmitted }; switchWorkspace('quiz'); });
                         ulTree.appendChild(liTree);
                     });
                     container.appendChild(ulTree);
                 }
                 fileListUi.appendChild(container);
             });
-        }
-
-        function updateSelectedBadgeCount() {
-            const activeDocs = state.uploadedFiles.filter(f => f.checked);
-            if (activeDocs.length === 1) activeFileIndicator.textContent = `🎯 Tài liệu: ${activeDocs[0].file_name}`;
-            else if (activeDocs.length > 1) activeFileIndicator.textContent = `🎯 Kết nối: ${activeDocs.length} Slide`;
-            else activeFileIndicator.textContent = `⚠️ Chưa chọn tài liệu`;
+            document.getElementById('active-file-indicator').textContent = `Tài liệu đang chọn: ${state.uploadedFiles.filter(f=>f.checked).length}`;
         }
 
         function renderChatHistory() {
             chatBox.innerHTML = '<div id="chat-anchor"></div>';
-            const anchor = document.getElementById('chat-anchor');
-
             if (state.conversationHistory.length === 0) {
-                const dashboard = document.createElement('div');
-                dashboard.className = 'empty-dashboard';
-                dashboard.innerHTML = `
-                    <h2>Học phần Tốc chiến với <span>AceQuiz AI</span></h2>
-                    <div class="suggested-cards-grid">
-                        <div class="suggest-card" onclick="populateSuggestedPrompt('Hãy tạo bộ đề thi trắc nghiệm khảo thí gồm 15 câu hỏi cốt lõi từ tài liệu này.')">
-                            <h4>📝 Khảo thí trắc nghiệm 15 câu</h4>
-                            <p>Tự động phân tích sâu nội dung slide để biên soạn bộ câu hỏi tương tác Moodle.</p>
-                        </div>
-                        <div class="suggest-card" onclick="populateSuggestedPrompt('Tóm tắt lý thuyết chi tiết theo từng chương dưới dạng gạch đầu dòng ngắn gọn.')">
-                            <h4>💡 Trích xuất tóm tắt cốt lõi</h4>
-                            <p>Tổng hợp công thức, thuật ngữ trọng tâm định hướng ra đề thi cuối kỳ.</p>
-                        </div>
-                    </div>`;
-                chatBox.insertBefore(dashboard, anchor); return;
+                const dash = document.createElement('div'); dash.className = 'empty-dashboard';
+                dash.innerHTML = `<h2>Học phần Tốc chiến với <span>AceQuiz AI</span></h2><div class="suggested-cards-grid"><div class="suggest-card" onclick="userInput.value='Tạo 15 câu trắc nghiệm'; userInput.focus();"><h4>📝 Khảo thí trắc nghiệm 15 câu</h4></div><div class="suggest-card" onclick="userInput.value='Tóm tắt lý thuyết cốt lõi'; userInput.focus();"><h4>💡 Trích xuất tóm tắt cốt lõi</h4></div></div>`;
+                chatBox.insertBefore(dash, document.getElementById('chat-anchor')); return;
             }
-
             state.conversationHistory.forEach((msg) => {
                 const row = document.createElement('div'); row.className = `message-row ${msg.role === 'assistant' ? 'bot' : 'user'}`;
-                const avatar = document.createElement('div'); avatar.className = 'avatar-box'; avatar.textContent = msg.role === 'assistant' ? 'AI' : 'U';
-                const div = document.createElement('div'); div.className = `message ${msg.role === 'assistant' ? 'bot' : 'user'}`;
-                div.innerHTML = msg.role === 'assistant' ? renderMarkdownSafe(msg.content) : msg.content;
-                row.appendChild(avatar); row.appendChild(div); chatBox.insertBefore(row, anchor);
-            });
-            forceScrollBottom();
+                row.innerHTML = `<div class="avatar-box">${msg.role === 'assistant' ? 'AI' : 'U'}</div><div class="message ${msg.role === 'assistant' ? 'bot' : 'user'}">${msg.content}</div>`;
+                chatBox.insertBefore(row, document.getElementById('chat-anchor'));
+            }); forceScrollBottom();
         }
 
-        function populateSuggestedPrompt(promptText) { userInput.value = promptText; userInput.focus(); }
+        // CHAT ENGINE (FIXED ENTER KEY)
+        btnSendMsg.addEventListener('click', handleUserAction);
+        userInput.addEventListener('keyup', (e) => { if (e.key === 'Enter' && !userInput.disabled) { e.preventDefault(); handleUserAction(); } });
 
         async function handleUserAction() {
-            const text = userInput.value.trim();
-            if (!text) return;
-
-            const activeDocuments = state.uploadedFiles.filter(f => f.checked);
-            if (activeDocuments.length === 0) { alert("Vui lòng tích chọn slide học trình bên thanh điều hướng."); return; }
-
-            const anchor = document.getElementById('chat-anchor');
-            const uRow = document.createElement('div'); uRow.className = 'message-row user';
-            const uDiv = document.createElement('div'); uDiv.className = 'message user'; uDiv.textContent = text;
-            uRow.appendChild(uDiv); chatBox.insertBefore(uRow, anchor);
-
-            state.conversationHistory.push({ role: "user", content: text });
-            saveAppState(); userInput.value = '';
-
-            const summarizeKeywords = ["tóm tắt", "summarize", "lý thuyết", "giải thích", "đọc hiểu", "tổng hợp", "bản đồ", "keyword", "so sánh", "liệt kê", "công thức", "mindmap", "flashcard"];
-            const hasQuizKeywords = ["đề", "trắc nghiệm", "mcq", "quiz", "câu hỏi", "kiểm tra", "test"];
+            const text = userInput.value.trim(); if (!text) return;
+            const activeDocs = state.uploadedFiles.filter(f => f.checked); if (activeDocs.length === 0) return alert("Vui lòng tích chọn slide bên trái.");
             
-            let feature = "summarize";
-            if (hasQuizKeywords.some(kw => text.toLowerCase().includes(kw)) && !text.toLowerCase().includes("tóm tắt")) {
-                feature = "quiz";
-            }
+            state.conversationHistory.push({ role: "user", content: text }); userInput.value = ''; renderChatHistory();
 
-            let numQuestionsRequested = 10;
-            if (feature === "quiz") {
-                const numberMatch = text.match(/(\d+)/);
-                if (numberMatch) {
-                    numQuestionsRequested = parseInt(numberMatch[1]);
-                    if (numQuestionsRequested > 50) numQuestionsRequested = 50;
-                } else if (text.toLowerCase().includes("ngắn") || text.toLowerCase().includes("ít")) {
-                    numQuestionsRequested = 5;
-                } else if (text.toLowerCase().includes("dài") || text.toLowerCase().includes("cuối kỳ")) {
-                    numQuestionsRequested = 25;
-                }
-            }
+            let feature = "summarize"; let numQuestions = 10;
+            if (text.toLowerCase().includes("câu") || text.toLowerCase().includes("trắc nghiệm") || text.toLowerCase().includes("đề")) { feature = "quiz"; const match = text.match(/(\d+)/); if(match) numQuestions = parseInt(match[1]); }
+            
+            const payload = { feature, user_message: text, documents: activeDocs, quiz_params: { num_questions: numQuestions } };
 
-            const payload = {
-                feature, user_id: state.userId, user_message: text, documents: activeDocuments,
-                conversation_history: state.conversationHistory.slice(0, -1).map(h => ({ role: h.role, content: h.content })),
-                quiz_params: { num_questions: numQuestionsRequested, difficulty: "mixed" }
-            };
-
-            const typingId = showTypingIndicator();
+            const typingId = 'typing-' + Date.now();
+            const anchor = document.getElementById('chat-anchor');
+            const typingDiv = document.createElement('div'); typingDiv.className = 'typing-bubble'; typingDiv.id = typingId; typingDiv.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
+            chatBox.insertBefore(typingDiv, anchor); forceScrollBottom(); userInput.disabled = true;
 
             try {
                 const response = await fetch(BACKEND_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error("Mạng lỗi.");
-
-                removeTypingIndicator(typingId);
-                state.currentTokens--; updateTokenUI();
+                if (!response.ok) throw new Error("API Backend Lỗi (Có thể do API Key hoặc Server ngủ)");
+                
+                document.getElementById(typingId).remove(); userInput.disabled = false; userInput.focus();
 
                 if (feature === "summarize") {
                     const reader = response.body.getReader(); const decoder = new TextDecoder("utf-8");
-                    const botRow = document.createElement('div'); botRow.className = 'message-row bot';
-                    const botAvatar = document.createElement('div'); botAvatar.className = 'avatar-box'; botAvatar.textContent = 'AI';
-                    const botEl = document.createElement('div'); botEl.className = 'message bot streaming';
-                    botRow.appendChild(botAvatar); botRow.appendChild(botEl); chatBox.insertBefore(botRow, anchor);
-                    
+                    const botRow = document.createElement('div'); botRow.className = 'message-row bot'; botRow.innerHTML = `<div class="avatar-box">AI</div><div class="message bot streaming" id="stream-tgt-${typingId}"></div>`;
+                    chatBox.insertBefore(botRow, anchor); const targetEl = document.getElementById(`stream-tgt-${typingId}`);
                     let currentText = "";
                     while (true) {
                         const { value, done } = await reader.read(); if (done) break;
                         const lines = decoder.decode(value).split("\n");
                         for (const line of lines) {
                             if (!line.startsWith("data: ")) continue;
-                            try {
-                                const data = JSON.parse(line.substring(6));
-                                if (data.text) { currentText += data.text; botEl.innerHTML = renderMarkdownSafe(currentText); forceScrollBottom(); }
-                            } catch(e) {}
+                            try { const data = JSON.parse(line.substring(6)); if (data.text) { currentText += data.text; targetEl.innerHTML = currentText; forceScrollBottom(); } } catch(e) {}
                         }
                     }
-                    botEl.classList.remove('streaming');
-                    state.conversationHistory.push({ role: "assistant", content: currentText }); saveAppState();
+                    state.conversationHistory.push({ role: "assistant", content: currentText });
                 } else {
-                    const resJson = await response.json(); const quizArrayData = resJson.data;
-                    const primaryTargetFileName = activeDocuments[0].file_name;
-                    
-                    if (!state.quizHistoryStore[primaryTargetFileName]) state.quizHistoryStore[primaryTargetFileName] = [];
-                    const newQuizRecord = { quizId: "quiz_" + Date.now(), date: new Date().toLocaleDateString('vi-VN'), quizData: quizArrayData, userAnswers: {}, isSubmitted: false, timeSpent: 0 };
-                    
-                    state.quizHistoryStore[primaryTargetFileName].push(newQuizRecord);
-                    state.activeQuizInstance = { sourceFile: primaryTargetFileName, historyIndex: state.quizHistoryStore[primaryTargetFileName].length - 1, quizData: quizArrayData, timerSeconds: 0, isTimerActive: true };
-                    
-                    state.conversationHistory.push({ role: "assistant", content: `✨ Gia sư AI đã biên soạn xong bộ đề trắc nghiệm gồm ${quizArrayData.length} câu theo đúng mô tả của bạn. Hãy click vào thẻ "Workspace Khảo thí Moodle" ở trên đầu để tiến hành bấm giờ làm bài thử ngay.` });
-                    saveAppState(); renderFileListAndQuizHistoryTree(); renderChatHistory();
-                    switchWorkspace('quiz');
+                    const resJson = await response.json(); const quizArrayData = resJson.data; const primaryFileName = activeDocs[0].file_name;
+                    state.quizHistoryStore[primaryFileName].push({ quizData: quizArrayData, userAnswers: {}, isSubmitted: false, timeSpent: 0 });
+                    state.activeQuizInstance = { sourceFile: primaryFileName, historyIndex: state.quizHistoryStore[primaryFileName].length - 1, quizData: quizArrayData, timerSeconds: 0, isTimerActive: true };
+                    state.conversationHistory.push({ role: "assistant", content: `Đã tạo xong đề thi ${quizArrayData.length} câu. Hãy chuyển sang thẻ Khảo thí Moodle.` });
+                    renderFileListAndQuizHistoryTree(); renderChatHistory(); switchWorkspace('quiz');
                 }
-            } catch(err) {
-                removeTypingIndicator(typingId); state.conversationHistory.pop(); saveAppState(); alert(`Lỗi: ${err.message}`);
-            }
+            } catch(err) { document.getElementById(typingId).remove(); userInput.disabled = false; alert(err.message); }
         }
 
-        // --- INTERACTIVE MOODLE QUIZ INTERFACE WORKSPACE ---
+        // MOODLE RENDER
         function renderMoodleQuizWorkspaceArea() {
-            clearInterval(liveExamTimerInterval);
-            quizRenderEngineRoot.innerHTML = ''; moodleNavigatorGridRoot.innerHTML = '';
-            moodleTimerClock.textContent = "00:00"; moodleProgressFillNode.style.width = "0%";
-
-            const active = state.activeQuizInstance;
-            if (!active) {
-                quizRenderEngineRoot.innerHTML = `
-                    <div class="quiz-dashboard-empty">
-                        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5h-4a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-4"/><path d="M9 14l2 2l4 -4"/></svg>
-                        <h3>Chưa nạp phiên thi thử nào</h3>
-                        <p>Hãy chat tự do ở Khung thoại trợ lý (ví dụ gõ: "tạo 10 câu trắc nghiệm"), hệ thống sẽ tự động bốc tách dữ liệu và dựng đề thi tại đây.</p>
-                    </div>`;
-                return;
-            }
-
-            const targetStoreItem = state.quizHistoryStore[active.sourceFile][active.historyIndex];
+            clearInterval(liveExamTimerInterval); quizRenderEngineRoot.innerHTML = ''; document.getElementById('moodle-navigator-grid-root').innerHTML = '';
+            const active = state.activeQuizInstance; if (!active) { quizRenderEngineRoot.innerHTML = `<div class="empty-dashboard"><h3>Chưa có bài thi</h3><p>Gõ "tạo đề thi" bên khung chat để AI gen bài nhé.</p></div>`; return; }
             
-            if (active.isTimerActive && !targetStoreItem.isSubmitted) {
-                liveExamTimerInterval = setInterval(() => {
-                    active.timerSeconds++; targetStoreItem.timeSpent = active.timerSeconds;
-                    let min = Math.floor(active.timerSeconds / 60).toString().padStart(2, '0');
-                    let sec = (active.timerSeconds % 60).toString().padStart(2, '0');
-                    moodleTimerClock.textContent = `${min}:${sec}`; saveAppState();
-                }, 1000);
-            } else {
-                let min = Math.floor((targetStoreItem.timeSpent || 0) / 60).toString().padStart(2, '0');
-                let sec = ((targetStoreItem.timeSpent || 0) % 60).toString().padStart(2, '0');
-                moodleTimerClock.textContent = `${min}:${sec}`;
-            }
-
-            const totalQ = active.quizData.length;
-            const answeredCount = Object.keys(targetStoreItem.userAnswers).length;
-            moodleProgressFillNode.style.width = `${(answeredCount / totalQ) * 100}%`;
-
-            const quizContainerCard = document.createElement('div'); quizContainerCard.className = 'moodle-quiz-card';
-            const topMeta = document.createElement('div'); topMeta.className = 'quiz-meta-header';
-            topMeta.innerHTML = `<div><strong>Nguồn File gốc:</strong> ${active.sourceFile}</div><div><strong>Form:</strong> ${targetStoreItem.isSubmitted ? '🔴 Đã nộp chấm điểm' : '🟢 Live phòng thi'}</div>`;
-            quizContainerCard.appendChild(topMeta);
-
-            const stack = document.createElement('div'); stack.className = 'quiz-questions-stack';
-
+            const storeItem = state.quizHistoryStore[active.sourceFile][active.historyIndex];
+            if (active.isTimerActive && !storeItem.isSubmitted) { liveExamTimerInterval = setInterval(() => { active.timerSeconds++; storeItem.timeSpent = active.timerSeconds; document.getElementById('moodle-timer-clock').textContent = `${Math.floor(active.timerSeconds/60).toString().padStart(2,'0')}:${(active.timerSeconds%60).toString().padStart(2,'0')}`; }, 1000); }
+            
+            const card = document.createElement('div');
             active.quizData.forEach((q, qIdx) => {
-                const quizItem = document.createElement('div'); quizItem.className = 'moodle-quiz-item'; quizItem.id = `moodle-question-anchor-${qIdx}`;
-                
-                // 🎯 PREMIUM UX INDICATOR: Thêm thẻ thông báo nguồn gốc file PDF rõ ràng cho từng câu hỏi chống nhầm lẫn
-                const sourceBadge = document.createElement('div');
-                sourceBadge.className = 'quiz-source-file-badge';
-                sourceBadge.textContent = `📍 Nguồn: ${active.sourceFile}`;
-                quizItem.appendChild(sourceBadge);
-
-                const title = document.createElement('div'); title.className = 'quiz-question-title'; title.textContent = `Câu hỏi ${qIdx + 1}: ${q.question}`;
-                quizItem.appendChild(title);
-
-                const group = document.createElement('div'); group.className = 'quiz-options-group';
+                const item = document.createElement('div'); item.className = 'moodle-quiz-item'; item.id = `q-anchor-${qIdx}`;
+                item.innerHTML = `<div class="quiz-source-file-badge">📍 Nguồn: ${active.sourceFile}</div><div class="quiz-question-title">Câu ${qIdx + 1}: ${q.question}</div>`;
+                const grp = document.createElement('div'); grp.className = 'quiz-options-group';
                 Object.keys(q.options).forEach(optKey => {
                     const row = document.createElement('label'); row.className = 'quiz-option-row';
-                    const radio = document.createElement('input'); radio.type = 'radio'; radio.name = `moodle_live_quiz_${qIdx}`; radio.value = optKey;
-                    if (targetStoreItem.userAnswers[qIdx] === optKey) radio.checked = true;
-
-                    if (targetStoreItem.isSubmitted) {
-                        radio.disabled = true;
-                        if (optKey === q.answer) row.classList.add('moodle-correct');
-                        if (targetStoreItem.userAnswers[qIdx] === optKey && optKey !== q.answer) row.classList.add('moodle-incorrect');
-                    } else {
-                        radio.addEventListener('change', (e) => {
-                            targetStoreItem.userAnswers[qIdx] = e.target.value; saveAppState(); renderMoodleQuizWorkspaceArea();
-                        });
-                    }
-                    const txt = document.createElement('span'); txt.className = 'quiz-option-text'; txt.textContent = `${optKey}. ${q.options[optKey]}`;
-                    row.appendChild(radio); row.appendChild(txt); group.appendChild(row);
-                });
-                quizItem.appendChild(group);
-
-                if (targetStoreItem.isSubmitted) {
-                    const exp = document.createElement('div'); const isRight = targetStoreItem.userAnswers[qIdx] === q.answer;
-                    exp.className = `moodle-explanation-box ${isRight ? 'correct-pane' : 'incorrect-pane'}`;
-                    exp.innerHTML = `<strong>${isRight ? '✓ Câu trả lời chính xác' : '✕ Bạn chọn sai'}</strong><br/>• <strong>Đáp án chuẩn:</strong> ${q.answer}<br/>• <strong>Lý do trong file "${active.sourceFile}":</strong> ${q.explanation}`;
-                    quizItem.appendChild(exp);
-                }
-                stack.appendChild(quizItem);
-
-                const navBtn = document.createElement('button'); navBtn.className = 'nav-num-btn'; navBtn.textContent = qIdx + 1;
-                if (targetStoreItem.userAnswers[qIdx]) navBtn.classList.add('filled');
-                if (targetStoreItem.isSubmitted) navBtn.className = targetStoreItem.userAnswers[qIdx] === q.answer ? 'nav-num-btn correct' : 'nav-num-btn incorrect';
+                    if(storeItem.isSubmitted && optKey === q.answer) row.classList.add('moodle-correct');
+                    if(storeItem.isSubmitted && storeItem.userAnswers[qIdx] === optKey && optKey !== q.answer) row.classList.add('moodle-incorrect');
+                    row.innerHTML = `<input type="radio" name="q_${qIdx}" value="${optKey}" ${storeItem.userAnswers[qIdx]===optKey?'checked':''} ${storeItem.isSubmitted?'disabled':''}><span>${optKey}. ${q.options[optKey]}</span>`;
+                    row.querySelector('input').addEventListener('change', (e) => { storeItem.userAnswers[qIdx] = e.target.value; renderMoodleQuizWorkspaceArea(); });
+                    grp.appendChild(row);
+                }); item.appendChild(grp);
+                if(storeItem.isSubmitted) { const exp = document.createElement('div'); exp.className = `moodle-explanation-box ${storeItem.userAnswers[qIdx] === q.answer ? 'correct-pane' : 'incorrect-pane'}`; exp.innerHTML = `<b>Đáp án: ${q.answer}</b><br/>Giải thích: ${q.explanation}`; item.appendChild(exp); }
+                card.appendChild(item);
                 
-                navBtn.addEventListener('click', () => { document.getElementById(`moodle-question-anchor-${qIdx}`).scrollIntoView({ behavior: 'smooth', block: 'center' }); });
-                moodleNavigatorGridRoot.appendChild(navBtn);
+                const navBtn = document.createElement('button'); navBtn.className = 'nav-num-btn'; navBtn.textContent = qIdx + 1;
+                if(storeItem.userAnswers[qIdx]) navBtn.classList.add('filled');
+                if(storeItem.isSubmitted) navBtn.className = storeItem.userAnswers[qIdx] === q.answer ? 'nav-num-btn correct' : 'nav-num-btn incorrect';
+                navBtn.onclick = () => document.getElementById(`q-anchor-${qIdx}`).scrollIntoView({behavior: 'smooth'});
+                document.getElementById('moodle-navigator-grid-root').appendChild(navBtn);
             });
-
-            quizContainerCard.appendChild(stack);
-
-            if (targetStoreItem.isSubmitted) {
-                let score = 0; active.quizData.forEach((q, idx) => { if (targetStoreItem.userAnswers[idx] === q.answer) score++; });
-                const banner = document.createElement('div'); banner.className = 'moodle-score-banner'; banner.innerHTML = `📊 ĐIỂM THI THỬ: ĐẠT ${score}/${totalQ} CÂU ĐÚNG (${Math.round((score/totalQ)*100)}%)`;
-                quizContainerCard.appendChild(banner);
-
-                const retryBtn = document.createElement('button'); retryBtn.className = 'moodle-submit-btn'; retryBtn.style.backgroundColor = 'var(--text-main)'; retryBtn.style.color = 'var(--surface)'; retryBtn.textContent = "Làm lại đề thi này";
-                retryBtn.addEventListener('click', () => {
-                    targetStoreItem.userAnswers = {}; targetStoreItem.isSubmitted = false; targetStoreItem.timeSpent = 0; active.timerSeconds = 0; active.isTimerActive = true;
-                    saveAppState(); renderFileListAndQuizHistoryTree(); renderMoodleQuizWorkspaceArea();
-                });
-                quizContainerCard.appendChild(retryBtn);
+            
+            if(storeItem.isSubmitted) {
+                let score = 0; active.quizData.forEach((q, i) => { if(storeItem.userAnswers[i]===q.answer) score++; });
+                card.innerHTML += `<div class="moodle-score-banner">Điểm: ${score}/${active.quizData.length}</div>`;
             } else {
-                const submitBtn = document.createElement('button'); submitBtn.className = 'moodle-submit-btn'; submitBtn.textContent = "Nộp bài kết thúc";
-                submitBtn.addEventListener('click', () => {
-                    if (confirm("Nộp bài khảo thí? Hệ thống sẽ tự động chấm điểm.")) {
-                        targetStoreItem.isSubmitted = true; active.isTimerActive = false; clearInterval(liveExamTimerInterval);
-                        saveAppState(); renderFileListAndQuizHistoryTree(); renderMoodleQuizWorkspaceArea();
-                    }
-                });
-                submitBtn.className = 'moodle-submit-btn';
-                quizContainerCard.appendChild(submitBtn);
+                const submitBtn = document.createElement('button'); submitBtn.className = 'moodle-submit-btn'; submitBtn.textContent = 'Nộp bài';
+                submitBtn.onclick = () => { if(confirm("Nộp bài?")) { storeItem.isSubmitted = true; active.isTimerActive = false; renderMoodleQuizWorkspaceArea(); renderFileListAndQuizHistoryTree(); } };
+                card.appendChild(submitBtn);
             }
-            quizRenderEngineRoot.appendChild(quizContainerCard);
+            quizRenderEngineRoot.appendChild(card);
+            document.getElementById('moodle-progress-fill-node').style.width = `${(Object.keys(storeItem.userAnswers).length / active.quizData.length)*100}%`;
         }
-
-        function showTypingIndicator() {
-            const anchor = document.getElementById('chat-anchor'); const id = 'typing-' + Date.now(); const div = document.createElement('div'); div.className = 'typing-bubble'; div.id = id;
-            div.innerHTML = `<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>`;
-            chatBox.insertBefore(div, anchor); forceScrollBottom(); setInputState(false); return id;
-        }
-        function removeTypingIndicator(id) { const el = document.getElementById(id); if (el) el.remove(); setInputState(true); }
-        function setInputState(enabled) { userInput.disabled = !enabled; btnSendMsg.disabled = !enabled; if (enabled) userInput.focus(); }
-        function updateTokenUI() { tokensLeftSpan.textContent = state.currentTokens.toString(); usagePanel.classList.toggle('warning', state.currentTokens === 0); }
-
-        window.addEventListener('DOMContentLoaded', loadAppState);
     </script>
 </body>
+</html>
