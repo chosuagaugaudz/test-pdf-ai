@@ -1501,8 +1501,24 @@
     showToast(`Kết quả: ${correctCount}/${total} (${percent}%)`, percent >= 60 ? 'success' : 'info');
   });
 
-  // Kích hoạt App
-  initApp();
-</script>
-</body>
-</html>
+    // Kích hoạt App
+    initApp();
+    // HÀM BỔ SUNG: Xử lý lưu lịch sử sau khi AI stream chữ xong
+  function saveChatToLocal() {
+    const existingIdx = state.allChats.findIndex(c => c.id.toString() === state.currentChatId.toString());
+    if (state.chatHistory.length === 0) return;
+    
+    let chatTitle = state.chatHistory[0].content.substring(0, 20);
+    if(state.chatHistory[0].content.length > 20) chatTitle += '...';
+    
+    if(existingIdx >= 0) {
+      state.allChats[existingIdx].messages = [...state.chatHistory];
+    } else {
+      state.allChats.unshift({ id: state.currentChatId, title: chatTitle, messages: [...state.chatHistory] });
+    }
+    localStorage.setItem('all_chats', JSON.stringify(state.allChats));
+    renderChatHistoryList(); // Cập nhật luôn UI bên Sidebar
+  }
+  </script>
+  </body>
+  </html>
