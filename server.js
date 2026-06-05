@@ -1,5 +1,5 @@
 // ============================================================================
-// ACEQUIZ AI BACKEND SYSTEM - OPENROUTER VERSION
+// ACEQUIZ AI BACKEND SYSTEM - OPENROUTER DYNAMIC VERSION
 // ============================================================================
 
 require('dotenv').config();
@@ -32,7 +32,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // ============================================================================
 
 const API_KEY = (process.env.OPENROUTER_API_KEY || '').trim();
-const MODEL_NAME = (process.env.MODEL_NAME || 'google/gemini-2.0-flash-exp:free').trim();
+// Đổi tên biến này thành DEFAULT_MODEL để làm phương án dự phòng
+const DEFAULT_MODEL = (process.env.MODEL_NAME || 'google/gemini-2.0-flash-exp:free').trim();
 
 if (!API_KEY) {
     console.error("=========================================================");
@@ -120,7 +121,8 @@ app.post('/api/process', async (req, res) => {
     console.log(`\n[${new Date().toISOString()}] 📥 BẮT ĐẦU REQUEST [ID: ${requestId}]`);
 
     try {
-        const { feature, user_message, documents, quiz_params } = req.body;
+        // NÂNG CẤP: Bắt thêm tham số 'model' từ Web Vercel gửi xuống
+        const { feature, user_message, documents, quiz_params, model } = req.body;
 
         if (!feature) {
             console.warn(`[${requestId}] ⚠️ Lỗi 400: Không có tham số feature.`);
@@ -133,8 +135,12 @@ app.post('/api/process', async (req, res) => {
         }
 
         const contextText = buildContextText(documents);
+        
+        // NÂNG CẤP: Quyết định xem dùng con AI nào. Ưu tiên Web gửi xuống, nếu không có thì dùng mặc định.
+        const targetModel = model || DEFAULT_MODEL;
+        
         console.log(`[${requestId}] 📄 Đã ghép xong text từ ${documents.length} file PDF. Kích thước: ${contextText.length} ký tự.`);
-        console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${MODEL_NAME}] tại OpenRouter`);
+        console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${targetModel}] tại OpenRouter`);
 
         if (feature === 'quiz') {
             const numQ = quiz_params?.num_questions || 10;
@@ -143,7 +149,7 @@ app.post('/api/process', async (req, res) => {
             const prompt = buildQuizPrompt(contextText, user_message, numQ);
             
             const response = await openai.chat.completions.create({
-                model: MODEL_NAME,
+                model: targetModel, // Gọi đúng con AI được chỉ định
                 messages: [{ role: "user", content: prompt }],
                 temperature: 0.2 
             });
@@ -175,7 +181,7 @@ app.post('/api/process', async (req, res) => {
             const prompt = `Dựa vào tài liệu sau:\n\n${contextText}\n\nYêu cầu của sinh viên: ${user_message}\n\nHãy trả lời chi tiết, chuyên nghiệp, sử dụng markdown để định dạng đẹp mắt bằng tiếng Việt.`;
             
             const stream = await openai.chat.completions.create({
-                model: MODEL_NAME,
+                model: targetModel, // Gọi đúng con AI được chỉ định
                 messages: [{ role: "user", content: prompt }],
                 stream: true,
             });
@@ -236,6 +242,6 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
     console.log(`🔒 Chế độ bảo mật cực mạnh đã được kích hoạt.`);
     console.log(`🌐 Đã bind port 0.0.0.0 để tương thích tuyệt đối với Render.`);
-    console.log(`🤖 Đang cấu hình sử dụng Model AI: [${MODEL_NAME}]`);
+    console.log(`🤖 Đang cấu hình sử dụng Model AI: DYNAMIC ROUTING`);
     console.log("=========================================================");
 });
