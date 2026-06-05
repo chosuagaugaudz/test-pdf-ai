@@ -5,7 +5,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { OpenAI } = require('openai'); // Đổi từ Google sang OpenAI để dùng chuẩn OpenRouter
 
 // Khởi tạo Express App
 const app = express();
@@ -31,18 +31,26 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // 2. KIỂM TRA BIẾN MÔI TRƯỜNG & KHỞI TẠO AI
 // ============================================================================
 
-const API_KEY = (process.env.GEMINI_API_KEY || '').trim();
-const MODEL_NAME = (process.env.MODEL_NAME || 'gemini-2.0-flash').trim();
+const API_KEY = (process.env.OPENROUTER_API_KEY || '').trim();
+const MODEL_NAME = (process.env.MODEL_NAME || 'google/gemini-2.0-flash-exp:free').trim();
 
 if (!API_KEY) {
     console.error("=========================================================");
-    console.error("🚨 LỖI CHÍ MẠNG: KHÔNG TÌM THẤY GEMINI_API_KEY!");
+    console.error("🚨 LỖI CHÍ MẠNG: KHÔNG TÌM THẤY OPENROUTER_API_KEY!");
     console.error("🚨 Vui lòng kiểm tra tab Environment trên Render.");
     console.error("=========================================================");
     process.exit(1);
 }
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+// Khởi tạo SDK OpenRouter bằng format của OpenAI
+const openai = new OpenAI({
+    baseURL: "[https://openrouter.ai/api/v1](https://openrouter.ai/api/v1)",
+    apiKey: API_KEY,
+    defaultHeaders: {
+        "HTTP-Referer": "[https://acequiz.com](https://acequiz.com)", // Tùy chọn, để OpenRouter nhận diện
+        "X-Title": "AceQuiz AI",
+    }
+});
 
 // ============================================================================
 // 3. CÁC HÀM TIỆN ÍCH HỖ TRỢ XỬ LÝ DỮ LIỆU (HELPER FUNCTIONS)
@@ -58,7 +66,6 @@ const buildContextText = (documents) => {
     return context;
 };
 
-// ĐÂY LÀ CHỖ TÔI GHÉP CÁI PROMPT CỦA ÔNG VÀO NÈ!
 const buildQuizPrompt = (contextText, userMessage, numQ) => {
     return `
 You are an educational assessment AI.
@@ -79,7 +86,7 @@ Avoid trivial fact recall.
 PAPER EXAM MODE (JSON OUTPUT)
 Generate the entire exam at once: Questions, Options A/B/C/D, Answer key, Explanations.
 BẮT BUỘC chỉ trả về duy nhất một mảng JSON (JSON Array).
-KHÔNG sử dụng markdown format (như \`\`\`json).
+KHÔNG sử dụng markdown format.
 KHÔNG thêm bất kỳ văn bản giải thích nào ở đầu hay cuối ngoài định dạng JSON.
 
 =========================================
@@ -139,19 +146,26 @@ app.post('/api/process', async (req, res) => {
             
             const prompt = buildQuizPrompt(contextText, user_message, numQ);
             
-            const model = genAI.getGenerativeModel({ 
+            const response = await openai.chat.completions.create({
                 model: MODEL_NAME,
-                generationConfig: { 
-                    responseMimeType: "application/json",
-                    temperature: 0.2 
-                }
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.2 
             });
 
-            const result = await model.generateContent(prompt);
-            const responseText = result.response.text();
+            const responseText = response.choices[0].message.content;
             
             try {
-                const jsonData = JSON.parse(responseText);
+                // ĐÃ FIX: Không dùng Regex để bóc tách nữa vì dễ gây lỗi hiển thị Markdown và hỏng code
+                // Chỉ tìm chính xác vị trí dấu ngoặc vuông mở/đóng của mảng JSON
+                let cleanJson = responseText;
+                const startIndex = cleanJson.indexOf('[');
+                const endIndex = cleanJson.lastIndexOf(']');
+                
+                if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+                    cleanJson = cleanJson.substring(startIndex, endIndex + 1);
+                }
+
+                const jsonData = JSON.parse(cleanJson);
                 console.log(`[${requestId}] ✅ Hoàn thành JSON Quiz. Trả kết quả cho Frontend.`);
                 return res.status(200).json({ data: jsonData });
             } catch (parseError) {
@@ -165,17 +179,22 @@ app.post('/api/process', async (req, res) => {
             
             const prompt = `Dựa vào tài liệu sau:\n\n${contextText}\n\nYêu cầu của sinh viên: ${user_message}\n\nHãy trả lời chi tiết, chuyên nghiệp, sử dụng markdown để định dạng đẹp mắt bằng tiếng Việt.`;
             
-            const model = genAI.getGenerativeModel({ model: MODEL_NAME }); 
-            const result = await model.generateContentStream(prompt);
+            const stream = await openai.chat.completions.create({
+                model: MODEL_NAME,
+                messages: [{ role: "user", content: prompt }],
+                stream: true,
+            });
 
             res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
             res.flushHeaders(); 
 
-            for await (const chunk of result.stream) {
-                const chunkText = chunk.text();
-                res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+            for await (const chunk of stream) {
+                const chunkText = chunk.choices[0]?.delta?.content || "";
+                if (chunkText) {
+                    res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+                }
             }
             
             res.write('data: [DONE]\n\n');
@@ -194,7 +213,7 @@ app.post('/api/process', async (req, res) => {
         
         if (!res.headersSent) {
             res.status(500).json({ 
-                error: "Lỗi Server Internal: API Google có thể đang từ chối truy cập hoặc quá tải.", 
+                error: "Lỗi Server Internal: API OpenRouter có thể đang từ chối truy cập hoặc quá tải.", 
                 details: error.message 
             });
         }
@@ -210,13 +229,14 @@ app.get('/api/process', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.status(200).send("🚀 AceQuiz Backend System is Running Smoothly...");
+    res.status(200).send("🚀 AceQuiz Backend System is Running Smoothly on OpenRouter...");
 });
 
 // ============================================================================
 // 6. KHỞI ĐỘNG SERVER (ĐÃ FIX LỖI TIMEOUT 13 PHÚT TRÊN RENDER)
 // ============================================================================
 
+// Nốt chốt hạ '0.0.0.0' để Render không bao giờ bị Timeout nữa
 app.listen(PORT, '0.0.0.0', () => {
     console.log("=========================================================");
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
