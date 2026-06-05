@@ -1,60 +1,76 @@
+// ============================================================================
+// ACEQUIZ AI BACKEND SYSTEM - FULL PRODUCTION VERSION
+// ============================================================================
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+// Khởi tạo Express App
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================================
-// 1. CẤU HÌNH BẢO MẬT & MIDDLEWARE (CHUẨN PRODUCTION)
+// 1. CẤU HÌNH BẢO MẬT & MIDDLEWARE CHI TIẾT
 // ============================================================================
 
-// Thiết lập CORS an toàn, chỉ cho phép các domain được chỉ định (hoặc mở tạm thời cho mọi nguồn)
+// Thiết lập CORS an toàn để Frontend Vercel có thể giao tiếp với Backend Render
 const corsOptions = {
-    origin: '*', // Tạm mở để Vercel gọi thoải mái, sau này có thể fix cứng link Vercel vào đây
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: '*', // Chấp nhận mọi domain (có thể thay bằng link Vercel sau)
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200 // Tránh lỗi trên các trình duyệt cũ
 };
 app.use(cors(corsOptions));
 
-// Giới hạn dung lượng nhận vào (50MB để đọc các file PDF text cực dài)
+// Mở rộng giới hạn body size lên 50MB để đọc các file PDF cực lớn mà không bị nghẽn
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ============================================================================
-// 2. KHỞI TẠO GOOGLE GEMINI AI
+// 2. KIỂM TRA BIẾN MÔI TRƯỜNG & KHỞI TẠO AI
 // ============================================================================
+
 const API_KEY = (process.env.GEMINI_API_KEY || '').trim();
 
+// TỰ ĐỘNG NHẬN DIỆN MODEL TỪ RENDER (Ví dụ: gemini-2.0-flash, gemini-2.5-pro...)
+// Nếu không cấu hình, mặc định sẽ dùng bản 2.0-flash mới nhất
+const MODEL_NAME = (process.env.MODEL_NAME || 'gemini-2.0-flash').trim();
+
+// Nếu quên gắn key trên Render, server sẽ báo lỗi và dừng lại ngay
 if (!API_KEY) {
     console.error("=========================================================");
-    console.error("🚨 FATAL ERROR: KHÔNG TÌM THẤY GEMINI_API_KEY!");
-    console.error("🚨 Vui lòng kiểm tra lại tab Environment trên Render.");
+    console.error("🚨 LỖI CHÍ MẠNG: KHÔNG TÌM THẤY GEMINI_API_KEY!");
+    console.error("🚨 Vui lòng kiểm tra tab Environment trên Render.");
     console.error("=========================================================");
-    process.exit(1); // Ép server dừng lại nếu không có key để tránh lỗi ngầm
+    process.exit(1);
 }
 
+// Khởi tạo con bot Google Gemini với key chuẩn
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // ============================================================================
-// 3. CÁC HÀM TIỆN ÍCH (HELPER FUNCTIONS)
+// 3. CÁC HÀM TIỆN ÍCH HỖ TRỢ XỬ LÝ DỮ LIỆU (HELPER FUNCTIONS)
 // ============================================================================
 
-// Hàm xây dựng ngữ cảnh từ mảng documents
+/**
+ * Hàm gom toàn bộ text từ mảng file PDF thành một khối ngữ cảnh thống nhất
+ */
 const buildContextText = (documents) => {
-    let context = "DANH SÁCH TÀI LIỆU CUNG CẤP:\n";
+    let context = "DANH SÁCH TÀI LIỆU CUNG CẤP TỪ NGƯỜI DÙNG:\n";
     documents.forEach((doc, index) => {
-        context += `\n--- Tài liệu ${index + 1}: [${doc.file_name}] ---\n`;
+        context += `\n--- Bắt đầu Tài liệu ${index + 1}: [${doc.file_name}] ---\n`;
         context += doc.content;
-        context += `\n--- Kết thúc tài liệu ${index + 1} ---\n`;
+        context += `\n--- Kết thúc Tài liệu ${index + 1} ---\n`;
     });
     return context;
 };
 
-// Hàm tạo Prompt cho luồng Trắc nghiệm (Quiz)
+/**
+ * Hàm xây dựng câu lệnh (Prompt) chuẩn kỹ thuật prompt engineering cho luồng tạo đề thi
+ */
 const buildQuizPrompt = (contextText, userMessage, numQ) => {
     return `
 Bạn là một chuyên gia giáo dục và giáo sư đại học. Dựa vào nội dung tài liệu sau đây:
@@ -87,39 +103,48 @@ Cấu trúc JSON bắt buộc phải chuẩn xác như sau:
 };
 
 // ============================================================================
-// 4. API ENDPOINT CHÍNH (XỬ LÝ TOÀN BỘ LOGIC)
+// 4. API ENDPOINT CHÍNH: XỬ LÝ TOÀN BỘ YÊU CẦU TỪ FRONTEND
 // ============================================================================
 
 app.post('/api/process', async (req, res) => {
+    // Tạo ID ngẫu nhiên để theo dõi Log của từng request một cách dễ dàng
     const requestId = Math.random().toString(36).substring(7);
-    console.log(`[${new Date().toISOString()}] 📥 Nhận Request ID: ${requestId}`);
+    console.log(`\n[${new Date().toISOString()}] 📥 BẮT ĐẦU REQUEST [ID: ${requestId}]`);
 
     try {
         const { feature, user_message, documents, quiz_params } = req.body;
 
-        // --- VALIDATION: Kiểm tra dữ liệu cực kỳ chặt chẽ ---
+        // --- BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ CỦA DỮ LIỆU ĐẦU VÀO ---
         if (!feature) {
+            console.warn(`[${requestId}] ⚠️ Lỗi 400: Không có tham số feature.`);
             return res.status(400).json({ error: "Thiếu tham số 'feature' (quiz hoặc summarize)." });
         }
+        
         if (!documents || !Array.isArray(documents) || documents.length === 0) {
-            console.warn(`[${requestId}] ⚠️ Lỗi 400: Frontend không gửi mảng documents.`);
-            return res.status(400).json({ error: "Thiếu dữ liệu tài liệu (documents) từ Frontend gửi lên. Vui lòng check lại UI." });
+            console.warn(`[${requestId}] ⚠️ Lỗi 400: Không có dữ liệu PDF gửi lên.`);
+            return res.status(400).json({ error: "Thiếu dữ liệu tài liệu (documents). Vui lòng tải file lên." });
         }
 
+        // --- BƯỚC 2: BUILD NGỮ CẢNH ---
         const contextText = buildContextText(documents);
-        console.log(`[${requestId}] 📄 Đã parse xong text từ ${documents.length} file PDF. Kích thước text: ${contextText.length} ký tự.`);
+        console.log(`[${requestId}] 📄 Đã ghép xong text từ ${documents.length} file PDF. Kích thước: ${contextText.length} ký tự.`);
+        console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${MODEL_NAME}]`);
 
-        // --- LUỒNG 1: TẠO ĐỀ THI TRẮC NGHIỆM (TRẢ VỀ JSON) ---
+        // ==========================================================
+        // LUỒNG 1: TẠO ĐỀ THI TRẮC NGHIỆM (TRẢ VỀ CẤU TRÚC JSON)
+        // ==========================================================
         if (feature === 'quiz') {
             const numQ = quiz_params?.num_questions || 10;
             console.log(`[${requestId}] 🎯 Chế độ: QUIZ | Số câu yêu cầu: ${numQ}`);
             
             const prompt = buildQuizPrompt(contextText, user_message, numQ);
+            
+            // Gọi AI với thiết lập ép cứng trả về JSON
             const model = genAI.getGenerativeModel({ 
-                model: "gemini-1.5-flash",
+                model: MODEL_NAME, // Dùng biến đọc từ Render
                 generationConfig: { 
                     responseMimeType: "application/json",
-                    temperature: 0.2 // Giảm sự sáng tạo để AI bám sát tài liệu hơn
+                    temperature: 0.2 // Temperature thấp để AI không bịa đáp án
                 }
             });
 
@@ -127,51 +152,60 @@ app.post('/api/process', async (req, res) => {
             const responseText = result.response.text();
             
             try {
+                // Parse thử text AI trả về xem có chuẩn JSON không
                 const jsonData = JSON.parse(responseText);
-                console.log(`[${requestId}] ✅ Tạo JSON Quiz thành công.`);
+                console.log(`[${requestId}] ✅ Hoàn thành JSON Quiz. Trả kết quả cho Frontend.`);
                 return res.status(200).json({ data: jsonData });
             } catch (parseError) {
-                console.error(`[${requestId}] 🚨 Lỗi Parse JSON. Raw output:`, responseText);
+                console.error(`[${requestId}] 🚨 Lỗi Parse JSON! Phản hồi từ AI không chuẩn:`, responseText);
                 return res.status(500).json({ error: "AI trả về cấu trúc không hợp lệ. Vui lòng thử lại." });
             }
         } 
         
-        // --- LUỒNG 2: CHAT & TÓM TẮT (TRẢ VỀ STREAMING TEXT) ---
+        // ==========================================================
+        // LUỒNG 2: CHAT & TÓM TẮT (TRẢ VỀ KIỂU CHỮ CHẠY - STREAMING)
+        // ==========================================================
         else if (feature === 'summarize') {
-            console.log(`[${requestId}] 💬 Chế độ: SUMMARIZE/CHAT (Streaming)`);
+            console.log(`[${requestId}] 💬 Chế độ: SUMMARIZE (Chạy chữ Streaming)`);
             
-            const prompt = `Dựa vào tài liệu sau:\n${contextText}\n\nYêu cầu: ${user_message}\nTrả lời chi tiết, chuyên nghiệp bằng tiếng Việt.`;
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const prompt = `Dựa vào tài liệu sau:\n\n${contextText}\n\nYêu cầu của sinh viên: ${user_message}\n\nHãy trả lời chi tiết, chuyên nghiệp, sử dụng markdown để định dạng đẹp mắt bằng tiếng Việt.`;
+            
+            // Khởi tạo AI cho luồng Chat
+            const model = genAI.getGenerativeModel({ model: MODEL_NAME }); // Dùng biến đọc từ Render
             const result = await model.generateContentStream(prompt);
 
-            // Set Headers cho luồng stream liên tục
+            // Gửi header báo cho Vercel biết đây là luồng Streaming
             res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
-            res.flushHeaders(); // Bắt buộc bắn header đi trước
+            res.flushHeaders(); 
 
+            // Vòng lặp bắn từng cụm chữ về cho trình duyệt
             for await (const chunk of result.stream) {
                 const chunkText = chunk.text();
-                // Bắn từng cụm từ về cho Frontend V6
                 res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
             }
+            
+            // Đóng luồng
             res.write('data: [DONE]\n\n');
             res.end();
-            console.log(`[${requestId}] ✅ Đã stream xong toàn bộ text.`);
+            console.log(`[${requestId}] ✅ Đã stream xong toàn bộ đoạn hội thoại.`);
         } 
         
+        // --- NẾU FEATURE KHÔNG HỢP LỆ ---
         else {
-            return res.status(400).json({ error: "Tính năng không được hỗ trợ (feature không hợp lệ)." });
+            console.warn(`[${requestId}] ⚠️ Lỗi 400: Tham số feature [${feature}] không hợp lệ.`);
+            return res.status(400).json({ error: "Tính năng không được hỗ trợ." });
         }
 
     } catch (error) {
         console.error(`[${requestId}] 🚨 LỖI HỆ THỐNG:`, error.message);
-        console.error(error.stack);
+        console.error(error.stack); // In stack trace để dễ debug
         
-        // Nếu Header chưa gửi đi (luồng JSON), thì báo lỗi 500
+        // Đảm bảo không bị lỗi "Headers already sent" nếu crash giữa chừng
         if (!res.headersSent) {
             res.status(500).json({ 
-                error: "Lỗi Server Internal: API Google có thể đang quá tải hoặc gặp sự cố.", 
+                error: "Lỗi Server Internal: API Google có thể đang từ chối truy cập hoặc quá tải.", 
                 details: error.message 
             });
         }
@@ -179,20 +213,25 @@ app.post('/api/process', async (req, res) => {
 });
 
 // ============================================================================
-// 5. HEALTH CHECK & KHỞI ĐỘNG SERVER
+// 5. API HEALTH CHECK (ĐỂ TRÌNH DUYỆT KIỂM TRA SERVER CÓ SỐNG KHÔNG)
 // ============================================================================
 
-// Cổng GET để trình duyệt test ping xem server có "tỉnh" không
 app.get('/api/process', (req, res) => {
-    res.status(200).send("✅ API đang hoạt động! Hãy gửi request bằng phương thức POST.");
+    res.status(200).send("✅ API Endpoint /api/process đang hoạt động. Hãy gọi bằng POST.");
 });
+
 app.get('/', (req, res) => {
-    res.status(200).send("AceQuiz Backend System is Running...");
+    res.status(200).send("🚀 AceQuiz Backend System is Running Smoothly...");
 });
+
+// ============================================================================
+// 6. KHỞI ĐỘNG SERVER
+// ============================================================================
 
 app.listen(PORT, () => {
     console.log("=========================================================");
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
-    console.log(`🔒 Chế độ bảo vệ bằng CORS & Error Handling đã kích hoạt.`);
+    console.log(`🔒 Chế độ bảo mật cực mạnh đã được kích hoạt.`);
+    console.log(`🤖 Đang cấu hình sử dụng Model AI: [${MODEL_NAME}]`);
     console.log("=========================================================");
 });
