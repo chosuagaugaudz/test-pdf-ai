@@ -1,11 +1,11 @@
 // ============================================================================
-// ACEQUIZ AI BACKEND SYSTEM - FULL PRODUCTION VERSION
+// ACEQUIZ AI BACKEND SYSTEM - OPENROUTER VERSION
 // ============================================================================
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { OpenAI } = require('openai'); // Đổi từ Google sang OpenAI để dùng chuẩn OpenRouter
+const { OpenAI } = require('openai'); // Dùng chuẩn OpenAI để kết nối OpenRouter
 
 // Khởi tạo Express App
 const app = express();
@@ -42,14 +42,10 @@ if (!API_KEY) {
     process.exit(1);
 }
 
-// Khởi tạo SDK OpenRouter bằng format của OpenAI
+// Khởi tạo SDK OpenRouter (ĐÃ FIX SẠCH LỖI INVALID URL)
 const openai = new OpenAI({
-    baseURL: "[https://openrouter.ai/api/v1](https://openrouter.ai/api/v1)",
-    apiKey: API_KEY,
-    defaultHeaders: {
-        "HTTP-Referer": "[https://acequiz.com](https://acequiz.com)", // Tùy chọn, để OpenRouter nhận diện
-        "X-Title": "AceQuiz AI",
-    }
+    baseURL: "https://openrouter.ai/api/v1",
+    apiKey: API_KEY
 });
 
 // ============================================================================
@@ -138,7 +134,7 @@ app.post('/api/process', async (req, res) => {
 
         const contextText = buildContextText(documents);
         console.log(`[${requestId}] 📄 Đã ghép xong text từ ${documents.length} file PDF. Kích thước: ${contextText.length} ký tự.`);
-        console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${MODEL_NAME}]`);
+        console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${MODEL_NAME}] tại OpenRouter`);
 
         if (feature === 'quiz') {
             const numQ = quiz_params?.num_questions || 10;
@@ -155,8 +151,7 @@ app.post('/api/process', async (req, res) => {
             const responseText = response.choices[0].message.content;
             
             try {
-                // ĐÃ FIX: Không dùng Regex để bóc tách nữa vì dễ gây lỗi hiển thị Markdown và hỏng code
-                // Chỉ tìm chính xác vị trí dấu ngoặc vuông mở/đóng của mảng JSON
+                // Xử lý an toàn để lọc JSON ra khỏi Markdown code block nếu OpenRouter cố tình trả về
                 let cleanJson = responseText;
                 const startIndex = cleanJson.indexOf('[');
                 const endIndex = cleanJson.lastIndexOf(']');
@@ -233,10 +228,9 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================================
-// 6. KHỞI ĐỘNG SERVER (ĐÃ FIX LỖI TIMEOUT 13 PHÚT TRÊN RENDER)
+// 6. KHỞI ĐỘNG SERVER 
 // ============================================================================
 
-// Nốt chốt hạ '0.0.0.0' để Render không bao giờ bị Timeout nữa
 app.listen(PORT, '0.0.0.0', () => {
     console.log("=========================================================");
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
