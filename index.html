@@ -1,645 +1,1731 @@
 <!DOCTYPE html>
 <html lang="vi" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AceQuiz AI - Ultimate Workspace</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AceQuiz AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS & THEMES
+═══════════════════════════════════════════════ */
+:root {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
 
-    <style>
-        /* =========================================
-           1. CSS VARIABLES & THEMES
-           ========================================= */
-        :root[data-theme="dark"] {
-            --bg-main: #212121; --bg-sidebar: #171717; --bg-composer: #2f2f2f;
-            --text-main: #ececec; --text-muted: #9b9b9b; --border: rgba(255,255,255,0.1);
-            --msg-user: #2f2f2f; --accent: #ececec; --accent-bg: #171717;
-            --danger: #ef4444; --success: #10b981;
-        }
-        :root[data-theme="light"] {
-            --bg-main: #ffffff; --bg-sidebar: #f9f9f9; --bg-composer: #f4f4f4;
-            --text-main: #0d0d0d; --text-muted: #666666; --border: rgba(0,0,0,0.1);
-            --msg-user: #f4f4f4; --accent: #0d0d0d; --accent-bg: #ffffff;
-            --danger: #dc2626; --success: #059669;
-        }
+  /* Sidebar */
+  --sidebar-w: 260px;
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; position: relative; }
-        button { cursor: pointer; border: none; outline: none; background: transparent; color: inherit; transition: 0.15s ease; }
-        .hidden { display: none !important; }
+  /* Transitions */
+  --ease: cubic-bezier(0.4,0,0.2,1);
+}
 
-        /* SCROLLBAR CUSTOMIZATION */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+[data-theme="dark"] {
+  --bg:          #212121;
+  --bg-2:        #2f2f2f;
+  --bg-3:        #171717;
+  --surface:     #303030;
+  --surface-2:   #3a3a3a;
+  --border:      rgba(255,255,255,0.08);
+  --border-2:    rgba(255,255,255,0.14);
+  --text:        #ececec;
+  --text-2:      #b4b4b4;
+  --text-3:      #6b6b6b;
+  --accent:      #ececec;
+  --accent-inv:  #171717;
+  --danger:      #ef4444;
+  --success:     #22c55e;
+  --warning:     #f59e0b;
+  --user-bubble: #2f2f2f;
+  --code-bg:     #1a1a1a;
+  --scrollbar:   rgba(255,255,255,0.1);
+}
 
-        /* =========================================
-           2. OVERLAYS & MODALS & TOASTS
-           ========================================= */
-        #drop-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-        #drop-overlay.active { opacity: 1; pointer-events: all; }
+[data-theme="light"] {
+  --bg:          #ffffff;
+  --bg-2:        #f4f4f4;
+  --bg-3:        #f9f9f9;
+  --surface:     #ebebeb;
+  --surface-2:   #e2e2e2;
+  --border:      rgba(0,0,0,0.08);
+  --border-2:    rgba(0,0,0,0.14);
+  --text:        #0d0d0d;
+  --text-2:      #444444;
+  --text-3:      #999999;
+  --accent:      #0d0d0d;
+  --accent-inv:  #ffffff;
+  --danger:      #dc2626;
+  --success:     #16a34a;
+  --warning:     #d97706;
+  --user-bubble: #f4f4f4;
+  --code-bg:     #f0f0f0;
+  --scrollbar:   rgba(0,0,0,0.1);
+}
 
-        .toast-container { position: absolute; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { padding: 12px 20px; border-radius: 8px; font-weight: 500; font-size: 14px; color: #fff; transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .toast.show { transform: translateX(0); }
-        .toast.success { background-color: var(--success); }
-        .toast.error { background-color: var(--danger); }
-        .toast.info { background-color: var(--bg-composer); color: var(--text-main); border: 1px solid var(--border); }
+/* ═══════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+button { cursor: pointer; border: none; background: none; color: inherit; font: inherit; outline: none; }
+input, textarea { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+.hidden { display: none !important; }
 
-        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 5000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content { background: var(--bg-main); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 400px; max-width: 90%; transform: scale(0.95); transition: 0.2s; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 18px; font-weight: 600; }
-        .input-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .input-group label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-        .input-group input { padding: 10px; background: var(--bg-composer); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; outline: none; }
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
 
-        /* =========================================
-           3. LAYOUT & RESIZABLE SIDEBAR
-           ========================================= */
-        .app-container { display: flex; height: 100vh; width: 100vw; }
-        
-        .sidebar-wrapper { display: flex; height: 100%; transition: margin-left 0.3s ease; position: relative; }
-        .sidebar { width: 260px; min-width: 200px; max-width: 500px; background-color: var(--bg-sidebar); display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-wrapper.collapsed { margin-left: -260px !important; }
-        
-        .resizer { width: 4px; background: transparent; cursor: col-resize; transition: background 0.2s; border-right: 1px solid var(--border); }
-        .resizer:hover, .resizer.dragging { background: var(--text-muted); }
-        
-        .sidebar-header, .sidebar-footer { padding: 12px; }
-        .btn-full { width: 100%; padding: 10px 12px; background: transparent; border-radius: 8px; font-weight: 500; text-align: left; display: flex; align-items: center; gap: 8px; }
-        .btn-full:hover { background: var(--bg-composer); }
-        
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
-        .section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin: 16px 0 8px 8px; letter-spacing: 0.5px; }
-        
-        .doc-list { list-style: none; font-size: 13px; }
-        .doc-list li { padding: 8px; border-radius: 6px; margin-bottom: 4px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: space-between; }
-        .doc-list li:hover { background: var(--bg-composer); }
-        .btn-delete-doc { color: var(--danger); opacity: 0; padding: 4px; border-radius: 4px; }
-        .doc-list li:hover .btn-delete-doc { opacity: 1; }
-        .btn-delete-doc:hover { background: rgba(239, 68, 68, 0.1); }
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+}
 
-        /* =========================================
-           4. MAIN AREA & CHAT UI
-           ========================================= */
-        .main-area { flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
-        
-        .topbar { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: absolute; top: 0; left: 0; right: 0; z-index: 10; background: linear-gradient(180deg, var(--bg-main) 40%, transparent); }
-        .icon-btn { font-size: 18px; padding: 6px; border-radius: 6px; color: var(--text-muted); }
-        .icon-btn:hover { background: var(--bg-composer); color: var(--text-main); }
-        
-        .workspace { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .chat-scroll { flex: 1; overflow-y: auto; padding: 60px 16px 0 16px; scroll-behavior: smooth; }
-        .chat-container { max-width: 800px; margin: 0 auto; padding-bottom: 40px; }
-        
-        .message { display: flex; gap: 16px; padding: 24px 0; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .message.user { flex-direction: row-reverse; }
-        
-        .msg-bubble { max-width: 85%; line-height: 1.6; font-size: 15px; }
-        .message.user .msg-bubble { background-color: var(--msg-user); padding: 12px 16px; border-radius: 16px; }
-        .message.bot .msg-bubble { padding: 4px 0; width: 100%; overflow-x: auto;}
-        
-        /* Markdown Code Styles */
-        .markdown-body pre { background: var(--bg-composer); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 12px 0; border: 1px solid var(--border); }
-        .markdown-body code { font-family: monospace; font-size: 13px; }
-        .markdown-body table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        .markdown-body th, .markdown-body td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--bg-3);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  transition: transform 0.28s var(--ease), width 0.28s var(--ease);
+  position: relative;
+  z-index: 20;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sidebar.collapsed {
+  transform: translateX(calc(-1 * var(--sidebar-w)));
+  width: 0;
+  min-width: 0;
+  border-right: none;
+}
 
-        /* =========================================
-           5. COMPOSER
-           ========================================= */
-        .composer-wrapper { padding: 16px; display: flex; justify-content: center; background: linear-gradient(180deg, transparent, var(--bg-main) 30%); }
-        .composer { width: 100%; max-width: 800px; background: var(--bg-composer); border-radius: 24px; padding: 8px 12px; display: flex; align-items: flex-end; border: 1px solid var(--border); gap: 8px; transition: 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.05);}
-        .composer:focus-within { border-color: var(--text-muted); }
-        
-        .btn-upload { padding: 8px; border-radius: 50%; color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;}
-        .btn-upload:hover { background: var(--bg-main); }
-        
-        .composer textarea { flex: 1; background: transparent; border: none; color: var(--text-main); resize: none; outline: none; font-size: 15px; max-height: 200px; padding: 10px 0; }
-        
-        .btn-send { padding: 8px; border-radius: 50%; background: var(--accent); color: var(--accent-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .btn-send:hover { opacity: 0.8; }
-        .btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+.sidebar-top {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
 
-        /* =========================================
-           6. QUIZ WORKSPACE
-           ========================================= */
-        .quiz-layout { display: flex; gap: 32px; max-width: 1200px; margin: 0 auto; width: 100%; height: 100%; padding: 60px 24px 24px 24px; }
-        .quiz-main { flex: 1; overflow-y: auto; padding-right: 16px; }
-        .quiz-sidebar { width: 280px; padding-left: 24px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 24px; flex-shrink: 0; }
-        
-        .q-card { margin-bottom: 40px; background: var(--bg-composer); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
-        .q-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
-        .q-option { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.15s; background: var(--bg-main); }
-        .q-option:hover { border-color: var(--text-muted); }
-        .q-option input { margin-top: 4px; accent-color: var(--accent); }
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.sidebar-logo svg { opacity: 0.7; }
 
-        .btn-submit-quiz { width: 100%; padding: 14px; background: var(--text-main); color: var(--bg-main); border-radius: 12px; font-weight: 600; font-size: 15px; }
-        
-        /* TYPING ANIMATION */
-        .typing { display: inline-flex; gap: 4px; padding: 8px 0; }
-        .typing span { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: blink 1.4s infinite both; }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink { 0%, 100% { opacity: 0.2; } 20% { opacity: 1; } }
-    </style>
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar-btn:hover { background: var(--surface); color: var(--text); }
+.sidebar-btn svg { flex-shrink: 0; opacity: 0.7; }
+.sidebar-btn.active { background: var(--surface); color: var(--text); }
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 12px;
+  flex-shrink: 0;
+}
+
+.sidebar-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px 6px;
+  flex-shrink: 0;
+}
+
+.pdf-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pdf-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  transition: background 0.15s;
+  cursor: default;
+}
+.pdf-item:hover { background: var(--surface); }
+.pdf-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pdf-item-del {
+  opacity: 0;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 4px;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+.pdf-item:hover .pdf-item-del { opacity: 1; }
+.pdf-item-del:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
+.pdf-empty {
+  font-size: 13px;
+  color: var(--text-3);
+  padding: 12px 10px;
+  font-style: italic;
+}
+
+.sidebar-bottom {
+  padding: 12px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── MAIN ─── */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg);
+}
+
+/* ─── TOPBAR ─── */
+.topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: linear-gradient(to bottom, var(--bg) 55%, transparent);
+  pointer-events: none;
+}
+.topbar > * { pointer-events: all; }
+.topbar-left { display: flex; align-items: center; gap: 6px; }
+.topbar-right { display: flex; align-items: center; gap: 4px; }
+.topbar-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  padding: 4px 8px;
+  background: var(--surface);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: color 0.2s;
+}
+.topbar-status.busy { color: var(--warning); }
+.topbar-status.error { color: var(--danger); }
+.topbar-status.ready { color: var(--success); }
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border-radius: 8px;
+  color: var(--text-3);
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:hover { background: var(--surface); color: var(--text-2); }
+
+/* ═══════════════════════════════════════════════
+   WORKSPACES
+═══════════════════════════════════════════════ */
+.workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+/* ─── CHAT WORKSPACE ─── */
+.chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 60px 16px 16px;
+  scroll-behavior: auto; /* rAF handles this */
+}
+.chat-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 32px;
+}
+
+/* Welcome screen */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 15vh 24px 0;
+  gap: 16px;
+  animation: fadeUp 0.5s var(--ease);
+}
+.welcome-icon {
+  width: 52px; height: 52px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.welcome h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; }
+.welcome p { font-size: 14px; color: var(--text-3); max-width: 400px; line-height: 1.7; }
+.welcome-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-2);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-2);
+  background: var(--bg-2);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.chip:hover { background: var(--surface); border-color: var(--border-2); color: var(--text); }
+
+/* Messages */
+.msg-row {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  animation: fadeUp 0.25s var(--ease);
+}
+.msg-row.user { flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.msg-row.user .msg-avatar { background: var(--accent); color: var(--accent-inv); }
+.msg-row.bot .msg-avatar { background: var(--surface); color: var(--text-2); border: 1px solid var(--border-2); }
+
+.msg-content { max-width: 88%; min-width: 0; }
+.msg-row.user .msg-content { align-items: flex-end; display: flex; flex-direction: column; }
+
+.msg-bubble {
+  padding: 11px 15px;
+  border-radius: 16px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  word-break: break-word;
+}
+.msg-row.user .msg-bubble {
+  background: var(--user-bubble);
+  border-radius: 16px 4px 16px 16px;
+}
+.msg-row.bot .msg-bubble {
+  background: transparent;
+  padding: 6px 0;
+  border-radius: 4px 16px 16px 16px;
+}
+
+/* Markdown rendering */
+.md h1, .md h2, .md h3 { font-weight: 600; margin: 18px 0 10px; line-height: 1.3; letter-spacing: -0.3px; }
+.md h1 { font-size: 20px; }
+.md h2 { font-size: 17px; }
+.md h3 { font-size: 15px; }
+.md p { margin-bottom: 10px; }
+.md ul, .md ol { padding-left: 22px; margin-bottom: 10px; }
+.md li { margin-bottom: 4px; }
+.md strong { font-weight: 600; }
+.md em { font-style: italic; }
+.md code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--border-2);
+}
+.md pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.md pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+}
+.md blockquote {
+  border-left: 3px solid var(--border-2);
+  padding: 4px 16px;
+  color: var(--text-2);
+  margin: 10px 0;
+}
+.md table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+.md th, .md td { border: 1px solid var(--border-2); padding: 8px 12px; text-align: left; }
+.md th { background: var(--surface); font-weight: 600; }
+.md hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.md a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; opacity: 0.8; }
+
+/* Msg actions */
+.msg-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.msg-row:hover .msg-actions { opacity: 1; }
+.msg-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-3);
+  background: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.msg-action-btn:hover { background: var(--surface); color: var(--text-2); }
+
+/* Typing indicator */
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+}
+.typing-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-3);
+  animation: dotBounce 1.3s infinite ease-in-out both;
+}
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes dotBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ─── COMPOSER ─── */
+.composer-area {
+  padding: 10px 16px 18px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
+}
+.composer-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.composer-box {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.composer-box:focus-within { border-color: var(--text-3); }
+
+.composer-main {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 8px 6px 14px;
+}
+.composer-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 15px;
+  line-height: 1.55;
+  max-height: 180px;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--text);
+}
+.composer-textarea::placeholder { color: var(--text-3); }
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-bottom: 6px;
+}
+.composer-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-inv);
+  flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.composer-send:hover:not(:disabled) { opacity: 0.85; }
+.composer-send:disabled { opacity: 0.25; cursor: not-allowed; }
+.composer-send:active:not(:disabled) { transform: scale(0.93); }
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  color: var(--text-3);
+  transition: background 0.15s, color 0.15s;
+}
+.upload-btn:hover { background: var(--surface); color: var(--text-2); }
+
+.composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 10px;
+  gap: 8px;
+}
+.composer-hint {
+  font-size: 11.5px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+.composer-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pdf-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 20px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  max-width: 160px;
+  animation: fadeIn 0.2s;
+}
+.pdf-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdf-tag-del {
+  flex-shrink: 0;
+  opacity: 0.5;
+  line-height: 1;
+  font-size: 11px;
+  transition: opacity 0.15s, color 0.15s;
+}
+.pdf-tag-del:hover { opacity: 1; color: var(--danger); }
+
+/* ═══════════════════════════════════════════════
+   QUIZ WORKSPACE
+═══════════════════════════════════════════════ */
+#ws-quiz {
+  flex-direction: row;
+  overflow: hidden;
+}
+.quiz-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 60px 32px 40px;
+}
+.quiz-inner { max-width: 720px; margin: 0 auto; }
+
+.quiz-header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.quiz-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.quiz-header p { font-size: 13px; color: var(--text-3); }
+
+.q-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.q-card:hover { border-color: var(--border-2); }
+.q-card.answered-correct { border-color: var(--success); background: rgba(34,197,94,0.04); }
+.q-card.answered-wrong { border-color: var(--danger); background: rgba(239,68,68,0.04); }
+
+.q-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+}
+.q-text {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 18px;
+  color: var(--text);
+}
+.q-options { display: flex; flex-direction: column; gap: 8px; }
+.q-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  background: var(--bg);
+  font-size: 14px;
+  color: var(--text-2);
+  text-align: left;
+  width: 100%;
+}
+.q-option:hover { background: var(--surface); border-color: var(--border-2); color: var(--text); }
+.q-option.selected { border-color: var(--text-3); background: var(--surface); color: var(--text); }
+.q-option.correct { border-color: var(--success); background: rgba(34,197,94,0.08); color: var(--text); }
+.q-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.08); color: var(--text); }
+.q-option-key {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: background 0.15s;
+}
+.q-option.selected .q-option-key { background: var(--text); color: var(--bg); }
+.q-option.correct .q-option-key { background: var(--success); color: #fff; }
+.q-option.wrong .q-option-key { background: var(--danger); color: #fff; }
+.q-option-text { flex: 1; line-height: 1.5; }
+
+.q-explanation {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+  display: none;
+}
+.q-explanation.show { display: block; animation: fadeIn 0.2s; }
+.q-explanation strong { color: var(--text); }
+
+/* Quiz panel */
+.quiz-panel {
+  width: 240px;
+  min-width: 240px;
+  border-left: 1px solid var(--border);
+  background: var(--bg-3);
+  display: flex;
+  flex-direction: column;
+  padding: 60px 20px 24px;
+  gap: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.quiz-stat {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.quiz-stat-num { font-size: 32px; font-weight: 600; line-height: 1; }
+.quiz-stat-label { font-size: 12px; color: var(--text-3); }
+.quiz-progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.quiz-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.quiz-nav-dot {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-2);
+  background: var(--bg-2);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quiz-nav-dot:hover { background: var(--surface); color: var(--text-2); }
+.quiz-nav-dot.answered { background: var(--surface); color: var(--text); border-color: var(--border-2); }
+.quiz-nav-dot.correct { background: rgba(34,197,94,0.15); color: var(--success); border-color: var(--success); }
+.quiz-nav-dot.wrong { background: rgba(239,68,68,0.15); color: var(--danger); border-color: var(--danger); }
+
+.quiz-panel-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.7px; }
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: var(--accent-inv);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s;
+  text-align: center;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-ghost {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: background 0.15s;
+  text-align: center;
+}
+.btn-ghost:hover { background: var(--surface); }
+
+/* Score card */
+.score-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  display: none;
+  animation: fadeUp 0.3s;
+}
+.score-card.show { display: block; }
+.score-big { font-size: 36px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.score-label { font-size: 12px; color: var(--text-3); }
+
+/* ═══════════════════════════════════════════════
+   DRAG OVERLAY & TOAST & MODAL
+═══════════════════════════════════════════════ */
+#drag-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+#drag-overlay.show { opacity: 1; pointer-events: all; }
+.drag-drop-box {
+  border: 2px dashed rgba(255,255,255,0.35);
+  border-radius: 20px;
+  padding: 48px 64px;
+  text-align: center;
+  color: #fff;
+}
+.drag-drop-box h2 { font-size: 20px; font-weight: 600; margin-top: 14px; }
+.drag-drop-box p { font-size: 14px; opacity: 0.6; margin-top: 4px; }
+
+.toast-stack {
+  position: fixed; top: 18px; right: 18px;
+  z-index: 99999;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  max-width: 320px;
+  transform: translateX(110%);
+  transition: transform 0.3s var(--ease), opacity 0.3s;
+  border: 1px solid var(--border-2);
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.toast.in { transform: translateX(0); }
+.toast.out { opacity: 0; transform: translateX(110%); }
+.toast.success { background: var(--success); color: #fff; border-color: transparent; }
+.toast.error   { background: var(--danger);  color: #fff; border-color: transparent; }
+.toast.info    { background: var(--bg-2);    color: var(--text); }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  z-index: 8000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: 18px;
+  width: 380px; max-width: 92vw;
+  padding: 24px;
+  transform: scale(0.95);
+  transition: transform 0.2s var(--ease);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+.modal-backdrop.open .modal { transform: scale(1); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.modal-head h3 { font-size: 16px; font-weight: 600; }
+.modal-body { display: flex; flex-direction: column; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12.5px; color: var(--text-3); font-weight: 500; }
+.form-group input, .form-group select {
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 9px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  color: var(--text);
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--text-3); }
+.form-group select option { background: var(--bg-2); }
+.modal-foot { margin-top: 22px; }
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 </head>
 <body>
-    <div id="drop-overlay">Kéo thả PDF vào đây để nạp tài liệu</div>
-    <div class="toast-container" id="toast-container"></div>
 
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>Cài đặt tham số</span>
-                <button class="icon-btn" onclick="toggleModal(false)">✕</button>
-            </div>
-            <div class="input-group">
-                <label for="num-q">Số lượng câu hỏi trắc nghiệm mặc định:</label>
-                <input type="number" id="num-q" value="10" min="1" max="50">
-            </div>
-            <button class="btn-full" style="background: var(--accent); color: var(--accent-bg); justify-content: center; margin-top: 24px;" onclick="saveSettings()">Lưu cài đặt</button>
-        </div>
+<!-- DRAG OVERLAY -->
+<div id="drag-overlay">
+  <div class="drag-drop-box">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <h2>Thả file PDF vào đây</h2>
+    <p>Hỗ trợ nhiều file cùng lúc</p>
+  </div>
+</div>
+
+<!-- TOAST STACK -->
+<div class="toast-stack" id="toast-stack"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Cài đặt</h3>
+      <button class="icon-btn" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Số câu hỏi trắc nghiệm mặc định</label>
+        <input type="number" id="cfg-num-q" value="10" min="1" max="50">
+      </div>
+      <div class="form-group">
+        <label>Độ khó mặc định</label>
+        <select id="cfg-difficulty">
+          <option value="mixed">Hỗn hợp (khuyến nghị)</option>
+          <option value="easy">Dễ</option>
+          <option value="medium">Trung bình</option>
+          <option value="hard">Khó</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Backend URL</label>
+        <input type="text" id="cfg-backend" placeholder="https://your-backend.com/api/process">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-primary" onclick="saveSettings()">Lưu cài đặt</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        AceQuiz AI
+      </div>
+      <button class="sidebar-btn" id="btn-new-chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Chat mới
+      </button>
     </div>
 
-    <div class="app-container">
-        <div class="sidebar-wrapper" id="sidebar-wrapper">
-            <aside class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <button id="btn-new" class="btn-full">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Chat mới
-                    </button>
-                </div>
-                <div class="sidebar-content">
-                    <p class="section-title">Nguồn Dữ Liệu PDF</p>
-                    <ul id="pdf-list" class="doc-list">
-                        <li style="color: var(--text-muted); font-style: italic; justify-content: center;">Chưa có dữ liệu</li>
-                    </ul>
-                </div>
-                <div class="sidebar-footer">
-                    <button class="btn-full" onclick="toggleModal(true)" style="margin-bottom: 8px;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Cài đặt
-                    </button>
-                    <button id="theme-toggle" class="btn-full">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> Đổi giao diện
-                    </button>
-                </div>
-            </aside>
-            <div class="resizer" id="resizer"></div>
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section-label">Tài liệu đã nạp</div>
+    <ul class="pdf-list" id="pdf-list">
+      <li class="pdf-empty" id="pdf-empty">Chưa có tài liệu nào</li>
+    </ul>
+
+    <div class="sidebar-divider" style="margin-top:auto;"></div>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-btn" onclick="openModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Cài đặt
+      </button>
+      <button class="sidebar-btn" id="btn-theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Đổi giao diện
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="btn-toggle-sidebar" title="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-status" id="status-badge">IDLE</span>
+      </div>
+    </header>
+
+    <!-- CHAT WORKSPACE -->
+    <section class="workspace" id="ws-chat">
+      <div class="chat-scroll" id="chat-scroll">
+        <div class="chat-inner" id="chat-inner">
+
+          <!-- WELCOME -->
+          <div id="welcome-screen" class="welcome">
+            <div class="welcome-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+            <h1>AceQuiz AI</h1>
+            <p>Nạp tài liệu PDF và bắt đầu học thông minh hơn — tóm tắt, phân tích, và luyện đề trắc nghiệm tự động.</p>
+            <div class="welcome-chips">
+              <div class="chip" onclick="fillPrompt('Tóm tắt toàn bộ nội dung tài liệu')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+                Tóm tắt tài liệu
+              </div>
+              <div class="chip" onclick="fillPrompt('Tạo đề trắc nghiệm ôn tập từ tài liệu')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Tạo đề trắc nghiệm
+              </div>
+              <div class="chip" onclick="fillPrompt('Liệt kê các khái niệm quan trọng nhất trong tài liệu')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Khái niệm cốt lõi
+              </div>
+              <div class="chip" onclick="fillPrompt('Tạo bộ flashcard từ tài liệu')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                Tạo Flashcard
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COMPOSER -->
+      <div class="composer-area">
+        <div class="composer-wrap">
+          <div class="composer-box">
+            <div class="composer-main">
+              <input type="file" id="file-input" multiple accept=".pdf" class="hidden">
+              <label for="file-input" class="upload-btn" title="Nạp PDF">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </label>
+              <textarea id="composer-input" rows="1" placeholder="Gõ câu hỏi hoặc lệnh... (Enter để gửi, Shift+Enter xuống dòng)"></textarea>
+              <div class="composer-actions">
+                <button class="composer-send" id="btn-send" disabled>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="composer-footer" id="composer-footer" style="display:none">
+              <div class="composer-tags" id="pdf-tags"></div>
+              <span class="composer-hint" id="doc-count-hint"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ WORKSPACE -->
+    <section class="workspace hidden" id="ws-quiz">
+      <div class="quiz-main">
+        <div class="quiz-inner">
+          <div class="quiz-header">
+            <h2 id="quiz-title">Đề trắc nghiệm</h2>
+            <p id="quiz-subtitle">Chọn đáp án đúng cho mỗi câu hỏi</p>
+          </div>
+          <div id="quiz-questions"></div>
+        </div>
+      </div>
+      <div class="quiz-panel">
+        <div style="margin-top: 4px;">
+          <div class="quiz-stat">
+            <div class="quiz-stat-num" id="qs-total">0</div>
+            <div class="quiz-stat-label">Câu hỏi</div>
+          </div>
+        </div>
+        <div>
+          <div class="quiz-panel-label" style="margin-bottom:10px;">Tiến độ</div>
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress" style="width:0%"></div></div>
+          <div style="font-size:12px; color:var(--text-3); margin-top:6px; font-family:var(--font-mono);" id="quiz-progress-label">0 / 0 đã trả lời</div>
+        </div>
+        <div>
+          <div class="quiz-panel-label" style="margin-bottom:10px;">Điều hướng</div>
+          <div class="quiz-nav" id="quiz-nav"></div>
         </div>
 
-        <main class="main-area">
-            <header class="topbar">
-                <button id="toggle-sidebar" class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-                <span id="system-status" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">STATUS: IDLE</span>
-            </header>
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:8px;">
+          <div class="score-card" id="score-card">
+            <div class="score-big" id="score-big">—</div>
+            <div class="score-label">điểm</div>
+          </div>
+          <button class="btn-primary" id="btn-submit-quiz">Nộp bài</button>
+          <button class="btn-ghost" id="btn-exit-quiz">← Quay lại Chat</button>
+        </div>
+      </div>
+    </section>
 
-            <section id="workspace-chat" class="workspace">
-                <div class="chat-scroll" id="chat-scroll">
-                    <div class="chat-container" id="chat-history">
-                        <div id="welcome-msg" style="text-align: center; padding-top: 15vh;">
-                            <div style="width: 64px; height: 64px; background: var(--bg-composer); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; border: 1px solid var(--border);">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                            </div>
-                            <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 12px;">AceQuiz AI Workspace</h1>
-                            <p style="color: var(--text-muted); font-size: 15px;">Nền tảng tối ưu hóa phân tích tài liệu và luyện thi.</p>
-                        </div>
-                    </div>
-                </div>
+  </main>
+</div>
 
-                <div class="composer-wrapper">
-                    <div class="composer">
-                        <input type="file" id="pdf-upload" multiple accept=".pdf" class="hidden">
-                        <label for="pdf-upload" class="btn-upload" title="Nạp file PDF">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                        </label>
-                        <textarea id="user-input" rows="1" placeholder="Gõ lệnh xử lý... (Shift+Enter để xuống dòng)"></textarea>
-                        <button id="btn-send" class="btn-send" disabled>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                        </button>
-                    </div>
-                </div>
-            </section>
+<script>
+// =====================================================================
+// CONFIG & STATE
+// =====================================================================
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-            <section id="workspace-quiz" class="workspace hidden">
-                <div class="quiz-layout">
-                    <div id="quiz-content" class="quiz-main"></div>
-                    <div class="quiz-sidebar">
-                        <div>
-                            <h3 style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Thống kê bài thi</h3>
-                            <p style="font-size: 28px; font-weight: 600; margin-bottom: 4px;"><span id="quiz-status">0</span></p>
-                            <p style="font-size: 13px; color: var(--text-muted);">Câu hỏi trắc nghiệm</p>
-                        </div>
-                        <div style="height: 1px; background: var(--border); margin: 8px 0;"></div>
-                        <button id="btn-submit-quiz" class="btn-submit-quiz">Hoàn thành bài thi</button>
-                        <button id="btn-exit-quiz" class="btn-full" style="justify-content: center; border: 1px solid var(--border);">Thoát Workspace</button>
-                    </div>
-                </div>
-            </section>
-        </main>
+const cfg = {
+  get backendUrl() { return localStorage.getItem('cfg_backend') || 'https://spdf-t9x9.onrender.com/api/process'; },
+  get numQuestions() { return parseInt(localStorage.getItem('cfg_num_q')) || 10; },
+  get difficulty() { return localStorage.getItem('cfg_difficulty') || 'mixed'; },
+};
+
+let state = {
+  docs: [],
+  chatHistory: [],
+  quizData: [],
+  quizAnswers: {},
+  quizSubmitted: false,
+  isFetching: false,
+};
+
+// =====================================================================
+// THEME
+// =====================================================================
+const root = document.documentElement;
+root.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
+
+document.getElementById('btn-theme').addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+});
+
+// =====================================================================
+// SIDEBAR TOGGLE
+// =====================================================================
+const sidebar = document.getElementById('sidebar');
+document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+});
+
+// =====================================================================
+// TOAST SYSTEM
+// =====================================================================
+function toast(msg, type = 'info') {
+  const stack = document.getElementById('toast-stack');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+
+  const icons = {
+    success: '✓',
+    error: '✕',
+    info: 'ℹ'
+  };
+  el.innerHTML = `<span style="font-size:13px;opacity:0.8">${icons[type]||'ℹ'}</span> ${msg}`;
+  stack.appendChild(el);
+
+  requestAnimationFrame(() => {
+    void el.offsetWidth;
+    el.classList.add('in');
+  });
+
+  setTimeout(() => {
+    el.classList.remove('in');
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 350);
+  }, 3000);
+}
+
+// =====================================================================
+// MODAL
+// =====================================================================
+function openModal() {
+  document.getElementById('cfg-num-q').value = cfg.numQuestions;
+  document.getElementById('cfg-difficulty').value = cfg.difficulty;
+  document.getElementById('cfg-backend').value = cfg.backendUrl;
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+function saveSettings() {
+  const n = parseInt(document.getElementById('cfg-num-q').value);
+  const d = document.getElementById('cfg-difficulty').value;
+  const b = document.getElementById('cfg-backend').value.trim();
+  if (!n || n < 1 || n > 50) { toast('Số câu phải từ 1–50', 'error'); return; }
+  localStorage.setItem('cfg_num_q', n);
+  localStorage.setItem('cfg_difficulty', d);
+  if (b) localStorage.setItem('cfg_backend', b);
+  closeModal();
+  toast('Đã lưu cài đặt', 'success');
+}
+document.getElementById('settings-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// =====================================================================
+// STATUS BADGE
+// =====================================================================
+function setStatus(text, cls = '') {
+  const el = document.getElementById('status-badge');
+  el.textContent = text;
+  el.className = 'topbar-status ' + cls;
+}
+
+// =====================================================================
+// PDF MANAGEMENT
+// =====================================================================
+async function extractPDF(file) {
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n';
+  }
+  return { text: text.slice(0, 25000), pages: pdf.numPages };
+}
+
+async function handleFiles(files) {
+  if (!files || !files.length) return;
+  setStatus('PARSING PDF…', 'busy');
+
+  let added = 0;
+  for (const file of files) {
+    if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+      toast(`Bỏ qua: ${file.name} (không phải PDF)`, 'error');
+      continue;
+    }
+    if (state.docs.find(d => d.name === file.name)) {
+      toast(`Đã có: ${file.name}`, 'info');
+      continue;
+    }
+    try {
+      const { text, pages } = await extractPDF(file);
+      state.docs.push({ id: Date.now() + Math.random(), name: file.name, content: text, pages });
+      added++;
+    } catch(e) {
+      toast(`Lỗi đọc ${file.name}`, 'error');
+    }
+  }
+
+  renderDocSidebar();
+  renderComposerTags();
+  if (added) {
+    toast(`Đã nạp ${added} tài liệu`, 'success');
+    setStatus(`READY [${state.docs.length} DOCS]`, 'ready');
+  } else {
+    setStatus(state.docs.length ? `READY [${state.docs.length} DOCS]` : 'IDLE', state.docs.length ? 'ready' : '');
+  }
+}
+
+function removeDoc(id) {
+  state.docs = state.docs.filter(d => d.id !== id);
+  renderDocSidebar();
+  renderComposerTags();
+  setStatus(state.docs.length ? `READY [${state.docs.length} DOCS]` : 'IDLE', state.docs.length ? 'ready' : '');
+  toast('Đã xoá tài liệu', 'info');
+}
+
+function renderDocSidebar() {
+  const list = document.getElementById('pdf-list');
+  const empty = document.getElementById('pdf-empty');
+  // Clear existing items (keep empty placeholder)
+  [...list.querySelectorAll('.pdf-item')].forEach(el => el.remove());
+
+  if (!state.docs.length) {
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  state.docs.forEach(doc => {
+    const li = document.createElement('li');
+    li.className = 'pdf-item';
+    li.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="pdf-item-name" title="${doc.name}">${doc.name}</span>
+      <button class="pdf-item-del" onclick="removeDoc(${doc.id})" title="Xoá">✕</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function renderComposerTags() {
+  const footer = document.getElementById('composer-footer');
+  const tagsEl = document.getElementById('pdf-tags');
+  const hint = document.getElementById('doc-count-hint');
+
+  if (!state.docs.length) {
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'flex';
+  tagsEl.innerHTML = '';
+
+  state.docs.slice(0, 4).forEach(doc => {
+    const tag = document.createElement('div');
+    tag.className = 'pdf-tag';
+    tag.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${doc.name}</span><button class="pdf-tag-del" onclick="removeDoc(${doc.id})">✕</button>`;
+    tagsEl.appendChild(tag);
+  });
+
+  if (state.docs.length > 4) {
+    hint.textContent = `+${state.docs.length - 4} file khác`;
+  } else {
+    hint.textContent = `${state.docs.length} tài liệu`;
+  }
+}
+
+// File input
+document.getElementById('file-input').addEventListener('change', e => {
+  handleFiles(e.target.files);
+  e.target.value = '';
+});
+
+// Drag & drop
+const dragOverlay = document.getElementById('drag-overlay');
+let dragCounter = 0;
+window.addEventListener('dragenter', e => {
+  dragCounter++;
+  if ([...e.dataTransfer.types].includes('Files')) dragOverlay.classList.add('show');
+});
+window.addEventListener('dragleave', () => {
+  dragCounter--;
+  if (dragCounter <= 0) { dragCounter = 0; dragOverlay.classList.remove('show'); }
+});
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dragCounter = 0;
+  dragOverlay.classList.remove('show');
+  handleFiles(e.dataTransfer.files);
+});
+
+// =====================================================================
+// CHAT RENDERING
+// =====================================================================
+const chatInner = document.getElementById('chat-inner');
+const chatScroll = document.getElementById('chat-scroll');
+
+function scrollToBottom() {
+  requestAnimationFrame(() => { chatScroll.scrollTop = chatScroll.scrollHeight; });
+}
+
+function hideWelcome() {
+  const w = document.getElementById('welcome-screen');
+  if (w) w.remove();
+}
+
+function appendMsg(role, content, typing = false) {
+  hideWelcome();
+
+  const row = document.createElement('div');
+  row.className = `msg-row ${role}`;
+
+  const avatarText = role === 'user' ? 'U' : 'AI';
+  const bubble = typing
+    ? `<div class="typing-dots"><span></span><span></span><span></span></div>`
+    : (role === 'user'
+        ? `<div class="msg-bubble">${escHtml(content)}</div>`
+        : `<div class="msg-bubble md">${marked.parse(content)}</div>`);
+
+  const actions = role === 'bot' && !typing ? `
+    <div class="msg-actions">
+      <button class="msg-action-btn" onclick="copyMsg(this)" title="Sao chép">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Sao chép
+      </button>
+    </div>` : '';
+
+  row.innerHTML = `
+    <div class="msg-avatar">${avatarText}</div>
+    <div class="msg-content">
+      ${bubble}
+      ${actions}
     </div>
+  `;
 
-    <script>
-        // =====================================================================
-        // CORE CONFIGURATION & STATE MANAGEMENT
-        // =====================================================================
-        const BACKEND_URL = 'https://spdf-t9x9.onrender.com/api/process';
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        
-        let state = {
-            docs: [],
-            chatHistory: [],
-            numQuestions: parseInt(localStorage.getItem('quiz_num')) || 10
-        };
+  chatInner.appendChild(row);
+  scrollToBottom();
+  return row.querySelector('.msg-bubble') || row.querySelector('.typing-dots')?.parentElement;
+}
 
-        document.getElementById('num-q').value = state.numQuestions;
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
 
-        // =====================================================================
-        // UTILITIES: TOASTS & MODALS
-        // =====================================================================
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerText = message;
-            container.appendChild(toast);
-            
-            // Trigger reflow for animation
-            void toast.offsetWidth; 
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+function copyMsg(btn) {
+  const bubble = btn.closest('.msg-content').querySelector('.msg-bubble');
+  navigator.clipboard.writeText(bubble.innerText).then(() => toast('Đã sao chép', 'success'));
+}
 
-        function toggleModal(show) {
-            const modal = document.getElementById('settings-modal');
-            if (show) modal.classList.add('active');
-            else modal.classList.remove('active');
-        }
+// Restore chat history
+function loadChat() {
+  const saved = localStorage.getItem('chat_history');
+  if (!saved) return;
+  try {
+    const hist = JSON.parse(saved);
+    if (!hist.length) return;
+    hideWelcome();
+    hist.forEach(m => appendMsg(m.role, m.content));
+    state.chatHistory = hist;
+  } catch(e) {}
+}
 
-        function saveSettings() {
-            const val = parseInt(document.getElementById('num-q').value);
-            if(val > 0 && val <= 50) {
-                state.numQuestions = val;
-                localStorage.setItem('quiz_num', val);
-                toggleModal(false);
-                showToast(`Đã cập nhật số câu hỏi mặc định: ${val}`, 'success');
-            } else {
-                showToast('Vui lòng nhập số từ 1 đến 50', 'error');
-            }
-        }
+function saveChat() {
+  localStorage.setItem('chat_history', JSON.stringify(state.chatHistory));
+}
 
-        // =====================================================================
-        // UI INTERACTIONS: THEME, RESIZER, SIDEBAR
-        // =====================================================================
-        const root = document.documentElement;
-        root.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-        
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            root.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
+// =====================================================================
+// COMPOSER
+// =====================================================================
+const textarea = document.getElementById('composer-input');
+const btnSend = document.getElementById('btn-send');
 
-        const sidebarWrapper = document.getElementById('sidebar-wrapper');
-        const sidebar = document.getElementById('sidebar');
-        
-        document.getElementById('toggle-sidebar').addEventListener('click', () => {
-            sidebarWrapper.classList.toggle('collapsed');
-        });
+textarea.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 180) + 'px';
+  btnSend.disabled = !this.value.trim() || state.isFetching;
+});
 
-        // DRAG TO RESIZE SIDEBAR LOGIC
-        const resizer = document.getElementById('resizer');
-        let isResizing = false;
-        resizer.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            resizer.classList.add('dragging');
-            document.body.style.cursor = 'col-resize';
-            e.preventDefault();
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-            let newWidth = e.clientX;
-            if(newWidth >= 200 && newWidth <= 500) {
-                sidebar.style.width = `${newWidth}px`;
-            }
-        });
-        window.addEventListener('mouseup', () => {
-            if (isResizing) {
-                isResizing = false;
-                resizer.classList.remove('dragging');
-                document.body.style.cursor = 'default';
-            }
-        });
+textarea.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!btnSend.disabled) send(); }
+});
 
-        // =====================================================================
-        // CHAT STORAGE & RENDERING
-        // =====================================================================
-        const chatContainer = document.getElementById('chat-history');
-        const chatScroll = document.getElementById('chat-scroll');
+btnSend.addEventListener('click', send);
 
-        function saveChatToLocal() {
-            localStorage.setItem('chat_history', JSON.stringify(state.chatHistory));
-        }
+function fillPrompt(text) {
+  textarea.value = text;
+  textarea.dispatchEvent(new Event('input'));
+  textarea.focus();
+}
 
-        function loadChatFromLocal() {
-            const saved = localStorage.getItem('chat_history');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    if(parsed.length > 0) {
-                        document.getElementById('welcome-msg')?.remove();
-                        parsed.forEach(msg => renderMessageHTML(msg.role, msg.content, true));
-                        state.chatHistory = parsed;
-                        // Scroll to bottom immediately
-                        setTimeout(() => chatScroll.scrollTop = chatScroll.scrollHeight, 50);
-                    }
-                } catch(e) {}
-            }
-        }
+// =====================================================================
+// SEND & API
+// =====================================================================
+async function send() {
+  const text = textarea.value.trim();
+  if (!text || state.isFetching) return;
 
-        function renderMessageHTML(role, content, isHistory = false) {
-            document.getElementById('welcome-msg')?.remove();
-            const div = document.createElement('div');
-            div.className = `message ${role}`;
-            
-            const innerHTML = content === 'TYPING' 
-                ? `<div class="typing"><span></span><span></span><span></span></div>`
-                : (role === 'user' ? content : marked.parse(content));
+  if (!state.docs.length) {
+    toast('Nạp ít nhất một file PDF trước', 'error');
+    return;
+  }
 
-            div.innerHTML = `<div class="msg-bubble markdown-body">${innerHTML}</div>`;
-            chatContainer.appendChild(div);
-            if (!isHistory) scrollToBottomSmooth();
-            return div.querySelector('.msg-bubble');
-        }
+  // Determine feature
+  const isQuiz = /trắc nghiệm|quiz|đề thi|câu hỏi|bài tập/i.test(text);
 
-        function scrollToBottomSmooth() {
-            chatScroll.scrollTo({ top: chatScroll.scrollHeight, behavior: 'smooth' });
-        }
+  // Render user msg
+  appendMsg('user', text);
+  state.chatHistory.push({ role: 'user', content: text });
+  saveChat();
 
-        // =====================================================================
-        // WORKSPACE CONTROLLER
-        // =====================================================================
-        const wsChat = document.getElementById('workspace-chat');
-        const wsQuiz = document.getElementById('workspace-quiz');
-        
-        function switchWs(type) {
-            wsChat.classList.add('hidden');
-            wsQuiz.classList.add('hidden');
-            if(type === 'chat') wsChat.classList.remove('hidden');
-            if(type === 'quiz') wsQuiz.classList.remove('hidden');
-        }
-        
-        document.getElementById('btn-exit-quiz').addEventListener('click', () => switchWs('chat'));
+  textarea.value = '';
+  textarea.style.height = 'auto';
+  btnSend.disabled = true;
+  state.isFetching = true;
+  setStatus('FETCHING…', 'busy');
 
-        // =====================================================================
-        // NEW CHAT & RESET LOGIC
-        // =====================================================================
-        document.getElementById('btn-new').addEventListener('click', () => {
-            state.docs = [];
-            state.chatHistory = [];
-            localStorage.removeItem('chat_history');
-            
-            document.getElementById('pdf-list').innerHTML = '<li style="color: var(--text-muted); font-style: italic; justify-content: center;">Chưa có dữ liệu</li>';
-            chatContainer.innerHTML = `
-                <div id="welcome-msg" style="text-align: center; padding-top: 15vh;">
-                    <div style="width: 64px; height: 64px; background: var(--bg-composer); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; border: 1px solid var(--border);">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                    </div>
-                    <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 12px;">Đã dọn dẹp hệ thống</h1>
-                    <p style="color: var(--text-muted); font-size: 15px;">Workspace sẵn sàng nhận dữ liệu mới.</p>
-                </div>
-            `;
-            document.getElementById('system-status').innerText = 'STATUS: IDLE';
-            switchWs('chat');
-            showToast('Đã tạo luồng làm việc mới', 'success');
-        });
+  // Typing indicator
+  const typingRow = appendMsg('bot', '', true);
+  const typingParent = typingRow?.closest('.msg-row');
 
-        // =====================================================================
-        // PDF UPLOAD CORE LOGIC (CLICK & DRAG/DROP)
-        // =====================================================================
-        const dropOverlay = document.getElementById('drop-overlay');
+  try {
+    const payload = {
+      feature: isQuiz ? 'quiz' : 'summarize',
+      user_message: text,
+      documents: state.docs.map(d => ({ file_name: d.name, content: d.content, page_count: d.pages })),
+      conversation_history: state.chatHistory.slice(0, -1),
+      quiz_params: { num_questions: cfg.numQuestions, difficulty: cfg.difficulty }
+    };
 
-        async function handleFiles(files) {
-            if (!files || files.length === 0) return;
-            const sysStatus = document.getElementById('system-status');
-            sysStatus.innerText = "STATUS: PARSING PDF...";
-            
-            let loadedCount = 0;
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (file.type !== "application/pdf") {
-                    showToast(`Bỏ qua ${file.name} (Không phải PDF)`, 'error');
-                    continue;
-                }
-                try {
-                    const text = await extractTextFromPDF(file);
-                    state.docs.push({ id: Date.now() + i, file_name: file.name, content: text });
-                    loadedCount++;
-                } catch (err) { 
-                    showToast(`Lỗi parse file: ${file.name}`, 'error'); 
-                }
-            }
-            
-            updateDocSidebar();
-            if(loadedCount > 0) showToast(`Nạp thành công ${loadedCount} tài liệu`, 'success');
-            sysStatus.innerText = `STATUS: READY [${state.docs.length} DOCS]`;
-        }
+    const res = await fetch(cfg.backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-        function updateDocSidebar() {
-            const list = document.getElementById('pdf-list');
-            if (state.docs.length === 0) {
-                list.innerHTML = '<li style="color: var(--text-muted); font-style: italic; justify-content: center;">Chưa có dữ liệu</li>';
-                return;
-            }
-            list.innerHTML = '';
-            state.docs.forEach(doc => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${doc.file_name}</span>
-                    </div>
-                    <button class="btn-delete-doc" onclick="removeDoc(${doc.id})" title="Xóa tài liệu">✕</button>
-                `;
-                list.appendChild(li);
-            });
-        }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
 
-        window.removeDoc = function(id) {
-            state.docs = state.docs.filter(d => d.id !== id);
-            updateDocSidebar();
-            showToast('Đã xóa tài liệu khỏi bộ nhớ', 'info');
-            document.getElementById('system-status').innerText = `STATUS: READY [${state.docs.length} DOCS]`;
-        };
+    // Remove typing
+    typingParent?.remove();
 
-        document.getElementById('pdf-upload').addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-            e.target.value = ''; // reset input
-        });
+    if (isQuiz) {
+      const data = await res.json();
+      const quiz = data.data || data;
+      if (Array.isArray(quiz) && quiz.length) {
+        state.chatHistory.push({ role: 'bot', content: `Đã tạo đề ${quiz.length} câu. Chuyển sang Quiz Workspace...` });
+        saveChat();
+        appendMsg('bot', `Đã tạo đề **${quiz.length} câu hỏi**. Đang mở Quiz Workspace...`);
+        setTimeout(() => openQuizWorkspace(quiz), 600);
+      } else {
+        throw new Error('Dữ liệu quiz không hợp lệ');
+      }
+    } else {
+      // Streaming summarize
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      const botBubble = (() => {
+        hideWelcome();
+        const row = document.createElement('div');
+        row.className = 'msg-row bot';
+        row.innerHTML = `<div class="msg-avatar">AI</div><div class="msg-content"><div class="msg-bubble md"></div><div class="msg-actions"><button class="msg-action-btn" onclick="copyMsg(this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Sao chép</button></div></div>`;
+        chatInner.appendChild(row);
+        return row.querySelector('.msg-bubble');
+      })();
 
-        window.addEventListener('dragover', (e) => { e.preventDefault(); dropOverlay.classList.add('active'); });
-        window.addEventListener('dragleave', (e) => { if (e.clientX === 0 || e.clientY === 0) dropOverlay.classList.remove('active'); });
-        window.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropOverlay.classList.remove('active');
-            if (e.dataTransfer.files) handleFiles(e.dataTransfer.files);
-        });
+      let fullText = '';
+      let autoScroll = true;
 
-        function extractTextFromPDF(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async function() {
-                    try {
-                        const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
-                        let text = "";
-                        for (let i = 1; i <= pdf.numPages; i++) {
-                            const page = await pdf.getPage(i);
-                            const content = await page.getTextContent();
-                            text += content.items.map(item => item.str).join(" ") + "\n";
-                        }
-                        resolve(text);
-                    } catch (e) { reject(e); }
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        }
+      const onScroll = () => {
+        autoScroll = chatScroll.scrollHeight - chatScroll.scrollTop <= chatScroll.clientHeight + 80;
+      };
+      chatScroll.addEventListener('scroll', onScroll);
 
-        // =====================================================================
-        // INPUT CONTROLLER & FETCH API (WITH STREAMING)
-        // =====================================================================
-        const textarea = document.getElementById('user-input');
-        const btnSend = document.getElementById('btn-send');
-        
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-            btnSend.disabled = this.value.trim() === '';
-        });
-
-        function renderQuizWorkspace(data) {
-            switchWs('quiz');
-            const container = document.getElementById('quiz-content');
-            container.innerHTML = '';
-            
-            data.forEach((item, i) => {
-                let options = '';
-                for (const [k, v] of Object.entries(item.options)) {
-                    options += `
-                        <label class="q-option">
-                            <input type="radio" name="q${i}" value="${k}"> 
-                            <div style="flex:1"><strong>${k}.</strong> ${v}</div>
-                        </label>`;
-                }
-                container.innerHTML += `
-                    <div class="q-card">
-                        <div class="q-title"><span style="color: var(--text-muted); margin-right: 8px;">${i+1}.</span>${item.question}</div>
-                        ${options}
-                    </div>`;
-            });
-            document.getElementById('quiz-status').innerText = data.length;
-            showToast('Tạo đề thi thành công!', 'success');
-        }
-
-        btnSend.addEventListener('click', async () => {
-            const text = textarea.value.trim();
-            if (!text) return;
-            if (state.docs.length === 0) { 
-                showToast('Chưa có dữ liệu. Vui lòng nạp PDF trước khi gửi yêu cầu.', 'error');
-                return; 
-            }
-
-            // Xử lý Input
-            textarea.value = ''; textarea.style.height = 'auto'; btnSend.disabled = true;
-            
-            // Lưu tin nhắn User
-            renderMessageHTML('user', text);
-            state.chatHistory.push({ role: 'user', content: text });
-            saveChatToLocal();
-            
-            const isQuiz = text.toLowerCase().includes('đề') || text.toLowerCase().includes('trắc nghiệm') || text.toLowerCase().includes('câu hỏi');
-            const botBubble = isQuiz ? null : renderMessageHTML('bot', 'TYPING');
-
-            document.getElementById('system-status').innerText = 'STATUS: FETCHING API...';
-
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const lines = dec.decode(value, { stream: true }).split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
             try {
-                const res = await fetch(BACKEND_URL, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        feature: isQuiz ? 'quiz' : 'summarize', 
-                        user_message: text, 
-                        documents: state.docs,
-                        quiz_params: { num_questions: state.numQuestions }
-                    })
-                });
+              const chunk = JSON.parse(line.slice(6));
+              if (chunk.text) {
+                fullText += chunk.text;
+                botBubble.innerHTML = marked.parse(fullText);
+                if (autoScroll) scrollToBottom();
+              }
+            } catch(e) {}
+          }
+        }
+      }
 
-                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+      chatScroll.removeEventListener('scroll', onScroll);
+      state.chatHistory.push({ role: 'bot', content: fullText });
+      saveChat();
+    }
 
-                if (isQuiz) {
-                    const data = await res.json();
-                    if (data.data) renderQuizWorkspace(data.data);
-                    document.getElementById('system-status').innerText = `STATUS: READY [${state.docs.length} DOCS]`;
-                } else {
-                    botBubble.innerHTML = '';
-                    const reader = res.body.getReader();
-                    const decoder = new TextDecoder();
-                    let fullText = "";
-                    let isAutoScroll = true; // Auto scroll flag
+    setStatus(`READY [${state.docs.length} DOCS]`, 'ready');
 
-                    // Kiểm tra user có lăn chuột lên trên lúc đang stream không
-                    chatScroll.addEventListener('scroll', () => {
-                        const isAtBottom = chatScroll.scrollHeight - chatScroll.scrollTop <= chatScroll.clientHeight + 50;
-                        isAutoScroll = isAtBottom;
-                    });
-                    
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        const lines = decoder.decode(value, {stream: true}).split('\n');
-                        for (let line of lines) {
-                            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-                                try {
-                                    fullText += JSON.parse(line.substring(6)).text;
-                                    botBubble.innerHTML = marked.parse(fullText);
-                                    if(isAutoScroll) scrollToBottomSmooth();
-                                } catch(e){}
-                            }
-                        }
-                    }
-                    
-                    // Lưu tin nhắn AI vào bộ nhớ
-                    state.chatHistory.push({ role: 'bot', content: fullText });
-                    saveChatToLocal();
-                    document.getElementById('system-status').innerText = `STATUS: READY [${state.docs.length} DOCS]`;
-                }
-            } catch (err) {
-                console.error(err);
-                if(botBubble) botBubble.innerHTML = `<span style="color: var(--danger);">Đã xảy ra lỗi kết nối với máy chủ AI. Vui lòng thử lại.</span>`;
-                showToast('Lỗi API Endpoint!', 'error');
-                document.getElementById('system-status').innerText = 'STATUS: ERROR';
-            } finally { textarea.focus(); }
-        });
+  } catch(err) {
+    typingParent?.remove();
+    appendMsg('bot', `⚠️ **Lỗi kết nối:** ${err.message}\n\nKiểm tra lại Backend URL trong Cài đặt.`);
+    setStatus('ERROR', 'error');
+    toast('Lỗi API: ' + err.message, 'error');
+    state.chatHistory.pop();
+    saveChat();
+  } finally {
+    state.isFetching = false;
+    btnSend.disabled = !textarea.value.trim();
+    textarea.focus();
+  }
+}
 
-        textarea.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if(!btnSend.disabled) btnSend.click(); }
-        });
+// =====================================================================
+// NEW CHAT
+// =====================================================================
+document.getElementById('btn-new-chat').addEventListener('click', () => {
+  state.chatHistory = [];
+  localStorage.removeItem('chat_history');
+  chatInner.innerHTML = `
+    <div id="welcome-screen" class="welcome">
+      <div class="welcome-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <h1>AceQuiz AI</h1>
+      <p>Nạp tài liệu PDF và bắt đầu học thông minh hơn — tóm tắt, phân tích, và luyện đề trắc nghiệm tự động.</p>
+      <div class="welcome-chips">
+        <div class="chip" onclick="fillPrompt('Tóm tắt toàn bộ nội dung tài liệu')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>Tóm tắt tài liệu</div>
+        <div class="chip" onclick="fillPrompt('Tạo đề trắc nghiệm ôn tập từ tài liệu')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tạo đề trắc nghiệm</div>
+        <div class="chip" onclick="fillPrompt('Liệt kê các khái niệm quan trọng nhất trong tài liệu')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Khái niệm cốt lõi</div>
+        <div class="chip" onclick="fillPrompt('Tạo bộ flashcard từ tài liệu')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Tạo Flashcard</div>
+      </div>
+    </div>`;
+  switchWs('chat');
+  toast('Đã tạo cuộc trò chuyện mới', 'success');
+});
 
-        // =====================================================================
-        // INIT ON LOAD
-        // =====================================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            loadChatFromLocal();
-        });
+// =====================================================================
+// WORKSPACE SWITCHER
+// =====================================================================
+function switchWs(ws) {
+  document.getElementById('ws-chat').classList.toggle('hidden', ws !== 'chat');
+  document.getElementById('ws-quiz').classList.toggle('hidden', ws !== 'quiz');
+}
 
-    </script>
+// =====================================================================
+// QUIZ WORKSPACE
+// =====================================================================
+function openQuizWorkspace(data) {
+  state.quizData = data;
+  state.quizAnswers = {};
+  state.quizSubmitted = false;
+
+  document.getElementById('quiz-title').textContent = `Đề trắc nghiệm — ${data.length} câu`;
+  document.getElementById('quiz-subtitle').textContent = 'Chọn đáp án đúng cho mỗi câu. Nộp bài để xem kết quả.';
+  document.getElementById('qs-total').textContent = data.length;
+  document.getElementById('score-card').classList.remove('show');
+  document.getElementById('quiz-progress').style.width = '0%';
+  document.getElementById('quiz-progress-label').textContent = `0 / ${data.length} đã trả lời`;
+
+  // Render questions
+  const container = document.getElementById('quiz-questions');
+  container.innerHTML = '';
+
+  data.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard-${i}`;
+
+    const optionsHtml = Object.entries(q.options).map(([k, v]) => `
+      <button class="q-option" data-q="${i}" data-key="${k}" onclick="selectAnswer(${i}, '${k}')">
+        <span class="q-option-key">${k}</span>
+        <span class="q-option-text">${v}</span>
+      </button>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="q-num">Câu ${i + 1} / ${data.length}</div>
+      <div class="q-text">${q.question}</div>
+      <div class="q-options" id="qopts-${i}">${optionsHtml}</div>
+      <div class="q-explanation" id="qexp-${i}">
+        <strong>💡 Giải thích:</strong> ${q.explanation || ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Render nav dots
+  const nav = document.getElementById('quiz-nav');
+  nav.innerHTML = '';
+  data.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'quiz-nav-dot';
+    dot.textContent = i + 1;
+    dot.onclick = () => {
+      document.getElementById(`qcard-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    nav.appendChild(dot);
+  });
+
+  switchWs('quiz');
+}
+
+function selectAnswer(qIdx, key) {
+  if (state.quizSubmitted) return;
+  state.quizAnswers[qIdx] = key;
+
+  // Update option styling
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.key === key);
+  });
+
+  // Update nav dot
+  const dots = document.querySelectorAll('.quiz-nav-dot');
+  if (dots[qIdx]) dots[qIdx].classList.add('answered');
+
+  // Update progress
+  const answered = Object.keys(state.quizAnswers).length;
+  const total = state.quizData.length;
+  document.getElementById('quiz-progress').style.width = `${(answered/total)*100}%`;
+  document.getElementById('quiz-progress-label').textContent = `${answered} / ${total} đã trả lời`;
+}
+
+document.getElementById('btn-submit-quiz').addEventListener('click', () => {
+  if (state.quizSubmitted) return;
+  const answered = Object.keys(state.quizAnswers).length;
+  if (answered < state.quizData.length) {
+    if (!confirm(`Bạn còn ${state.quizData.length - answered} câu chưa trả lời. Vẫn nộp bài?`)) return;
+  }
+  submitQuiz();
+});
+
+function submitQuiz() {
+  state.quizSubmitted = true;
+  let correct = 0;
+
+  state.quizData.forEach((q, i) => {
+    const chosen = state.quizAnswers[i];
+    const isRight = chosen === q.answer;
+    if (isRight) correct++;
+
+    // Style card
+    const card = document.getElementById(`qcard-${i}`);
+    if (card) {
+      card.classList.add(isRight ? 'answered-correct' : 'answered-wrong');
+    }
+
+    // Style options
+    Object.keys(q.options).forEach(k => {
+      const btn = document.querySelector(`[data-q="${i}"][data-key="${k}"]`);
+      if (!btn) return;
+      btn.disabled = true;
+      if (k === q.answer) btn.classList.add('correct');
+      else if (k === chosen && k !== q.answer) btn.classList.add('wrong');
+    });
+
+    // Show explanation
+    const expEl = document.getElementById(`qexp-${i}`);
+    if (expEl) expEl.classList.add('show');
+
+    // Nav dot
+    const dots = document.querySelectorAll('.quiz-nav-dot');
+    if (dots[i]) {
+      dots[i].classList.remove('answered');
+      dots[i].classList.add(isRight ? 'correct' : 'wrong');
+    }
+  });
+
+  // Score
+  const total = state.quizData.length;
+  const pct = Math.round((correct / total) * 100);
+  const scoreCard = document.getElementById('score-card');
+  document.getElementById('score-big').textContent = `${correct}/${total}`;
+  scoreCard.classList.add('show');
+  scoreCard.querySelector('.score-label').textContent = `${pct}% — ${pct >= 80 ? '🎉 Xuất sắc' : pct >= 60 ? '👍 Khá tốt' : '📚 Cần ôn thêm'}`;
+
+  document.getElementById('quiz-progress').style.width = '100%';
+  document.getElementById('quiz-progress-label').textContent = `Hoàn thành — ${correct}/${total} đúng`;
+  document.getElementById('btn-submit-quiz').disabled = true;
+
+  toast(`Kết quả: ${correct}/${total} (${pct}%)`, pct >= 60 ? 'success' : 'info');
+}
+
+document.getElementById('btn-exit-quiz').addEventListener('click', () => {
+  switchWs('chat');
+});
+
+// =====================================================================
+// INIT
+// =====================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  loadChat();
+  document.getElementById('cfg-num-q').value = cfg.numQuestions;
+  document.getElementById('cfg-difficulty').value = cfg.difficulty;
+  document.getElementById('cfg-backend').value = cfg.backendUrl;
+  textarea.focus();
+});
+</script>
 </body>
 </html>
