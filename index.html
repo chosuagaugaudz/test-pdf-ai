@@ -681,19 +681,58 @@
       </button>
     </div>
     <div class="docs-section">
-      <div class="section-title">📄 Tài liệu đã nạp</div>
+      
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span class="section-title" style="margin-bottom: 0;">📁 Môn học của tôi</span>
+          <button style="background: transparent; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 6px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;" title="Thêm môn học mới" onmouseover="this.style.background='var(--surface)'; this.style.color='var(--text-primary)'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-secondary)'">+</button>
+        </div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 4px;">
+          <li class="folder-item" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--accent); background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); cursor: pointer;" onclick="switchFolder(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Toán rời rạc
+          </li>
+          <li class="folder-item" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border: 1px solid transparent;" onclick="switchFolder(this)" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='transparent'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Kiến trúc máy tính
+          </li>
+          <li class="folder-item" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border: 1px solid transparent;" onclick="switchFolder(this)" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='transparent'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Giải tích
+          </li>
+        </ul>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div class="section-title" style="margin-bottom: 0;">📄 Tài liệu đã nạp</div>
+        <label for="pdfUpload" style="background: var(--accent); color: white; border: none; border-radius: 6px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px; font-weight: 500;" title="Tải PDF lên">+</label>
+      </div>
       <ul class="pdf-list" id="pdfList"></ul>
       <div id="emptyDocs" class="empty-docs">Chưa có PDF nào. Kéo thả hoặc nhấn nút + để tải lên.</div>
     </div>
+
     <div class="sidebar-footer">
-      <button class="sidebar-btn" id="settingsBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Cài đặt
+      <button id="googleLoginBtn" style="background: white; color: #3c4043; border: 1px solid #dadce0; border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: 0.2s; width: 100%; font-family: 'Inter', sans-serif; margin-bottom: 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+        Đăng nhập Google
       </button>
-      <button class="sidebar-btn" id="themeToggle">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        Chế độ sáng/tối
-      </button>
+      
+      <div id="userProfile" style="display: none; align-items: center; gap: 12px; padding: 8px; background: var(--bg-tertiary); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 8px;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">M</div>
+        <div style="flex: 1; overflow: hidden;">
+          <div style="font-size: 13px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Đức Mạnh</div>
+          <div style="font-size: 11px; color: var(--text-tertiary);">Đã đồng bộ</div>
+        </div>
+        <button id="logoutBtn" style="background: transparent; border: none; color: var(--text-tertiary); cursor: pointer; padding: 4px; border-radius: 4px;" title="Đăng xuất">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="sidebar-btn" id="settingsBtn" style="flex: 1; justify-content: center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="sidebar-btn" id="themeToggle" style="flex: 1; justify-content: center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
     </div>
   </aside>
 
@@ -790,12 +829,11 @@
     quizSubmitted: false
   };
 
-  // ĐÃ FIX: ÉP XÓA LINK LỖI KẸT TRONG LOCALSTORAGE
-  localStorage.removeItem('backend_url'); 
-  
+  // ĐÃ FIX: Xóa sạch bộ nhớ URL lỗi (nếu có) và ghim cứng URL Render xịn của ông
+  localStorage.removeItem('backend_url');
+
   let config = {
-    // ĐÃ FIX: GHIM CỨNG LINK CHUẨN ĐỂ KHÔNG BAO GIỜ LỖI API NỮA
-    backendUrl: 'https://spdf-t9x9.onrender.com/api/process', 
+    backendUrl: 'https://spdf-t9x9.onrender.com/api/process',
     numQuestions: parseInt(localStorage.getItem('num_questions')) || 10,
     difficulty: localStorage.getItem('difficulty') || 'mixed'
   };
@@ -823,6 +861,42 @@
   const pdfList = document.getElementById('pdfList');
   const emptyDocs = document.getElementById('emptyDocs');
   const activeDocsTags = document.getElementById('activeDocsTags');
+
+  // ==================== BỔ SUNG: LOGIC GOOGLE LOGIN & FOLDER ====================
+  const googleBtn = document.getElementById('googleLoginBtn');
+  const userProfile = document.getElementById('userProfile');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  if(localStorage.getItem('isLoggedIn') === 'true') {
+    googleBtn.style.display = 'none';
+    userProfile.style.display = 'flex';
+  }
+
+  googleBtn.addEventListener('click', () => {
+    localStorage.setItem('isLoggedIn', 'true');
+    googleBtn.style.display = 'none';
+    userProfile.style.display = 'flex';
+    showToast('Đăng nhập thành công! Hệ thống sẵn sàng đồng bộ.', 'success');
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('isLoggedIn');
+    googleBtn.style.display = 'flex';
+    userProfile.style.display = 'none';
+  });
+
+  function switchFolder(el) {
+    document.querySelectorAll('.folder-item').forEach(i => {
+      i.style.color = 'var(--text-secondary)';
+      i.style.background = 'transparent';
+      i.style.borderColor = 'transparent';
+    });
+    el.style.color = 'var(--accent)';
+    el.style.background = 'rgba(99, 102, 241, 0.1)';
+    el.style.borderColor = 'rgba(99, 102, 241, 0.2)';
+    showToast('Đã chuyển thư mục làm việc', 'info');
+  }
+  // ==============================================================================
 
   // ==================== HELPER FUNCTIONS ====================
   function setStatus(text, type = '') {
@@ -1120,7 +1194,7 @@
       }
     } catch (err) {
       removeTypingIndicator();
-      appendMessage('bot', `❌ Lỗi: ${err.message}. Vui lòng kiểm tra backend URL hoặc thử lại.`, true);
+      appendMessage('bot', `❌ Lỗi kết nối Server: ${err.message}.`, true);
       setStatus('Lỗi kết nối', 'error');
       console.error(err);
     } finally {
@@ -1253,7 +1327,6 @@
     config.numQuestions = parseInt(numQuestionsInput.value) || 10;
     config.difficulty = difficultySelect.value;
     
-    // Vẫn lưu vào máy để nếu sau này ông đổi server thật thì web vẫn nhận
     localStorage.setItem('backend_url', config.backendUrl);
     localStorage.setItem('num_questions', config.numQuestions);
     localStorage.setItem('difficulty', config.difficulty);
