@@ -58,19 +58,38 @@ const buildContextText = (documents) => {
     return context;
 };
 
+// ĐÂY LÀ CHỖ TÔI GHÉP CÁI PROMPT CỦA ÔNG VÀO NÈ!
 const buildQuizPrompt = (contextText, userMessage, numQ) => {
     return `
-Bạn là một chuyên gia giáo dục và giáo sư đại học. Dựa vào nội dung tài liệu sau đây:
+You are an educational assessment AI.
+Your task is to generate quizzes, MCQs, flashcards, and exams ONLY from the academic learning content inside uploaded materials.
 
+STRICT CONTENT FILTERING
+Before generating questions, classify document content into:
+ALLOWED CONTENT: Definitions, Concepts, Theories, Formulas, Models, Frameworks, Algorithms, Processes, Comparisons, Technical explanations, Learning objectives directly related to the subject, Examples used to explain concepts.
+FORBIDDEN CONTENT: Never generate questions from Lecturer biography, Author biography, Instructor information, Contact information, Email addresses, Phone numbers, Course credits, Assessment percentages, Grading policies, Course schedule, Timetable, Office hours, References list, Copyright notices, Acknowledgements, Administrative information, Page numbers, Metadata.
+
+If a section is not teaching the academic subject itself, ignore it completely.
+
+QUESTION QUALITY RULES
+Generate questions only from high-value educational content.
+Prioritize: Core concepts, Definitions, Important terminology, Relationships between concepts, Comparisons, Processes and workflows, Exam-relevant knowledge.
+Avoid trivial fact recall.
+
+PAPER EXAM MODE (JSON OUTPUT)
+Generate the entire exam at once: Questions, Options A/B/C/D, Answer key, Explanations.
+BẮT BUỘC chỉ trả về duy nhất một mảng JSON (JSON Array).
+KHÔNG sử dụng markdown format (như \`\`\`json).
+KHÔNG thêm bất kỳ văn bản giải thích nào ở đầu hay cuối ngoài định dạng JSON.
+
+=========================================
+DỮ LIỆU TÀI LIỆU CỦA NGƯỜI DÙNG:
 ${contextText}
+=========================================
 
 Yêu cầu cụ thể của sinh viên: "${userMessage}"
 
-Nhiệm vụ: Tạo ra ${numQ} câu hỏi trắc nghiệm khách quan bằng tiếng Việt.
-Yêu cầu định dạng:
-- BẮT BUỘC chỉ trả về duy nhất một mảng JSON (JSON Array).
-- KHÔNG sử dụng markdown format (như \`\`\`json).
-- KHÔNG thêm bất kỳ văn bản giải thích nào ở đầu hay cuối.
+Nhiệm vụ: Dựa vào tài liệu trên, hãy tạo ra ${numQ} câu hỏi trắc nghiệm khách quan bằng tiếng Việt.
 
 Cấu trúc JSON bắt buộc phải chuẩn xác như sau:
 [
@@ -198,7 +217,6 @@ app.get('/', (req, res) => {
 // 6. KHỞI ĐỘNG SERVER (ĐÃ FIX LỖI TIMEOUT 13 PHÚT TRÊN RENDER)
 // ============================================================================
 
-// Nốt chốt hạ '0.0.0.0' để Render không bao giờ bị Timeout nữa
 app.listen(PORT, '0.0.0.0', () => {
     console.log("=========================================================");
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
