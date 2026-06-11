@@ -1,11 +1,14 @@
 // ============================================================================
-// ACEQUIZ AI BACKEND SYSTEM - OPENROUTER DYNAMIC VERSION
+// ACEQUIZ AI BACKEND SYSTEM - GOOGLE GEMINI 2.5 VERSION WITH FALLBACK
 // ============================================================================
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { OpenAI } = require('openai'); // Dùng chuẩn OpenAI để kết nối OpenRouter
+const { GoogleGenAI } = require('@google/genai');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 
 // Khởi tạo Express App
 const app = express();
@@ -24,30 +27,50 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
+      workerSrc: ["'self'", "blob:", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "blob:"]
+    }
+  }
+}));
+
+// Rate limiting: 100 requests per 15 minutes
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: "Too many requests from this IP, please try again later"
+});
+app.use(limiter);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Serve static files from the public directory
+app.use(express.static('public'));
 
 // ============================================================================
 // 2. KIỂM TRA BIẾN MÔI TRƯỜNG & KHỞI TẠO AI
 // ============================================================================
 
-const API_KEY = (process.env.OPENROUTER_API_KEY || '').trim();
-// Đổi tên biến này thành DEFAULT_MODEL để làm phương án dự phòng
-const DEFAULT_MODEL = (process.env.MODEL_NAME || 'google/gemini-2.0-flash-exp:free').trim();
+const API_KEY = (process.env.GEMINI_API_KEY || '').trim();
 
 if (!API_KEY) {
     console.error("=========================================================");
-    console.error("🚨 LỖI CHÍ MẠNG: KHÔNG TÌM THẤY OPENROUTER_API_KEY!");
-    console.error("🚨 Vui lòng kiểm tra tab Environment trên Render.");
+    console.error("🚨 LỖI CHÍ MẠNG: KHÔNG TÌM THẤY GEMINI_API_KEY!");
+    console.error("🚨 Vui lòng khai báo GEMINI_API_KEY trong file .env");
     console.error("=========================================================");
     process.exit(1);
 }
 
-// Khởi tạo SDK OpenRouter (ĐÃ FIX SẠCH LỖI INVALID URL)
-const openai = new OpenAI({
-    baseURL: "https://openrouter.ai/api/v1",
-    apiKey: API_KEY
-});
+// Khởi tạo SDK Google GenAI
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 // ============================================================================
 // 3. CÁC HÀM TIỆN ÍCH HỖ TRỢ XỬ LÝ DỮ LIỆU (HELPER FUNCTIONS)
@@ -113,16 +136,62 @@ Cấu trúc JSON bắt buộc phải chuẩn xác như sau:
 };
 
 // ============================================================================
-// 4. API ENDPOINT CHÍNH: XỬ LÝ TOÀN BỘ YÊU CẦU TỪ FRONTEND
+// 4. MODEL FALLBACK & RETRY UTILITY
+// ============================================================================
+
+const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+const MAX_RETRIES = 2; // total 3 attempts per model
+
+const executeWithFallback = async (actionFn) => {
+    for (let modelIndex = 0; modelIndex < FALLBACK_MODELS.length; modelIndex++) {
+        const modelName = FALLBACK_MODELS[modelIndex];
+        console.log(`[MODEL] Trying ${modelName}`);
+
+        for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
+            try {
+                // Thử chạy logic được truyền vào với model hiện tại
+                const result = await actionFn(modelName);
+                console.log(`[MODEL] Success`);
+                return result; 
+            } catch (error) {
+                const status = error.status || (error.response && error.response.status);
+                const isRetryable = status === 503 || status === 429 || (status >= 500) || 
+                                    (error.message && (error.message.includes('503') || error.message.includes('429')));
+                
+                if (isRetryable) {
+                    console.log(`[MODEL] ${status || '503'} received`);
+                    
+                    if (attempt <= MAX_RETRIES) {
+                        console.log(`[MODEL] Retrying...`);
+                        const backoffTime = Math.pow(2, attempt - 1) * 1000; // Exponential Backoff: 1s, 2s
+                        await new Promise(r => setTimeout(r, backoffTime));
+                    } else {
+                        // Hết lượt retry cho model này, chuẩn bị chuyển sang model kế tiếp
+                        if (modelIndex < FALLBACK_MODELS.length - 1) {
+                            console.log(`[MODEL] Switching to ${FALLBACK_MODELS[modelIndex + 1]}`);
+                        }
+                    }
+                } else {
+                    // Nếu lỗi client (như 400 Bad Request, 401 Unauthorized), văng lỗi ngay lập tức
+                    throw error;
+                }
+            }
+        }
+    }
+    // Nếu chạy qua toàn bộ list model mà vẫn lỗi
+    throw new Error("Tất cả hệ thống AI đều đang quá tải. Vui lòng thử lại sau.");
+};
+
+// ============================================================================
+// 5. API ENDPOINT CHÍNH: XỬ LÝ TOÀN BỘ YÊU CẦU TỪ FRONTEND
 // ============================================================================
 
 app.post('/api/process', async (req, res) => {
-    const requestId = Math.random().toString(36).substring(7);
+    const requestId = crypto.randomUUID();
     console.log(`\n[${new Date().toISOString()}] 📥 BẮT ĐẦU REQUEST [ID: ${requestId}]`);
 
     try {
-        // NÂNG CẤP: Bắt thêm tham số 'model' từ Web Vercel gửi xuống
-        const { feature, user_message, documents, quiz_params, model } = req.body;
+        const { feature, user_message, documents, quiz_params } = req.body;
 
         if (!feature) {
             console.warn(`[${requestId}] ⚠️ Lỗi 400: Không có tham số feature.`);
@@ -135,38 +204,28 @@ app.post('/api/process', async (req, res) => {
         }
 
         const contextText = buildContextText(documents);
-        
-        // NÂNG CẤP: Quyết định xem dùng con AI nào. Ưu tiên Web gửi xuống, nếu không có thì dùng mặc định.
-        const targetModel = model || DEFAULT_MODEL;
-        
         console.log(`[${requestId}] 📄 Đã ghép xong text từ ${documents.length} file PDF. Kích thước: ${contextText.length} ký tự.`);
-        console.log(`[${requestId}] 🤖 Chuẩn bị gọi model: [${targetModel}] tại OpenRouter`);
 
         if (feature === 'quiz') {
             const numQ = quiz_params?.num_questions || 10;
             console.log(`[${requestId}] 🎯 Chế độ: QUIZ | Số câu yêu cầu: ${numQ}`);
-            
             const prompt = buildQuizPrompt(contextText, user_message, numQ);
             
-            const response = await openai.chat.completions.create({
-                model: targetModel, // Gọi đúng con AI được chỉ định
-                messages: [{ role: "user", content: prompt }],
-                temperature: 0.2 
+            // XỬ LÝ VỚI FALLBACK LAYER
+            const responseText = await executeWithFallback(async (modelName) => {
+                const response = await ai.models.generateContent({
+                    model: modelName,
+                    contents: prompt,
+                    config: {
+                        temperature: 0.2,
+                        responseMimeType: "application/json"
+                    }
+                });
+                return response.text;
             });
-
-            const responseText = response.choices[0].message.content;
             
             try {
-                // Xử lý an toàn để lọc JSON ra khỏi Markdown code block nếu OpenRouter cố tình trả về
-                let cleanJson = responseText;
-                const startIndex = cleanJson.indexOf('[');
-                const endIndex = cleanJson.lastIndexOf(']');
-                
-                if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-                    cleanJson = cleanJson.substring(startIndex, endIndex + 1);
-                }
-
-                const jsonData = JSON.parse(cleanJson);
+                const jsonData = JSON.parse(responseText);
                 console.log(`[${requestId}] ✅ Hoàn thành JSON Quiz. Trả kết quả cho Frontend.`);
                 return res.status(200).json({ data: jsonData });
             } catch (parseError) {
@@ -177,29 +236,37 @@ app.post('/api/process', async (req, res) => {
         
         else if (feature === 'summarize') {
             console.log(`[${requestId}] 💬 Chế độ: SUMMARIZE (Chạy chữ Streaming)`);
-            
             const prompt = `Dựa vào tài liệu sau:\n\n${contextText}\n\nYêu cầu của sinh viên: ${user_message}\n\nHãy trả lời chi tiết, chuyên nghiệp, sử dụng markdown để định dạng đẹp mắt bằng tiếng Việt.`;
             
-            const stream = await openai.chat.completions.create({
-                model: targetModel, // Gọi đúng con AI được chỉ định
-                messages: [{ role: "user", content: prompt }],
-                stream: true,
+            let isHeadersSent = false;
+
+            // XỬ LÝ VỚI FALLBACK LAYER
+            await executeWithFallback(async (modelName) => {
+                const responseStream = await ai.models.generateContentStream({
+                    model: modelName,
+                    contents: prompt
+                });
+
+                // Nếu API Call thành công (không bị crash ở trên) -> Bắt đầu mở Stream trả về Client
+                if (!isHeadersSent) {
+                    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+                    res.setHeader('Cache-Control', 'no-cache');
+                    res.setHeader('Connection', 'keep-alive');
+                    res.flushHeaders(); 
+                    isHeadersSent = true;
+                }
+
+                for await (const chunk of responseStream) {
+                    if (chunk.text) {
+                        res.write(`data: ${JSON.stringify({ text: chunk.text })}\n\n`);
+                    }
+                }
             });
 
-            res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-            res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Connection', 'keep-alive');
-            res.flushHeaders(); 
-
-            for await (const chunk of stream) {
-                const chunkText = chunk.choices[0]?.delta?.content || "";
-                if (chunkText) {
-                    res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
-                }
+            if (isHeadersSent) {
+                res.write('data: [DONE]\n\n');
+                res.end();
             }
-            
-            res.write('data: [DONE]\n\n');
-            res.end();
             console.log(`[${requestId}] ✅ Đã stream xong toàn bộ đoạn hội thoại.`);
         } 
         
@@ -210,11 +277,10 @@ app.post('/api/process', async (req, res) => {
 
     } catch (error) {
         console.error(`[${requestId}] 🚨 LỖI HỆ THỐNG:`, error.message);
-        console.error(error.stack); 
         
         if (!res.headersSent) {
             res.status(500).json({ 
-                error: "Lỗi Server Internal: API OpenRouter có thể đang từ chối truy cập hoặc quá tải.", 
+                error: error.message || "Lỗi Server Internal.", 
                 details: error.message 
             });
         }
@@ -222,26 +288,34 @@ app.post('/api/process', async (req, res) => {
 });
 
 // ============================================================================
-// 5. API HEALTH CHECK
+// 6. API HEALTH CHECK
 // ============================================================================
 
 app.get('/api/process', (req, res) => {
     res.status(200).send("✅ API Endpoint /api/process đang hoạt động. Hãy gọi bằng POST.");
 });
 
-app.get('/', (req, res) => {
-    res.status(200).send("🚀 AceQuiz Backend System is Running Smoothly on OpenRouter...");
+// ============================================================================
+// 7. ERROR HANDLING
+// ============================================================================
+
+app.use((req, res, next) => {
+    res.status(404).json({ error: "Endpoint not found." });
+});
+
+app.use((err, req, res, next) => {
+    console.error("🚨 GLOBAL ERROR:", err.stack);
+    res.status(500).json({ error: "Something broke!" });
 });
 
 // ============================================================================
-// 6. KHỞI ĐỘNG SERVER 
+// 8. KHỞI ĐỘNG SERVER 
 // ============================================================================
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log("=========================================================");
     console.log(`🚀 BẬT MÁY: AceQuiz Backend đang chạy tại port ${PORT}`);
     console.log(`🔒 Chế độ bảo mật cực mạnh đã được kích hoạt.`);
-    console.log(`🌐 Đã bind port 0.0.0.0 để tương thích tuyệt đối với Render.`);
-    console.log(`🤖 Đang cấu hình sử dụng Model AI: DYNAMIC ROUTING`);
+    console.log(`🤖 Sử dụng Model AI: Google Gemini 2.5 với cơ chế TỰ ĐỘNG FALLBACK`);
     console.log("=========================================================");
 });

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AceQuiz AI - Học thông minh với AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        AceQuiz AI
+      </div>
+      <button class="new-chat-btn" id="newChatBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Cuộc trò chuyện mới
+      </button>
+    </div>
+
+    <div class="sidebar-scroll">
+      
+      <div>
+        <div class="section-header">
+          <span class="section-title">💬 Lịch sử trò chuyện</span>
+        </div>
+        <ul class="folder-list" id="chatHistoryList">
+          </ul>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <span class="section-title">📁 Môn học của tôi</span>
+          <button id="openFolderModalBtn" class="icon-btn-small" title="Tạo môn học mới">+</button>
+        </div>
+        <ul class="folder-list" id="folderList">
+          </ul>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <span class="section-title">📄 Tài liệu đã nạp</span>
+          <label for="pdfUpload" class="icon-btn-small" style="background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer;" title="Tải PDF lên">+</label>
+        </div>
+        <ul class="pdf-list" id="pdfList"></ul>
+        <div id="emptyDocs" class="empty-docs">Chưa có PDF nào. Kéo thả hoặc nhấn nút + để tải lên.</div>
+      </div>
+      
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="google-btn" id="googleLoginBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          <path d="M1 1h22v22H1z" fill="none"/>
+        </svg>
+        Đăng nhập Google
+      </button>
+
+      <div class="user-profile" id="userProfile">
+        <div class="user-avatar">M</div>
+        <div class="user-info">
+          <div class="user-name">Đức Mạnh</div>
+          <div class="user-email">Đã đồng bộ</div>
+        </div>
+        <button class="logout-btn" id="logoutBtn" title="Đăng xuất">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-utils">
+        <button class="sidebar-btn" id="settingsBtn" title="Cài đặt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="sidebar-btn" id="themeToggle" title="Giao diện">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <button class="menu-btn" id="toggleSidebarBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="status" id="statusBadge">Sẵn sàng</div>
+    </div>
+
+    <div id="chatWorkspace" class="workspace">
+      <div class="chat-container" id="chatContainer">
+        <div class="chat-messages" id="chatMessages">
+        </div>
+      </div>
+      <div class="composer">
+        <div class="composer-inner">
+          <div class="composer-input-area">
+            <label class="attach-btn" for="pdfUpload">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </label>
+            <input type="file" id="pdfUpload" multiple accept=".pdf" style="display:none">
+            <textarea id="messageInput" rows="1" placeholder="Nhập câu hỏi hoặc yêu cầu... (Enter gửi, Shift+Enter xuống dòng)"></textarea>
+            <button class="send-btn" id="sendBtn" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="active-docs" id="activeDocsTags" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="quizWorkspace" class="workspace hidden">
+      <div class="quiz-container" id="quizContainer">
+        <div class="quiz-header">
+          <h2 id="quizTitle">Đề trắc nghiệm</h2>
+          <p id="quizSubtitle">Chọn đáp án và nộp bài để xem kết quả chi tiết</p>
+        </div>
+        <div class="quiz-grid" id="quizGrid"></div>
+        <div class="flex justify-between items-center mt-4" style="max-width:800px; margin:0 auto; padding-bottom: 20px;">
+          <button class="sidebar-btn" id="backToChatBtn">← Quay lại chat</button>
+          <button class="sidebar-btn" id="submitQuizBtn" style="background: var(--accent); color:white;">Nộp bài</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+      <h3>Cài đặt hệ thống</h3>
+      <button class="menu-btn" id="closeModalBtn">✕</button>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <label style="display:block; margin-bottom:6px; font-size:13px;">Backend URL</label>
+      <input type="text" id="backendUrl" style="width:100%; padding:10px; border-radius:8px; background:var(--bg-tertiary); border:1px solid var(--border); color:var(--text-primary);" readonly>
+    </div>
+    <div style="margin-bottom: 24px;">
+      <label style="display:block; margin-bottom:6px; font-size:13px;">Số câu hỏi mặc định</label>
+      <input type="number" id="numQuestions" min="1" max="50" value="10" style="width:100%; padding:10px; border-radius:8px; background:var(--bg-tertiary); border:1px solid var(--border); color:var(--text-primary);">
+    </div>
+    <button id="saveSettingsBtn" class="sidebar-btn" style="background: var(--accent); color:white; width:100%; justify-content:center;">Lưu cài đặt</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="folderModal">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+      <h3>Tạo Môn học mới</h3>
+      <button class="menu-btn" id="closeFolderModalBtn">✕</button>
+    </div>
+    <div style="margin-bottom: 24px;">
+      <input type="text" id="folderNameInput" placeholder="Nhập tên môn học (VD: Lập trình C++)..." style="width:100%; padding:12px; border-radius:8px; background:var(--bg-tertiary); border:1px solid var(--border); color:var(--text-primary); outline: none;">
+    </div>
+    <button id="saveFolderBtn" class="sidebar-btn" style="background: var(--accent); color:white; width:100%; justify-content:center; padding: 12px;">Tạo thư mục</button>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
